@@ -1,4 +1,4 @@
- 
+
 <style>
   :host {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -317,14 +317,31 @@
 </div>
 
 <div class="content" role="main">
+ 
+  <swiper effect="cube" [slidesPerView]="1"    [spaceBetween]="20" [pagination]="{ type: 'fraction' }" [navigation]="true">
+		<ng-template swiperSlide>
+      
+      <vg-player>
+        <video poster="https://images.ctfassets.net/2h5cis3l2sua/4UN96KpEURaQZFcULRvaEk/ec2955134e97f44c7e6f889d52ec74f0/content1-small.png" title="Video 1"  [vgMedia]="media" #media id="singleVideo1" preload="auto" responsive="true" autoPlay="true" controls >
+            <source src="https://videos.ctfassets.net/2h5cis3l2sua/7lQeqbAv7zjWg5e5jCtRzY/81d2f874c170d71a6830a220fa0062c2/Wikisource_activities_in_India.webm.480p.webm" type="video/webm">
+          
+        </video>
+    </vg-player>
+  
+    </ng-template>
+		<ng-template swiperSlide>
+            <vg-player> 
+        <video poster="https:////images.ctfassets.net/2h5cis3l2sua/6CMATNgPbI5JcC1YWWmP2k/11fe5f180c8ff4462764215ac57145e2/2021-04-13_11_21_37-File_The_Wolverine_Trailer_Exclusive__2013_.webm_-_Wikimedia_Commons_-_med.png" title="Video 2"  [vgMedia]="media" #media id="singleVideo2" preload="auto" responsive="true"  controls >
+            <source src="https://videos.ctfassets.net/2h5cis3l2sua/1bRAvalxxO0Mu4pPvIcDQw/4e115e14b65d4c974a40631f1dc7d856/The_Wolverine_Trailer_Exclusive__2013_.webm.480p.webm" type="video/webm">
+          
+        </video>
+    </vg-player>
+    </ng-template>
+
+	</swiper>
 
   
-  <vg-player>
-    <video poster="https://images.ctfassets.net/2h5cis3l2sua/4UN96KpEURaQZFcULRvaEk/ec2955134e97f44c7e6f889d52ec74f0/content1-small.png" title="Video 1"  [vgMedia]="media" #media id="singleVideo" preload="auto" responsive="true" autoPlay="true" controls >
-        <source src="https://videos.ctfassets.net/2h5cis3l2sua/7lQeqbAv7zjWg5e5jCtRzY/81d2f874c170d71a6830a220fa0062c2/Wikisource_activities_in_India.webm.480p.webm" type="video/webm">
-      
-    </video>
-</vg-player>
+ 
 <h3>Video 1</h3>
 
 <vg-player>

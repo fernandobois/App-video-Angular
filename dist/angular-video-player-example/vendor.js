@@ -1,5 +1,258 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["vendor"],{
 
+/***/ "/Rr7":
+/*!******************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideTo.js ***!
+  \******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideTo; });
+function slideTo(index, speed, runCallbacks, internal) {
+  if (index === void 0) {
+    index = 0;
+  }
+
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  if (typeof index !== 'number' && typeof index !== 'string') {
+    throw new Error("The 'index' argument cannot have type other than 'number' or 'string'. [" + typeof index + "] given.");
+  }
+
+  if (typeof index === 'string') {
+    /**
+     * The `index` argument converted from `string` to `number`.
+     * @type {number}
+     */
+    var indexAsNumber = parseInt(index, 10);
+    /**
+     * Determines whether the `index` argument is a valid `number`
+     * after being converted from the `string` type.
+     * @type {boolean}
+     */
+
+    var isValidNumber = isFinite(indexAsNumber);
+
+    if (!isValidNumber) {
+      throw new Error("The passed-in 'index' (string) couldn't be converted to 'number'. [" + index + "] given.");
+    } // Knowing that the converted `index` is a valid number,
+    // we can update the original argument's value.
+
+
+    index = indexAsNumber;
+  }
+
+  var swiper = this;
+  var slideIndex = index;
+  if (slideIndex < 0) slideIndex = 0;
+  var params = swiper.params,
+      snapGrid = swiper.snapGrid,
+      slidesGrid = swiper.slidesGrid,
+      previousIndex = swiper.previousIndex,
+      activeIndex = swiper.activeIndex,
+      rtl = swiper.rtlTranslate,
+      wrapperEl = swiper.wrapperEl;
+
+  if (swiper.animating && params.preventInteractionOnTransition) {
+    return false;
+  }
+
+  var skip = Math.min(swiper.params.slidesPerGroupSkip, slideIndex);
+  var snapIndex = skip + Math.floor((slideIndex - skip) / swiper.params.slidesPerGroup);
+  if (snapIndex >= snapGrid.length) snapIndex = snapGrid.length - 1;
+
+  if ((activeIndex || params.initialSlide || 0) === (previousIndex || 0) && runCallbacks) {
+    swiper.emit('beforeSlideChangeStart');
+  }
+
+  var translate = -snapGrid[snapIndex]; // Update progress
+
+  swiper.updateProgress(translate); // Normalize slideIndex
+
+  if (params.normalizeSlideIndex) {
+    for (var i = 0; i < slidesGrid.length; i += 1) {
+      var normalizedTranslate = -Math.floor(translate * 100);
+      var normalizedGird = Math.floor(slidesGrid[i] * 100);
+      var normalizedGridNext = Math.floor(slidesGrid[i + 1] * 100);
+
+      if (typeof slidesGrid[i + 1] !== 'undefined') {
+        if (normalizedTranslate >= normalizedGird && normalizedTranslate < normalizedGridNext - (normalizedGridNext - normalizedGird) / 2) {
+          slideIndex = i;
+        } else if (normalizedTranslate >= normalizedGird && normalizedTranslate < normalizedGridNext) {
+          slideIndex = i + 1;
+        }
+      } else if (normalizedTranslate >= normalizedGird) {
+        slideIndex = i;
+      }
+    }
+  } // Directions locks
+
+
+  if (swiper.initialized && slideIndex !== activeIndex) {
+    if (!swiper.allowSlideNext && translate < swiper.translate && translate < swiper.minTranslate()) {
+      return false;
+    }
+
+    if (!swiper.allowSlidePrev && translate > swiper.translate && translate > swiper.maxTranslate()) {
+      if ((activeIndex || 0) !== slideIndex) return false;
+    }
+  }
+
+  var direction;
+  if (slideIndex > activeIndex) direction = 'next';else if (slideIndex < activeIndex) direction = 'prev';else direction = 'reset'; // Update Index
+
+  if (rtl && -translate === swiper.translate || !rtl && translate === swiper.translate) {
+    swiper.updateActiveIndex(slideIndex); // Update Height
+
+    if (params.autoHeight) {
+      swiper.updateAutoHeight();
+    }
+
+    swiper.updateSlidesClasses();
+
+    if (params.effect !== 'slide') {
+      swiper.setTranslate(translate);
+    }
+
+    if (direction !== 'reset') {
+      swiper.transitionStart(runCallbacks, direction);
+      swiper.transitionEnd(runCallbacks, direction);
+    }
+
+    return false;
+  }
+
+  if (params.cssMode) {
+    var isH = swiper.isHorizontal();
+    var t = -translate;
+
+    if (rtl) {
+      t = wrapperEl.scrollWidth - wrapperEl.offsetWidth - t;
+    }
+
+    if (speed === 0) {
+      wrapperEl[isH ? 'scrollLeft' : 'scrollTop'] = t;
+    } else {
+      // eslint-disable-next-line
+      if (wrapperEl.scrollTo) {
+        var _wrapperEl$scrollTo;
+
+        wrapperEl.scrollTo((_wrapperEl$scrollTo = {}, _wrapperEl$scrollTo[isH ? 'left' : 'top'] = t, _wrapperEl$scrollTo.behavior = 'smooth', _wrapperEl$scrollTo));
+      } else {
+        wrapperEl[isH ? 'scrollLeft' : 'scrollTop'] = t;
+      }
+    }
+
+    return true;
+  }
+
+  if (speed === 0) {
+    swiper.setTransition(0);
+    swiper.setTranslate(translate);
+    swiper.updateActiveIndex(slideIndex);
+    swiper.updateSlidesClasses();
+    swiper.emit('beforeTransitionStart', speed, internal);
+    swiper.transitionStart(runCallbacks, direction);
+    swiper.transitionEnd(runCallbacks, direction);
+  } else {
+    swiper.setTransition(speed);
+    swiper.setTranslate(translate);
+    swiper.updateActiveIndex(slideIndex);
+    swiper.updateSlidesClasses();
+    swiper.emit('beforeTransitionStart', speed, internal);
+    swiper.transitionStart(runCallbacks, direction);
+
+    if (!swiper.animating) {
+      swiper.animating = true;
+
+      if (!swiper.onSlideToWrapperTransitionEnd) {
+        swiper.onSlideToWrapperTransitionEnd = function transitionEnd(e) {
+          if (!swiper || swiper.destroyed) return;
+          if (e.target !== this) return;
+          swiper.$wrapperEl[0].removeEventListener('transitionend', swiper.onSlideToWrapperTransitionEnd);
+          swiper.$wrapperEl[0].removeEventListener('webkitTransitionEnd', swiper.onSlideToWrapperTransitionEnd);
+          swiper.onSlideToWrapperTransitionEnd = null;
+          delete swiper.onSlideToWrapperTransitionEnd;
+          swiper.transitionEnd(runCallbacks, direction);
+        };
+      }
+
+      swiper.$wrapperEl[0].addEventListener('transitionend', swiper.onSlideToWrapperTransitionEnd);
+      swiper.$wrapperEl[0].addEventListener('webkitTransitionEnd', swiper.onSlideToWrapperTransitionEnd);
+    }
+  }
+
+  return true;
+}
+
+/***/ }),
+
+/***/ "/WHX":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/removeSlide.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return removeSlide; });
+function removeSlide(slidesIndexes) {
+  var swiper = this;
+  var params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl,
+      activeIndex = swiper.activeIndex;
+  var activeIndexBuffer = activeIndex;
+
+  if (params.loop) {
+    activeIndexBuffer -= swiper.loopedSlides;
+    swiper.loopDestroy();
+    swiper.slides = $wrapperEl.children("." + params.slideClass);
+  }
+
+  var newActiveIndex = activeIndexBuffer;
+  var indexToRemove;
+
+  if (typeof slidesIndexes === 'object' && 'length' in slidesIndexes) {
+    for (var i = 0; i < slidesIndexes.length; i += 1) {
+      indexToRemove = slidesIndexes[i];
+      if (swiper.slides[indexToRemove]) swiper.slides.eq(indexToRemove).remove();
+      if (indexToRemove < newActiveIndex) newActiveIndex -= 1;
+    }
+
+    newActiveIndex = Math.max(newActiveIndex, 0);
+  } else {
+    indexToRemove = slidesIndexes;
+    if (swiper.slides[indexToRemove]) swiper.slides.eq(indexToRemove).remove();
+    if (indexToRemove < newActiveIndex) newActiveIndex -= 1;
+    newActiveIndex = Math.max(newActiveIndex, 0);
+  }
+
+  if (params.loop) {
+    swiper.loopCreate();
+  }
+
+  if (!(params.observer && swiper.support.observer)) {
+    swiper.update();
+  }
+
+  if (params.loop) {
+    swiper.slideTo(newActiveIndex + swiper.loopedSlides, 0, false);
+  } else {
+    swiper.slideTo(newActiveIndex, 0, false);
+  }
+}
+
+/***/ }),
+
 /***/ "/d8p":
 /*!*****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/repeat.js ***!
@@ -124,6 +377,194 @@ class DistinctUntilChangedSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODUL
     }
 }
 //# sourceMappingURL=distinctUntilChanged.js.map
+
+/***/ }),
+
+/***/ "/xfr":
+/*!***************************************************!*\
+  !*** ./node_modules/ssr-window/ssr-window.esm.js ***!
+  \***************************************************/
+/*! exports provided: extend, getDocument, getWindow, ssrDocument, ssrWindow */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "extend", function() { return extend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDocument", function() { return getDocument; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getWindow", function() { return getWindow; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ssrDocument", function() { return ssrDocument; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ssrWindow", function() { return ssrWindow; });
+/**
+ * SSR Window 3.0.0
+ * Better handling for window object in SSR environment
+ * https://github.com/nolimits4web/ssr-window
+ *
+ * Copyright 2020, Vladimir Kharlampidi
+ *
+ * Licensed under MIT
+ *
+ * Released on: November 9, 2020
+ */
+/* eslint-disable no-param-reassign */
+function isObject(obj) {
+    return (obj !== null &&
+        typeof obj === 'object' &&
+        'constructor' in obj &&
+        obj.constructor === Object);
+}
+function extend(target, src) {
+    if (target === void 0) { target = {}; }
+    if (src === void 0) { src = {}; }
+    Object.keys(src).forEach(function (key) {
+        if (typeof target[key] === 'undefined')
+            target[key] = src[key];
+        else if (isObject(src[key]) &&
+            isObject(target[key]) &&
+            Object.keys(src[key]).length > 0) {
+            extend(target[key], src[key]);
+        }
+    });
+}
+
+var ssrDocument = {
+    body: {},
+    addEventListener: function () { },
+    removeEventListener: function () { },
+    activeElement: {
+        blur: function () { },
+        nodeName: '',
+    },
+    querySelector: function () {
+        return null;
+    },
+    querySelectorAll: function () {
+        return [];
+    },
+    getElementById: function () {
+        return null;
+    },
+    createEvent: function () {
+        return {
+            initEvent: function () { },
+        };
+    },
+    createElement: function () {
+        return {
+            children: [],
+            childNodes: [],
+            style: {},
+            setAttribute: function () { },
+            getElementsByTagName: function () {
+                return [];
+            },
+        };
+    },
+    createElementNS: function () {
+        return {};
+    },
+    importNode: function () {
+        return null;
+    },
+    location: {
+        hash: '',
+        host: '',
+        hostname: '',
+        href: '',
+        origin: '',
+        pathname: '',
+        protocol: '',
+        search: '',
+    },
+};
+function getDocument() {
+    var doc = typeof document !== 'undefined' ? document : {};
+    extend(doc, ssrDocument);
+    return doc;
+}
+
+var ssrWindow = {
+    document: ssrDocument,
+    navigator: {
+        userAgent: '',
+    },
+    location: {
+        hash: '',
+        host: '',
+        hostname: '',
+        href: '',
+        origin: '',
+        pathname: '',
+        protocol: '',
+        search: '',
+    },
+    history: {
+        replaceState: function () { },
+        pushState: function () { },
+        go: function () { },
+        back: function () { },
+    },
+    CustomEvent: function CustomEvent() {
+        return this;
+    },
+    addEventListener: function () { },
+    removeEventListener: function () { },
+    getComputedStyle: function () {
+        return {
+            getPropertyValue: function () {
+                return '';
+            },
+        };
+    },
+    Image: function () { },
+    Date: function () { },
+    screen: {},
+    setTimeout: function () { },
+    clearTimeout: function () { },
+    matchMedia: function () {
+        return {};
+    },
+    requestAnimationFrame: function (callback) {
+        if (typeof setTimeout === 'undefined') {
+            callback();
+            return null;
+        }
+        return setTimeout(callback, 0);
+    },
+    cancelAnimationFrame: function (id) {
+        if (typeof setTimeout === 'undefined') {
+            return;
+        }
+        clearTimeout(id);
+    },
+};
+function getWindow() {
+    var win = typeof window !== 'undefined' ? window : {};
+    extend(win, ssrWindow);
+    return win;
+}
+
+
+
+
+/***/ }),
+
+/***/ "00qV":
+/*!**************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/classes/removeClasses.js ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return removeClasses; });
+function removeClasses() {
+  var swiper = this;
+  var $el = swiper.$el,
+      classNames = swiper.classNames;
+  $el.removeClass(classNames.join(' '));
+  swiper.emitContainerClasses();
+}
 
 /***/ }),
 
@@ -2186,8 +2627,9 @@ CarouselComponent.propDecorators = {
 
 class IvyCarouselModule {
 }
+IvyCarouselModule.ɵfac = function IvyCarouselModule_Factory(t) { return new (t || IvyCarouselModule)(); };
 IvyCarouselModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: IvyCarouselModule });
-IvyCarouselModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function IvyCarouselModule_Factory(t) { return new (t || IvyCarouselModule)(); }, providers: [], imports: [[
+IvyCarouselModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ providers: [], imports: [[
             _angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]
         ]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](IvyCarouselModule, { declarations: function () { return [CarouselComponent]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]; }, exports: function () { return [CarouselComponent]; } }); })();
@@ -2243,6 +2685,365 @@ function endWith(...array) {
     return (source) => Object(_observable_concat__WEBPACK_IMPORTED_MODULE_0__["concat"])(source, Object(_observable_of__WEBPACK_IMPORTED_MODULE_1__["of"])(...array));
 }
 //# sourceMappingURL=endWith.js.map
+
+/***/ }),
+
+/***/ "0Xqd":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/autoplay/autoplay.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+/* eslint no-underscore-dangle: "off" */
+
+
+var Autoplay = {
+  run: function run() {
+    var swiper = this;
+    var $activeSlideEl = swiper.slides.eq(swiper.activeIndex);
+    var delay = swiper.params.autoplay.delay;
+
+    if ($activeSlideEl.attr('data-swiper-autoplay')) {
+      delay = $activeSlideEl.attr('data-swiper-autoplay') || swiper.params.autoplay.delay;
+    }
+
+    clearTimeout(swiper.autoplay.timeout);
+    swiper.autoplay.timeout = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["nextTick"])(function () {
+      var autoplayResult;
+
+      if (swiper.params.autoplay.reverseDirection) {
+        if (swiper.params.loop) {
+          swiper.loopFix();
+          autoplayResult = swiper.slidePrev(swiper.params.speed, true, true);
+          swiper.emit('autoplay');
+        } else if (!swiper.isBeginning) {
+          autoplayResult = swiper.slidePrev(swiper.params.speed, true, true);
+          swiper.emit('autoplay');
+        } else if (!swiper.params.autoplay.stopOnLastSlide) {
+          autoplayResult = swiper.slideTo(swiper.slides.length - 1, swiper.params.speed, true, true);
+          swiper.emit('autoplay');
+        } else {
+          swiper.autoplay.stop();
+        }
+      } else if (swiper.params.loop) {
+        swiper.loopFix();
+        autoplayResult = swiper.slideNext(swiper.params.speed, true, true);
+        swiper.emit('autoplay');
+      } else if (!swiper.isEnd) {
+        autoplayResult = swiper.slideNext(swiper.params.speed, true, true);
+        swiper.emit('autoplay');
+      } else if (!swiper.params.autoplay.stopOnLastSlide) {
+        autoplayResult = swiper.slideTo(0, swiper.params.speed, true, true);
+        swiper.emit('autoplay');
+      } else {
+        swiper.autoplay.stop();
+      }
+
+      if (swiper.params.cssMode && swiper.autoplay.running) swiper.autoplay.run();else if (autoplayResult === false) {
+        swiper.autoplay.run();
+      }
+    }, delay);
+  },
+  start: function start() {
+    var swiper = this;
+    if (typeof swiper.autoplay.timeout !== 'undefined') return false;
+    if (swiper.autoplay.running) return false;
+    swiper.autoplay.running = true;
+    swiper.emit('autoplayStart');
+    swiper.autoplay.run();
+    return true;
+  },
+  stop: function stop() {
+    var swiper = this;
+    if (!swiper.autoplay.running) return false;
+    if (typeof swiper.autoplay.timeout === 'undefined') return false;
+
+    if (swiper.autoplay.timeout) {
+      clearTimeout(swiper.autoplay.timeout);
+      swiper.autoplay.timeout = undefined;
+    }
+
+    swiper.autoplay.running = false;
+    swiper.emit('autoplayStop');
+    return true;
+  },
+  pause: function pause(speed) {
+    var swiper = this;
+    if (!swiper.autoplay.running) return;
+    if (swiper.autoplay.paused) return;
+    if (swiper.autoplay.timeout) clearTimeout(swiper.autoplay.timeout);
+    swiper.autoplay.paused = true;
+
+    if (speed === 0 || !swiper.params.autoplay.waitForTransition) {
+      swiper.autoplay.paused = false;
+      swiper.autoplay.run();
+    } else {
+      swiper.$wrapperEl[0].addEventListener('transitionend', swiper.autoplay.onTransitionEnd);
+      swiper.$wrapperEl[0].addEventListener('webkitTransitionEnd', swiper.autoplay.onTransitionEnd);
+    }
+  },
+  onVisibilityChange: function onVisibilityChange() {
+    var swiper = this;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+
+    if (document.visibilityState === 'hidden' && swiper.autoplay.running) {
+      swiper.autoplay.pause();
+    }
+
+    if (document.visibilityState === 'visible' && swiper.autoplay.paused) {
+      swiper.autoplay.run();
+      swiper.autoplay.paused = false;
+    }
+  },
+  onTransitionEnd: function onTransitionEnd(e) {
+    var swiper = this;
+    if (!swiper || swiper.destroyed || !swiper.$wrapperEl) return;
+    if (e.target !== swiper.$wrapperEl[0]) return;
+    swiper.$wrapperEl[0].removeEventListener('transitionend', swiper.autoplay.onTransitionEnd);
+    swiper.$wrapperEl[0].removeEventListener('webkitTransitionEnd', swiper.autoplay.onTransitionEnd);
+    swiper.autoplay.paused = false;
+
+    if (!swiper.autoplay.running) {
+      swiper.autoplay.stop();
+    } else {
+      swiper.autoplay.run();
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'autoplay',
+  params: {
+    autoplay: {
+      enabled: false,
+      delay: 3000,
+      waitForTransition: true,
+      disableOnInteraction: true,
+      stopOnLastSlide: false,
+      reverseDirection: false
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      autoplay: _extends({}, Autoplay, {
+        running: false,
+        paused: false
+      })
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (swiper.params.autoplay.enabled) {
+        swiper.autoplay.start();
+        var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+        document.addEventListener('visibilitychange', swiper.autoplay.onVisibilityChange);
+      }
+    },
+    beforeTransitionStart: function beforeTransitionStart(swiper, speed, internal) {
+      if (swiper.autoplay.running) {
+        if (internal || !swiper.params.autoplay.disableOnInteraction) {
+          swiper.autoplay.pause(speed);
+        } else {
+          swiper.autoplay.stop();
+        }
+      }
+    },
+    sliderFirstMove: function sliderFirstMove(swiper) {
+      if (swiper.autoplay.running) {
+        if (swiper.params.autoplay.disableOnInteraction) {
+          swiper.autoplay.stop();
+        } else {
+          swiper.autoplay.pause();
+        }
+      }
+    },
+    touchEnd: function touchEnd(swiper) {
+      if (swiper.params.cssMode && swiper.autoplay.paused && !swiper.params.autoplay.disableOnInteraction) {
+        swiper.autoplay.run();
+      }
+    },
+    destroy: function destroy(swiper) {
+      if (swiper.autoplay.running) {
+        swiper.autoplay.stop();
+      }
+
+      var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+      document.removeEventListener('visibilitychange', swiper.autoplay.onVisibilityChange);
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "0me/":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/prependSlide.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return prependSlide; });
+function prependSlide(slides) {
+  var swiper = this;
+  var params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl,
+      activeIndex = swiper.activeIndex;
+
+  if (params.loop) {
+    swiper.loopDestroy();
+  }
+
+  var newActiveIndex = activeIndex + 1;
+
+  if (typeof slides === 'object' && 'length' in slides) {
+    for (var i = 0; i < slides.length; i += 1) {
+      if (slides[i]) $wrapperEl.prepend(slides[i]);
+    }
+
+    newActiveIndex = activeIndex + slides.length;
+  } else {
+    $wrapperEl.prepend(slides);
+  }
+
+  if (params.loop) {
+    swiper.loopCreate();
+  }
+
+  if (!(params.observer && swiper.support.observer)) {
+    swiper.update();
+  }
+
+  swiper.slideTo(newActiveIndex, 0, false);
+}
+
+/***/ }),
+
+/***/ "0roy":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/index.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _getTranslate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./getTranslate */ "jQP/");
+/* harmony import */ var _setTranslate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./setTranslate */ "EJt4");
+/* harmony import */ var _minTranslate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./minTranslate */ "IBc5");
+/* harmony import */ var _maxTranslate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./maxTranslate */ "2ijT");
+/* harmony import */ var _translateTo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./translateTo */ "s/PY");
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  getTranslate: _getTranslate__WEBPACK_IMPORTED_MODULE_0__["default"],
+  setTranslate: _setTranslate__WEBPACK_IMPORTED_MODULE_1__["default"],
+  minTranslate: _minTranslate__WEBPACK_IMPORTED_MODULE_2__["default"],
+  maxTranslate: _maxTranslate__WEBPACK_IMPORTED_MODULE_3__["default"],
+  translateTo: _translateTo__WEBPACK_IMPORTED_MODULE_4__["default"]
+});
+
+/***/ }),
+
+/***/ "0t0F":
+/*!**********************************************************!*\
+  !*** ./node_modules/swiper/esm/modules/resize/resize.js ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+
+
+
+var supportsResizeObserver = function supportsResizeObserver() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  return typeof window.ResizeObserver !== 'undefined';
+};
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'resize',
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper, {
+      resize: {
+        observer: null,
+        createObserver: function createObserver() {
+          if (!swiper || swiper.destroyed || !swiper.initialized) return;
+          swiper.resize.observer = new ResizeObserver(function (entries) {
+            var width = swiper.width,
+                height = swiper.height;
+            var newWidth = width;
+            var newHeight = height;
+            entries.forEach(function (_ref) {
+              var contentBoxSize = _ref.contentBoxSize,
+                  contentRect = _ref.contentRect,
+                  target = _ref.target;
+              if (target && target !== swiper.el) return;
+              newWidth = contentRect ? contentRect.width : (contentBoxSize[0] || contentBoxSize).inlineSize;
+              newHeight = contentRect ? contentRect.height : (contentBoxSize[0] || contentBoxSize).blockSize;
+            });
+
+            if (newWidth !== width || newHeight !== height) {
+              swiper.resize.resizeHandler();
+            }
+          });
+          swiper.resize.observer.observe(swiper.el);
+        },
+        removeObserver: function removeObserver() {
+          if (swiper.resize.observer && swiper.resize.observer.unobserve && swiper.el) {
+            swiper.resize.observer.unobserve(swiper.el);
+            swiper.resize.observer = null;
+          }
+        },
+        resizeHandler: function resizeHandler() {
+          if (!swiper || swiper.destroyed || !swiper.initialized) return;
+          swiper.emit('beforeResize');
+          swiper.emit('resize');
+        },
+        orientationChangeHandler: function orientationChangeHandler() {
+          if (!swiper || swiper.destroyed || !swiper.initialized) return;
+          swiper.emit('orientationchange');
+        }
+      }
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+      if (swiper.params.resizeObserver && supportsResizeObserver()) {
+        swiper.resize.createObserver();
+        return;
+      } // Emit resize
+
+
+      window.addEventListener('resize', swiper.resize.resizeHandler); // Emit orientationchange
+
+      window.addEventListener('orientationchange', swiper.resize.orientationChangeHandler);
+    },
+    destroy: function destroy(swiper) {
+      var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+      swiper.resize.removeObserver();
+      window.removeEventListener('resize', swiper.resize.resizeHandler);
+      window.removeEventListener('orientationchange', swiper.resize.orientationChangeHandler);
+    }
+  }
+});
 
 /***/ }),
 
@@ -2320,6 +3121,214 @@ class TakeUntilSubscriber extends _innerSubscribe__WEBPACK_IMPORTED_MODULE_0__["
     }
 }
 //# sourceMappingURL=takeUntil.js.map
+
+/***/ }),
+
+/***/ "1VCM":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/effect-cube/effect-cube.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Cube = {
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    var $el = swiper.$el,
+        $wrapperEl = swiper.$wrapperEl,
+        slides = swiper.slides,
+        swiperWidth = swiper.width,
+        swiperHeight = swiper.height,
+        rtl = swiper.rtlTranslate,
+        swiperSize = swiper.size,
+        browser = swiper.browser;
+    var params = swiper.params.cubeEffect;
+    var isHorizontal = swiper.isHorizontal();
+    var isVirtual = swiper.virtual && swiper.params.virtual.enabled;
+    var wrapperRotate = 0;
+    var $cubeShadowEl;
+
+    if (params.shadow) {
+      if (isHorizontal) {
+        $cubeShadowEl = $wrapperEl.find('.swiper-cube-shadow');
+
+        if ($cubeShadowEl.length === 0) {
+          $cubeShadowEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])('<div class="swiper-cube-shadow"></div>');
+          $wrapperEl.append($cubeShadowEl);
+        }
+
+        $cubeShadowEl.css({
+          height: swiperWidth + "px"
+        });
+      } else {
+        $cubeShadowEl = $el.find('.swiper-cube-shadow');
+
+        if ($cubeShadowEl.length === 0) {
+          $cubeShadowEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])('<div class="swiper-cube-shadow"></div>');
+          $el.append($cubeShadowEl);
+        }
+      }
+    }
+
+    for (var i = 0; i < slides.length; i += 1) {
+      var $slideEl = slides.eq(i);
+      var slideIndex = i;
+
+      if (isVirtual) {
+        slideIndex = parseInt($slideEl.attr('data-swiper-slide-index'), 10);
+      }
+
+      var slideAngle = slideIndex * 90;
+      var round = Math.floor(slideAngle / 360);
+
+      if (rtl) {
+        slideAngle = -slideAngle;
+        round = Math.floor(-slideAngle / 360);
+      }
+
+      var progress = Math.max(Math.min($slideEl[0].progress, 1), -1);
+      var tx = 0;
+      var ty = 0;
+      var tz = 0;
+
+      if (slideIndex % 4 === 0) {
+        tx = -round * 4 * swiperSize;
+        tz = 0;
+      } else if ((slideIndex - 1) % 4 === 0) {
+        tx = 0;
+        tz = -round * 4 * swiperSize;
+      } else if ((slideIndex - 2) % 4 === 0) {
+        tx = swiperSize + round * 4 * swiperSize;
+        tz = swiperSize;
+      } else if ((slideIndex - 3) % 4 === 0) {
+        tx = -swiperSize;
+        tz = 3 * swiperSize + swiperSize * 4 * round;
+      }
+
+      if (rtl) {
+        tx = -tx;
+      }
+
+      if (!isHorizontal) {
+        ty = tx;
+        tx = 0;
+      }
+
+      var transform = "rotateX(" + (isHorizontal ? 0 : -slideAngle) + "deg) rotateY(" + (isHorizontal ? slideAngle : 0) + "deg) translate3d(" + tx + "px, " + ty + "px, " + tz + "px)";
+
+      if (progress <= 1 && progress > -1) {
+        wrapperRotate = slideIndex * 90 + progress * 90;
+        if (rtl) wrapperRotate = -slideIndex * 90 - progress * 90;
+      }
+
+      $slideEl.transform(transform);
+
+      if (params.slideShadows) {
+        // Set shadows
+        var shadowBefore = isHorizontal ? $slideEl.find('.swiper-slide-shadow-left') : $slideEl.find('.swiper-slide-shadow-top');
+        var shadowAfter = isHorizontal ? $slideEl.find('.swiper-slide-shadow-right') : $slideEl.find('.swiper-slide-shadow-bottom');
+
+        if (shadowBefore.length === 0) {
+          shadowBefore = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (isHorizontal ? 'left' : 'top') + "\"></div>");
+          $slideEl.append(shadowBefore);
+        }
+
+        if (shadowAfter.length === 0) {
+          shadowAfter = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (isHorizontal ? 'right' : 'bottom') + "\"></div>");
+          $slideEl.append(shadowAfter);
+        }
+
+        if (shadowBefore.length) shadowBefore[0].style.opacity = Math.max(-progress, 0);
+        if (shadowAfter.length) shadowAfter[0].style.opacity = Math.max(progress, 0);
+      }
+    }
+
+    $wrapperEl.css({
+      '-webkit-transform-origin': "50% 50% -" + swiperSize / 2 + "px",
+      '-moz-transform-origin': "50% 50% -" + swiperSize / 2 + "px",
+      '-ms-transform-origin': "50% 50% -" + swiperSize / 2 + "px",
+      'transform-origin': "50% 50% -" + swiperSize / 2 + "px"
+    });
+
+    if (params.shadow) {
+      if (isHorizontal) {
+        $cubeShadowEl.transform("translate3d(0px, " + (swiperWidth / 2 + params.shadowOffset) + "px, " + -swiperWidth / 2 + "px) rotateX(90deg) rotateZ(0deg) scale(" + params.shadowScale + ")");
+      } else {
+        var shadowAngle = Math.abs(wrapperRotate) - Math.floor(Math.abs(wrapperRotate) / 90) * 90;
+        var multiplier = 1.5 - (Math.sin(shadowAngle * 2 * Math.PI / 360) / 2 + Math.cos(shadowAngle * 2 * Math.PI / 360) / 2);
+        var scale1 = params.shadowScale;
+        var scale2 = params.shadowScale / multiplier;
+        var offset = params.shadowOffset;
+        $cubeShadowEl.transform("scale3d(" + scale1 + ", 1, " + scale2 + ") translate3d(0px, " + (swiperHeight / 2 + offset) + "px, " + -swiperHeight / 2 / scale2 + "px) rotateX(-90deg)");
+      }
+    }
+
+    var zFactor = browser.isSafari || browser.isWebView ? -swiperSize / 2 : 0;
+    $wrapperEl.transform("translate3d(0px,0," + zFactor + "px) rotateX(" + (swiper.isHorizontal() ? 0 : wrapperRotate) + "deg) rotateY(" + (swiper.isHorizontal() ? -wrapperRotate : 0) + "deg)");
+  },
+  setTransition: function setTransition(duration) {
+    var swiper = this;
+    var $el = swiper.$el,
+        slides = swiper.slides;
+    slides.transition(duration).find('.swiper-slide-shadow-top, .swiper-slide-shadow-right, .swiper-slide-shadow-bottom, .swiper-slide-shadow-left').transition(duration);
+
+    if (swiper.params.cubeEffect.shadow && !swiper.isHorizontal()) {
+      $el.find('.swiper-cube-shadow').transition(duration);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'effect-cube',
+  params: {
+    cubeEffect: {
+      slideShadows: true,
+      shadow: true,
+      shadowOffset: 20,
+      shadowScale: 0.94
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      cubeEffect: _extends({}, Cube)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (swiper.params.effect !== 'cube') return;
+      swiper.classNames.push(swiper.params.containerModifierClass + "cube");
+      swiper.classNames.push(swiper.params.containerModifierClass + "3d");
+      var overwriteParams = {
+        slidesPerView: 1,
+        slidesPerColumn: 1,
+        slidesPerGroup: 1,
+        watchSlidesProgress: true,
+        resistanceRatio: 0,
+        spaceBetween: 0,
+        centeredSlides: false,
+        virtualTranslate: true
+      };
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.params, overwriteParams);
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.originalParams, overwriteParams);
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (swiper.params.effect !== 'cube') return;
+      swiper.cubeEffect.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      if (swiper.params.effect !== 'cube') return;
+      swiper.cubeEffect.setTransition(duration);
+    }
+  }
+});
 
 /***/ }),
 
@@ -2720,6 +3729,22 @@ const config = {
 
 /***/ }),
 
+/***/ "2ijT":
+/*!***************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/maxTranslate.js ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return maxTranslate; });
+function maxTranslate() {
+  return -this.snapGrid[this.snapGrid.length - 1];
+}
+
+/***/ }),
+
 /***/ "32Ea":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/skipWhile.js ***!
@@ -2967,6 +3992,9098 @@ class AsyncAction extends _Action__WEBPACK_IMPORTED_MODULE_0__["Action"] {
 
 /***/ }),
 
+/***/ "3PNi":
+/*!***************************************!*\
+  !*** ./node_modules/dom7/dom7.esm.js ***!
+  \***************************************/
+/*! exports provided: default, $, add, addClass, animate, animationEnd, append, appendTo, attr, blur, change, children, click, closest, css, data, dataset, detach, each, empty, eq, filter, find, focus, focusin, focusout, hasClass, height, hide, html, index, insertAfter, insertBefore, is, keydown, keypress, keyup, mousedown, mouseenter, mouseleave, mousemove, mouseout, mouseover, mouseup, next, nextAll, off, offset, on, once, outerHeight, outerWidth, parent, parents, prepend, prependTo, prev, prevAll, prop, remove, removeAttr, removeClass, removeData, resize, scroll, scrollLeft, scrollTo, scrollTop, show, siblings, stop, styles, submit, text, toggleClass, touchend, touchmove, touchstart, transform, transition, transitionEnd, trigger, val, value, width */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "$", function() { return $; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "add", function() { return add; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addClass", function() { return addClass; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "animate", function() { return animate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "animationEnd", function() { return animationEnd; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "append", function() { return append; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "appendTo", function() { return appendTo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "attr", function() { return attr; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "blur", function() { return blur; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "change", function() { return change; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "children", function() { return children; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "click", function() { return click; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "closest", function() { return closest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "css", function() { return css; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "data", function() { return data; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataset", function() { return dataset; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "detach", function() { return detach; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "each", function() { return each; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "empty", function() { return empty; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "eq", function() { return eq; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filter", function() { return filter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "find", function() { return find; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "focus", function() { return focus; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "focusin", function() { return focusin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "focusout", function() { return focusout; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hasClass", function() { return hasClass; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "height", function() { return height; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hide", function() { return hide; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "html", function() { return html; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "index", function() { return index; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "insertAfter", function() { return insertAfter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "insertBefore", function() { return insertBefore; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "is", function() { return is; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keydown", function() { return keydown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keypress", function() { return keypress; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keyup", function() { return keyup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mousedown", function() { return mousedown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mouseenter", function() { return mouseenter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mouseleave", function() { return mouseleave; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mousemove", function() { return mousemove; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mouseout", function() { return mouseout; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mouseover", function() { return mouseover; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mouseup", function() { return mouseup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "next", function() { return next; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nextAll", function() { return nextAll; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "off", function() { return off; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "offset", function() { return offset; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "on", function() { return on; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "once", function() { return once; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "outerHeight", function() { return outerHeight; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "outerWidth", function() { return outerWidth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parent", function() { return parent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parents", function() { return parents; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prepend", function() { return prepend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prependTo", function() { return prependTo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prev", function() { return prev; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prevAll", function() { return prevAll; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prop", function() { return prop; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "remove", function() { return remove; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeAttr", function() { return removeAttr; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeClass", function() { return removeClass; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeData", function() { return removeData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "resize", function() { return resize; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scroll", function() { return scroll; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scrollLeft", function() { return scrollLeft; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scrollTo", function() { return scrollTo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scrollTop", function() { return scrollTop; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "show", function() { return show; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "siblings", function() { return siblings; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stop", function() { return stop; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "styles", function() { return styles; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "submit", function() { return submit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "text", function() { return text; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toggleClass", function() { return toggleClass; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "touchend", function() { return touchend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "touchmove", function() { return touchmove; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "touchstart", function() { return touchstart; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transform", function() { return transform; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transition", function() { return transition; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transitionEnd", function() { return transitionEnd; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "trigger", function() { return trigger; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "val", function() { return val; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "value", function() { return value; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "width", function() { return width; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/**
+ * Dom7 3.0.0
+ * Minimalistic JavaScript library for DOM manipulation, with a jQuery-compatible API
+ * https://framework7.io/docs/dom7.html
+ *
+ * Copyright 2020, Vladimir Kharlampidi
+ *
+ * Licensed under MIT
+ *
+ * Released on: November 9, 2020
+ */
+
+
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  subClass.__proto__ = superClass;
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function _construct(Parent, args, Class) {
+  if (_isNativeReflectConstruct()) {
+    _construct = Reflect.construct;
+  } else {
+    _construct = function _construct(Parent, args, Class) {
+      var a = [null];
+      a.push.apply(a, args);
+      var Constructor = Function.bind.apply(Parent, a);
+      var instance = new Constructor();
+      if (Class) _setPrototypeOf(instance, Class.prototype);
+      return instance;
+    };
+  }
+
+  return _construct.apply(null, arguments);
+}
+
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+
+  _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !_isNativeFunction(Class)) return Class;
+
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+
+      _cache.set(Class, Wrapper);
+    }
+
+    function Wrapper() {
+      return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+    }
+
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return _setPrototypeOf(Wrapper, Class);
+  };
+
+  return _wrapNativeSuper(Class);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return self;
+}
+
+/* eslint-disable no-proto */
+function makeReactive(obj) {
+  var proto = obj.__proto__;
+  Object.defineProperty(obj, '__proto__', {
+    get: function get() {
+      return proto;
+    },
+    set: function set(value) {
+      proto.__proto__ = value;
+    }
+  });
+}
+
+var Dom7 = /*#__PURE__*/function (_Array) {
+  _inheritsLoose(Dom7, _Array);
+
+  function Dom7(items) {
+    var _this;
+
+    _this = _Array.call.apply(_Array, [this].concat(items)) || this;
+    makeReactive(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  return Dom7;
+}( /*#__PURE__*/_wrapNativeSuper(Array));
+
+function arrayFlat(arr) {
+  if (arr === void 0) {
+    arr = [];
+  }
+
+  var res = [];
+  arr.forEach(function (el) {
+    if (Array.isArray(el)) {
+      res.push.apply(res, arrayFlat(el));
+    } else {
+      res.push(el);
+    }
+  });
+  return res;
+}
+function arrayFilter(arr, callback) {
+  return Array.prototype.filter.call(arr, callback);
+}
+function arrayUnique(arr) {
+  var uniqueArray = [];
+
+  for (var i = 0; i < arr.length; i += 1) {
+    if (uniqueArray.indexOf(arr[i]) === -1) uniqueArray.push(arr[i]);
+  }
+
+  return uniqueArray;
+}
+function toCamelCase(string) {
+  return string.toLowerCase().replace(/-(.)/g, function (match, group) {
+    return group.toUpperCase();
+  });
+}
+
+function qsa(selector, context) {
+  if (typeof selector !== 'string') {
+    return [selector];
+  }
+
+  var a = [];
+  var res = context.querySelectorAll(selector);
+
+  for (var i = 0; i < res.length; i += 1) {
+    a.push(res[i]);
+  }
+
+  return a;
+}
+
+function $(selector, context) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var arr = [];
+
+  if (!context && selector instanceof Dom7) {
+    return selector;
+  }
+
+  if (!selector) {
+    return new Dom7(arr);
+  }
+
+  if (typeof selector === 'string') {
+    var html = selector.trim();
+
+    if (html.indexOf('<') >= 0 && html.indexOf('>') >= 0) {
+      var toCreate = 'div';
+      if (html.indexOf('<li') === 0) toCreate = 'ul';
+      if (html.indexOf('<tr') === 0) toCreate = 'tbody';
+      if (html.indexOf('<td') === 0 || html.indexOf('<th') === 0) toCreate = 'tr';
+      if (html.indexOf('<tbody') === 0) toCreate = 'table';
+      if (html.indexOf('<option') === 0) toCreate = 'select';
+      var tempParent = document.createElement(toCreate);
+      tempParent.innerHTML = html;
+
+      for (var i = 0; i < tempParent.childNodes.length; i += 1) {
+        arr.push(tempParent.childNodes[i]);
+      }
+    } else {
+      arr = qsa(selector.trim(), context || document);
+    } // arr = qsa(selector, document);
+
+  } else if (selector.nodeType || selector === window || selector === document) {
+    arr.push(selector);
+  } else if (Array.isArray(selector)) {
+    if (selector instanceof Dom7) return selector;
+    arr = selector;
+  }
+
+  return new Dom7(arrayUnique(arr));
+}
+
+$.fn = Dom7.prototype;
+
+function addClass() {
+  for (var _len = arguments.length, classes = new Array(_len), _key = 0; _key < _len; _key++) {
+    classes[_key] = arguments[_key];
+  }
+
+  var classNames = arrayFlat(classes.map(function (c) {
+    return c.split(' ');
+  }));
+  this.forEach(function (el) {
+    var _el$classList;
+
+    (_el$classList = el.classList).add.apply(_el$classList, classNames);
+  });
+  return this;
+}
+
+function removeClass() {
+  for (var _len2 = arguments.length, classes = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    classes[_key2] = arguments[_key2];
+  }
+
+  var classNames = arrayFlat(classes.map(function (c) {
+    return c.split(' ');
+  }));
+  this.forEach(function (el) {
+    var _el$classList2;
+
+    (_el$classList2 = el.classList).remove.apply(_el$classList2, classNames);
+  });
+  return this;
+}
+
+function toggleClass() {
+  for (var _len3 = arguments.length, classes = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    classes[_key3] = arguments[_key3];
+  }
+
+  var classNames = arrayFlat(classes.map(function (c) {
+    return c.split(' ');
+  }));
+  this.forEach(function (el) {
+    classNames.forEach(function (className) {
+      el.classList.toggle(className);
+    });
+  });
+}
+
+function hasClass() {
+  for (var _len4 = arguments.length, classes = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    classes[_key4] = arguments[_key4];
+  }
+
+  var classNames = arrayFlat(classes.map(function (c) {
+    return c.split(' ');
+  }));
+  return arrayFilter(this, function (el) {
+    return classNames.filter(function (className) {
+      return el.classList.contains(className);
+    }).length > 0;
+  }).length > 0;
+}
+
+function attr(attrs, value) {
+  if (arguments.length === 1 && typeof attrs === 'string') {
+    // Get attr
+    if (this[0]) return this[0].getAttribute(attrs);
+    return undefined;
+  } // Set attrs
+
+
+  for (var i = 0; i < this.length; i += 1) {
+    if (arguments.length === 2) {
+      // String
+      this[i].setAttribute(attrs, value);
+    } else {
+      // Object
+      for (var attrName in attrs) {
+        this[i][attrName] = attrs[attrName];
+        this[i].setAttribute(attrName, attrs[attrName]);
+      }
+    }
+  }
+
+  return this;
+}
+
+function removeAttr(attr) {
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].removeAttribute(attr);
+  }
+
+  return this;
+}
+
+function prop(props, value) {
+  if (arguments.length === 1 && typeof props === 'string') {
+    // Get prop
+    if (this[0]) return this[0][props];
+  } else {
+    // Set props
+    for (var i = 0; i < this.length; i += 1) {
+      if (arguments.length === 2) {
+        // String
+        this[i][props] = value;
+      } else {
+        // Object
+        for (var propName in props) {
+          this[i][propName] = props[propName];
+        }
+      }
+    }
+
+    return this;
+  }
+
+  return this;
+}
+
+function data(key, value) {
+  var el;
+
+  if (typeof value === 'undefined') {
+    el = this[0];
+    if (!el) return undefined; // Get value
+
+    if (el.dom7ElementDataStorage && key in el.dom7ElementDataStorage) {
+      return el.dom7ElementDataStorage[key];
+    }
+
+    var dataKey = el.getAttribute("data-" + key);
+
+    if (dataKey) {
+      return dataKey;
+    }
+
+    return undefined;
+  } // Set value
+
+
+  for (var i = 0; i < this.length; i += 1) {
+    el = this[i];
+    if (!el.dom7ElementDataStorage) el.dom7ElementDataStorage = {};
+    el.dom7ElementDataStorage[key] = value;
+  }
+
+  return this;
+}
+
+function removeData(key) {
+  for (var i = 0; i < this.length; i += 1) {
+    var el = this[i];
+
+    if (el.dom7ElementDataStorage && el.dom7ElementDataStorage[key]) {
+      el.dom7ElementDataStorage[key] = null;
+      delete el.dom7ElementDataStorage[key];
+    }
+  }
+}
+
+function dataset() {
+  var el = this[0];
+  if (!el) return undefined;
+  var dataset = {}; // eslint-disable-line
+
+  if (el.dataset) {
+    for (var dataKey in el.dataset) {
+      dataset[dataKey] = el.dataset[dataKey];
+    }
+  } else {
+    for (var i = 0; i < el.attributes.length; i += 1) {
+      var _attr = el.attributes[i];
+
+      if (_attr.name.indexOf('data-') >= 0) {
+        dataset[toCamelCase(_attr.name.split('data-')[1])] = _attr.value;
+      }
+    }
+  }
+
+  for (var key in dataset) {
+    if (dataset[key] === 'false') dataset[key] = false;else if (dataset[key] === 'true') dataset[key] = true;else if (parseFloat(dataset[key]) === dataset[key] * 1) dataset[key] *= 1;
+  }
+
+  return dataset;
+}
+
+function val(value) {
+  if (typeof value === 'undefined') {
+    // get value
+    var el = this[0];
+    if (!el) return undefined;
+
+    if (el.multiple && el.nodeName.toLowerCase() === 'select') {
+      var values = [];
+
+      for (var i = 0; i < el.selectedOptions.length; i += 1) {
+        values.push(el.selectedOptions[i].value);
+      }
+
+      return values;
+    }
+
+    return el.value;
+  } // set value
+
+
+  for (var _i = 0; _i < this.length; _i += 1) {
+    var _el = this[_i];
+
+    if (Array.isArray(value) && _el.multiple && _el.nodeName.toLowerCase() === 'select') {
+      for (var j = 0; j < _el.options.length; j += 1) {
+        _el.options[j].selected = value.indexOf(_el.options[j].value) >= 0;
+      }
+    } else {
+      _el.value = value;
+    }
+  }
+
+  return this;
+}
+
+function value(value) {
+  return this.val(value);
+}
+
+function transform(transform) {
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].style.transform = transform;
+  }
+
+  return this;
+}
+
+function transition(duration) {
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].style.transitionDuration = typeof duration !== 'string' ? duration + "ms" : duration;
+  }
+
+  return this;
+}
+
+function on() {
+  for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+    args[_key5] = arguments[_key5];
+  }
+
+  var eventType = args[0],
+      targetSelector = args[1],
+      listener = args[2],
+      capture = args[3];
+
+  if (typeof args[1] === 'function') {
+    eventType = args[0];
+    listener = args[1];
+    capture = args[2];
+    targetSelector = undefined;
+  }
+
+  if (!capture) capture = false;
+
+  function handleLiveEvent(e) {
+    var target = e.target;
+    if (!target) return;
+    var eventData = e.target.dom7EventData || [];
+
+    if (eventData.indexOf(e) < 0) {
+      eventData.unshift(e);
+    }
+
+    if ($(target).is(targetSelector)) listener.apply(target, eventData);else {
+      var _parents = $(target).parents(); // eslint-disable-line
+
+
+      for (var k = 0; k < _parents.length; k += 1) {
+        if ($(_parents[k]).is(targetSelector)) listener.apply(_parents[k], eventData);
+      }
+    }
+  }
+
+  function handleEvent(e) {
+    var eventData = e && e.target ? e.target.dom7EventData || [] : [];
+
+    if (eventData.indexOf(e) < 0) {
+      eventData.unshift(e);
+    }
+
+    listener.apply(this, eventData);
+  }
+
+  var events = eventType.split(' ');
+  var j;
+
+  for (var i = 0; i < this.length; i += 1) {
+    var el = this[i];
+
+    if (!targetSelector) {
+      for (j = 0; j < events.length; j += 1) {
+        var event = events[j];
+        if (!el.dom7Listeners) el.dom7Listeners = {};
+        if (!el.dom7Listeners[event]) el.dom7Listeners[event] = [];
+        el.dom7Listeners[event].push({
+          listener: listener,
+          proxyListener: handleEvent
+        });
+        el.addEventListener(event, handleEvent, capture);
+      }
+    } else {
+      // Live events
+      for (j = 0; j < events.length; j += 1) {
+        var _event = events[j];
+        if (!el.dom7LiveListeners) el.dom7LiveListeners = {};
+        if (!el.dom7LiveListeners[_event]) el.dom7LiveListeners[_event] = [];
+
+        el.dom7LiveListeners[_event].push({
+          listener: listener,
+          proxyListener: handleLiveEvent
+        });
+
+        el.addEventListener(_event, handleLiveEvent, capture);
+      }
+    }
+  }
+
+  return this;
+}
+
+function off() {
+  for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+    args[_key6] = arguments[_key6];
+  }
+
+  var eventType = args[0],
+      targetSelector = args[1],
+      listener = args[2],
+      capture = args[3];
+
+  if (typeof args[1] === 'function') {
+    eventType = args[0];
+    listener = args[1];
+    capture = args[2];
+    targetSelector = undefined;
+  }
+
+  if (!capture) capture = false;
+  var events = eventType.split(' ');
+
+  for (var i = 0; i < events.length; i += 1) {
+    var event = events[i];
+
+    for (var j = 0; j < this.length; j += 1) {
+      var el = this[j];
+      var handlers = void 0;
+
+      if (!targetSelector && el.dom7Listeners) {
+        handlers = el.dom7Listeners[event];
+      } else if (targetSelector && el.dom7LiveListeners) {
+        handlers = el.dom7LiveListeners[event];
+      }
+
+      if (handlers && handlers.length) {
+        for (var k = handlers.length - 1; k >= 0; k -= 1) {
+          var handler = handlers[k];
+
+          if (listener && handler.listener === listener) {
+            el.removeEventListener(event, handler.proxyListener, capture);
+            handlers.splice(k, 1);
+          } else if (listener && handler.listener && handler.listener.dom7proxy && handler.listener.dom7proxy === listener) {
+            el.removeEventListener(event, handler.proxyListener, capture);
+            handlers.splice(k, 1);
+          } else if (!listener) {
+            el.removeEventListener(event, handler.proxyListener, capture);
+            handlers.splice(k, 1);
+          }
+        }
+      }
+    }
+  }
+
+  return this;
+}
+
+function once() {
+  var dom = this;
+
+  for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+    args[_key7] = arguments[_key7];
+  }
+
+  var eventName = args[0],
+      targetSelector = args[1],
+      listener = args[2],
+      capture = args[3];
+
+  if (typeof args[1] === 'function') {
+    eventName = args[0];
+    listener = args[1];
+    capture = args[2];
+    targetSelector = undefined;
+  }
+
+  function onceHandler() {
+    for (var _len8 = arguments.length, eventArgs = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+      eventArgs[_key8] = arguments[_key8];
+    }
+
+    listener.apply(this, eventArgs);
+    dom.off(eventName, targetSelector, onceHandler, capture);
+
+    if (onceHandler.dom7proxy) {
+      delete onceHandler.dom7proxy;
+    }
+  }
+
+  onceHandler.dom7proxy = listener;
+  return dom.on(eventName, targetSelector, onceHandler, capture);
+}
+
+function trigger() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+    args[_key9] = arguments[_key9];
+  }
+
+  var events = args[0].split(' ');
+  var eventData = args[1];
+
+  for (var i = 0; i < events.length; i += 1) {
+    var event = events[i];
+
+    for (var j = 0; j < this.length; j += 1) {
+      var el = this[j];
+
+      if (window.CustomEvent) {
+        var evt = new window.CustomEvent(event, {
+          detail: eventData,
+          bubbles: true,
+          cancelable: true
+        });
+        el.dom7EventData = args.filter(function (data, dataIndex) {
+          return dataIndex > 0;
+        });
+        el.dispatchEvent(evt);
+        el.dom7EventData = [];
+        delete el.dom7EventData;
+      }
+    }
+  }
+
+  return this;
+}
+
+function transitionEnd(callback) {
+  var dom = this;
+
+  function fireCallBack(e) {
+    if (e.target !== this) return;
+    callback.call(this, e);
+    dom.off('transitionend', fireCallBack);
+  }
+
+  if (callback) {
+    dom.on('transitionend', fireCallBack);
+  }
+
+  return this;
+}
+
+function animationEnd(callback) {
+  var dom = this;
+
+  function fireCallBack(e) {
+    if (e.target !== this) return;
+    callback.call(this, e);
+    dom.off('animationend', fireCallBack);
+  }
+
+  if (callback) {
+    dom.on('animationend', fireCallBack);
+  }
+
+  return this;
+}
+
+function width() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  if (this[0] === window) {
+    return window.innerWidth;
+  }
+
+  if (this.length > 0) {
+    return parseFloat(this.css('width'));
+  }
+
+  return null;
+}
+
+function outerWidth(includeMargins) {
+  if (this.length > 0) {
+    if (includeMargins) {
+      var _styles = this.styles();
+
+      return this[0].offsetWidth + parseFloat(_styles.getPropertyValue('margin-right')) + parseFloat(_styles.getPropertyValue('margin-left'));
+    }
+
+    return this[0].offsetWidth;
+  }
+
+  return null;
+}
+
+function height() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  if (this[0] === window) {
+    return window.innerHeight;
+  }
+
+  if (this.length > 0) {
+    return parseFloat(this.css('height'));
+  }
+
+  return null;
+}
+
+function outerHeight(includeMargins) {
+  if (this.length > 0) {
+    if (includeMargins) {
+      var _styles2 = this.styles();
+
+      return this[0].offsetHeight + parseFloat(_styles2.getPropertyValue('margin-top')) + parseFloat(_styles2.getPropertyValue('margin-bottom'));
+    }
+
+    return this[0].offsetHeight;
+  }
+
+  return null;
+}
+
+function offset() {
+  if (this.length > 0) {
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    var el = this[0];
+    var box = el.getBoundingClientRect();
+    var body = document.body;
+    var clientTop = el.clientTop || body.clientTop || 0;
+    var clientLeft = el.clientLeft || body.clientLeft || 0;
+    var scrollTop = el === window ? window.scrollY : el.scrollTop;
+    var scrollLeft = el === window ? window.scrollX : el.scrollLeft;
+    return {
+      top: box.top + scrollTop - clientTop,
+      left: box.left + scrollLeft - clientLeft
+    };
+  }
+
+  return null;
+}
+
+function hide() {
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].style.display = 'none';
+  }
+
+  return this;
+}
+
+function show() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  for (var i = 0; i < this.length; i += 1) {
+    var el = this[i];
+
+    if (el.style.display === 'none') {
+      el.style.display = '';
+    }
+
+    if (window.getComputedStyle(el, null).getPropertyValue('display') === 'none') {
+      // Still not visible
+      el.style.display = 'block';
+    }
+  }
+
+  return this;
+}
+
+function styles() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  if (this[0]) return window.getComputedStyle(this[0], null);
+  return {};
+}
+
+function css(props, value) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var i;
+
+  if (arguments.length === 1) {
+    if (typeof props === 'string') {
+      // .css('width')
+      if (this[0]) return window.getComputedStyle(this[0], null).getPropertyValue(props);
+    } else {
+      // .css({ width: '100px' })
+      for (i = 0; i < this.length; i += 1) {
+        for (var _prop in props) {
+          this[i].style[_prop] = props[_prop];
+        }
+      }
+
+      return this;
+    }
+  }
+
+  if (arguments.length === 2 && typeof props === 'string') {
+    // .css('width', '100px')
+    for (i = 0; i < this.length; i += 1) {
+      this[i].style[props] = value;
+    }
+
+    return this;
+  }
+
+  return this;
+}
+
+function each(callback) {
+  if (!callback) return this;
+  this.forEach(function (el, index) {
+    callback.apply(el, [el, index]);
+  });
+  return this;
+}
+
+function filter(callback) {
+  var result = arrayFilter(this, callback);
+  return $(result);
+}
+
+function html(html) {
+  if (typeof html === 'undefined') {
+    return this[0] ? this[0].innerHTML : null;
+  }
+
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].innerHTML = html;
+  }
+
+  return this;
+}
+
+function text(text) {
+  if (typeof text === 'undefined') {
+    return this[0] ? this[0].textContent.trim() : null;
+  }
+
+  for (var i = 0; i < this.length; i += 1) {
+    this[i].textContent = text;
+  }
+
+  return this;
+}
+
+function is(selector) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var el = this[0];
+  var compareWith;
+  var i;
+  if (!el || typeof selector === 'undefined') return false;
+
+  if (typeof selector === 'string') {
+    if (el.matches) return el.matches(selector);
+    if (el.webkitMatchesSelector) return el.webkitMatchesSelector(selector);
+    if (el.msMatchesSelector) return el.msMatchesSelector(selector);
+    compareWith = $(selector);
+
+    for (i = 0; i < compareWith.length; i += 1) {
+      if (compareWith[i] === el) return true;
+    }
+
+    return false;
+  }
+
+  if (selector === document) {
+    return el === document;
+  }
+
+  if (selector === window) {
+    return el === window;
+  }
+
+  if (selector.nodeType || selector instanceof Dom7) {
+    compareWith = selector.nodeType ? [selector] : selector;
+
+    for (i = 0; i < compareWith.length; i += 1) {
+      if (compareWith[i] === el) return true;
+    }
+
+    return false;
+  }
+
+  return false;
+}
+
+function index() {
+  var child = this[0];
+  var i;
+
+  if (child) {
+    i = 0; // eslint-disable-next-line
+
+    while ((child = child.previousSibling) !== null) {
+      if (child.nodeType === 1) i += 1;
+    }
+
+    return i;
+  }
+
+  return undefined;
+}
+
+function eq(index) {
+  if (typeof index === 'undefined') return this;
+  var length = this.length;
+
+  if (index > length - 1) {
+    return $([]);
+  }
+
+  if (index < 0) {
+    var returnIndex = length + index;
+    if (returnIndex < 0) return $([]);
+    return $([this[returnIndex]]);
+  }
+
+  return $([this[index]]);
+}
+
+function append() {
+  var newChild;
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+
+  for (var k = 0; k < arguments.length; k += 1) {
+    newChild = k < 0 || arguments.length <= k ? undefined : arguments[k];
+
+    for (var i = 0; i < this.length; i += 1) {
+      if (typeof newChild === 'string') {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newChild;
+
+        while (tempDiv.firstChild) {
+          this[i].appendChild(tempDiv.firstChild);
+        }
+      } else if (newChild instanceof Dom7) {
+        for (var j = 0; j < newChild.length; j += 1) {
+          this[i].appendChild(newChild[j]);
+        }
+      } else {
+        this[i].appendChild(newChild);
+      }
+    }
+  }
+
+  return this;
+}
+
+function appendTo(parent) {
+  $(parent).append(this);
+  return this;
+}
+
+function prepend(newChild) {
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var i;
+  var j;
+
+  for (i = 0; i < this.length; i += 1) {
+    if (typeof newChild === 'string') {
+      var tempDiv = document.createElement('div');
+      tempDiv.innerHTML = newChild;
+
+      for (j = tempDiv.childNodes.length - 1; j >= 0; j -= 1) {
+        this[i].insertBefore(tempDiv.childNodes[j], this[i].childNodes[0]);
+      }
+    } else if (newChild instanceof Dom7) {
+      for (j = 0; j < newChild.length; j += 1) {
+        this[i].insertBefore(newChild[j], this[i].childNodes[0]);
+      }
+    } else {
+      this[i].insertBefore(newChild, this[i].childNodes[0]);
+    }
+  }
+
+  return this;
+}
+
+function prependTo(parent) {
+  $(parent).prepend(this);
+  return this;
+}
+
+function insertBefore(selector) {
+  var before = $(selector);
+
+  for (var i = 0; i < this.length; i += 1) {
+    if (before.length === 1) {
+      before[0].parentNode.insertBefore(this[i], before[0]);
+    } else if (before.length > 1) {
+      for (var j = 0; j < before.length; j += 1) {
+        before[j].parentNode.insertBefore(this[i].cloneNode(true), before[j]);
+      }
+    }
+  }
+}
+
+function insertAfter(selector) {
+  var after = $(selector);
+
+  for (var i = 0; i < this.length; i += 1) {
+    if (after.length === 1) {
+      after[0].parentNode.insertBefore(this[i], after[0].nextSibling);
+    } else if (after.length > 1) {
+      for (var j = 0; j < after.length; j += 1) {
+        after[j].parentNode.insertBefore(this[i].cloneNode(true), after[j].nextSibling);
+      }
+    }
+  }
+}
+
+function next(selector) {
+  if (this.length > 0) {
+    if (selector) {
+      if (this[0].nextElementSibling && $(this[0].nextElementSibling).is(selector)) {
+        return $([this[0].nextElementSibling]);
+      }
+
+      return $([]);
+    }
+
+    if (this[0].nextElementSibling) return $([this[0].nextElementSibling]);
+    return $([]);
+  }
+
+  return $([]);
+}
+
+function nextAll(selector) {
+  var nextEls = [];
+  var el = this[0];
+  if (!el) return $([]);
+
+  while (el.nextElementSibling) {
+    var _next = el.nextElementSibling; // eslint-disable-line
+
+    if (selector) {
+      if ($(_next).is(selector)) nextEls.push(_next);
+    } else nextEls.push(_next);
+
+    el = _next;
+  }
+
+  return $(nextEls);
+}
+
+function prev(selector) {
+  if (this.length > 0) {
+    var el = this[0];
+
+    if (selector) {
+      if (el.previousElementSibling && $(el.previousElementSibling).is(selector)) {
+        return $([el.previousElementSibling]);
+      }
+
+      return $([]);
+    }
+
+    if (el.previousElementSibling) return $([el.previousElementSibling]);
+    return $([]);
+  }
+
+  return $([]);
+}
+
+function prevAll(selector) {
+  var prevEls = [];
+  var el = this[0];
+  if (!el) return $([]);
+
+  while (el.previousElementSibling) {
+    var _prev = el.previousElementSibling; // eslint-disable-line
+
+    if (selector) {
+      if ($(_prev).is(selector)) prevEls.push(_prev);
+    } else prevEls.push(_prev);
+
+    el = _prev;
+  }
+
+  return $(prevEls);
+}
+
+function siblings(selector) {
+  return this.nextAll(selector).add(this.prevAll(selector));
+}
+
+function parent(selector) {
+  var parents = []; // eslint-disable-line
+
+  for (var i = 0; i < this.length; i += 1) {
+    if (this[i].parentNode !== null) {
+      if (selector) {
+        if ($(this[i].parentNode).is(selector)) parents.push(this[i].parentNode);
+      } else {
+        parents.push(this[i].parentNode);
+      }
+    }
+  }
+
+  return $(parents);
+}
+
+function parents(selector) {
+  var parents = []; // eslint-disable-line
+
+  for (var i = 0; i < this.length; i += 1) {
+    var _parent = this[i].parentNode; // eslint-disable-line
+
+    while (_parent) {
+      if (selector) {
+        if ($(_parent).is(selector)) parents.push(_parent);
+      } else {
+        parents.push(_parent);
+      }
+
+      _parent = _parent.parentNode;
+    }
+  }
+
+  return $(parents);
+}
+
+function closest(selector) {
+  var closest = this; // eslint-disable-line
+
+  if (typeof selector === 'undefined') {
+    return $([]);
+  }
+
+  if (!closest.is(selector)) {
+    closest = closest.parents(selector).eq(0);
+  }
+
+  return closest;
+}
+
+function find(selector) {
+  var foundElements = [];
+
+  for (var i = 0; i < this.length; i += 1) {
+    var found = this[i].querySelectorAll(selector);
+
+    for (var j = 0; j < found.length; j += 1) {
+      foundElements.push(found[j]);
+    }
+  }
+
+  return $(foundElements);
+}
+
+function children(selector) {
+  var children = []; // eslint-disable-line
+
+  for (var i = 0; i < this.length; i += 1) {
+    var childNodes = this[i].children;
+
+    for (var j = 0; j < childNodes.length; j += 1) {
+      if (!selector || $(childNodes[j]).is(selector)) {
+        children.push(childNodes[j]);
+      }
+    }
+  }
+
+  return $(children);
+}
+
+function remove() {
+  for (var i = 0; i < this.length; i += 1) {
+    if (this[i].parentNode) this[i].parentNode.removeChild(this[i]);
+  }
+
+  return this;
+}
+
+function detach() {
+  return this.remove();
+}
+
+function add() {
+  var dom = this;
+  var i;
+  var j;
+
+  for (var _len10 = arguments.length, els = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
+    els[_key10] = arguments[_key10];
+  }
+
+  for (i = 0; i < els.length; i += 1) {
+    var toAdd = $(els[i]);
+
+    for (j = 0; j < toAdd.length; j += 1) {
+      dom.push(toAdd[j]);
+    }
+  }
+
+  return dom;
+}
+
+function empty() {
+  for (var i = 0; i < this.length; i += 1) {
+    var el = this[i];
+
+    if (el.nodeType === 1) {
+      for (var j = 0; j < el.childNodes.length; j += 1) {
+        if (el.childNodes[j].parentNode) {
+          el.childNodes[j].parentNode.removeChild(el.childNodes[j]);
+        }
+      }
+
+      el.textContent = '';
+    }
+  }
+
+  return this;
+}
+
+function scrollTo() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  var left = args[0],
+      top = args[1],
+      duration = args[2],
+      easing = args[3],
+      callback = args[4];
+
+  if (args.length === 4 && typeof easing === 'function') {
+    callback = easing;
+    left = args[0];
+    top = args[1];
+    duration = args[2];
+    callback = args[3];
+    easing = args[4];
+  }
+
+  if (typeof easing === 'undefined') easing = 'swing';
+  return this.each(function animate() {
+    var el = this;
+    var currentTop;
+    var currentLeft;
+    var maxTop;
+    var maxLeft;
+    var newTop;
+    var newLeft;
+    var scrollTop; // eslint-disable-line
+
+    var scrollLeft; // eslint-disable-line
+
+    var animateTop = top > 0 || top === 0;
+    var animateLeft = left > 0 || left === 0;
+
+    if (typeof easing === 'undefined') {
+      easing = 'swing';
+    }
+
+    if (animateTop) {
+      currentTop = el.scrollTop;
+
+      if (!duration) {
+        el.scrollTop = top;
+      }
+    }
+
+    if (animateLeft) {
+      currentLeft = el.scrollLeft;
+
+      if (!duration) {
+        el.scrollLeft = left;
+      }
+    }
+
+    if (!duration) return;
+
+    if (animateTop) {
+      maxTop = el.scrollHeight - el.offsetHeight;
+      newTop = Math.max(Math.min(top, maxTop), 0);
+    }
+
+    if (animateLeft) {
+      maxLeft = el.scrollWidth - el.offsetWidth;
+      newLeft = Math.max(Math.min(left, maxLeft), 0);
+    }
+
+    var startTime = null;
+    if (animateTop && newTop === currentTop) animateTop = false;
+    if (animateLeft && newLeft === currentLeft) animateLeft = false;
+
+    function render(time) {
+      if (time === void 0) {
+        time = new Date().getTime();
+      }
+
+      if (startTime === null) {
+        startTime = time;
+      }
+
+      var progress = Math.max(Math.min((time - startTime) / duration, 1), 0);
+      var easeProgress = easing === 'linear' ? progress : 0.5 - Math.cos(progress * Math.PI) / 2;
+      var done;
+      if (animateTop) scrollTop = currentTop + easeProgress * (newTop - currentTop);
+      if (animateLeft) scrollLeft = currentLeft + easeProgress * (newLeft - currentLeft);
+
+      if (animateTop && newTop > currentTop && scrollTop >= newTop) {
+        el.scrollTop = newTop;
+        done = true;
+      }
+
+      if (animateTop && newTop < currentTop && scrollTop <= newTop) {
+        el.scrollTop = newTop;
+        done = true;
+      }
+
+      if (animateLeft && newLeft > currentLeft && scrollLeft >= newLeft) {
+        el.scrollLeft = newLeft;
+        done = true;
+      }
+
+      if (animateLeft && newLeft < currentLeft && scrollLeft <= newLeft) {
+        el.scrollLeft = newLeft;
+        done = true;
+      }
+
+      if (done) {
+        if (callback) callback();
+        return;
+      }
+
+      if (animateTop) el.scrollTop = scrollTop;
+      if (animateLeft) el.scrollLeft = scrollLeft;
+      window.requestAnimationFrame(render);
+    }
+
+    window.requestAnimationFrame(render);
+  });
+} // scrollTop(top, duration, easing, callback) {
+
+
+function scrollTop() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  var top = args[0],
+      duration = args[1],
+      easing = args[2],
+      callback = args[3];
+
+  if (args.length === 3 && typeof easing === 'function') {
+    top = args[0];
+    duration = args[1];
+    callback = args[2];
+    easing = args[3];
+  }
+
+  var dom = this;
+
+  if (typeof top === 'undefined') {
+    if (dom.length > 0) return dom[0].scrollTop;
+    return null;
+  }
+
+  return dom.scrollTo(undefined, top, duration, easing, callback);
+}
+
+function scrollLeft() {
+  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    args[_key3] = arguments[_key3];
+  }
+
+  var left = args[0],
+      duration = args[1],
+      easing = args[2],
+      callback = args[3];
+
+  if (args.length === 3 && typeof easing === 'function') {
+    left = args[0];
+    duration = args[1];
+    callback = args[2];
+    easing = args[3];
+  }
+
+  var dom = this;
+
+  if (typeof left === 'undefined') {
+    if (dom.length > 0) return dom[0].scrollLeft;
+    return null;
+  }
+
+  return dom.scrollTo(left, undefined, duration, easing, callback);
+}
+
+function animate(initialProps, initialParams) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var els = this;
+  var a = {
+    props: Object.assign({}, initialProps),
+    params: Object.assign({
+      duration: 300,
+      easing: 'swing' // or 'linear'
+
+      /* Callbacks
+      begin(elements)
+      complete(elements)
+      progress(elements, complete, remaining, start, tweenValue)
+      */
+
+    }, initialParams),
+    elements: els,
+    animating: false,
+    que: [],
+    easingProgress: function easingProgress(easing, progress) {
+      if (easing === 'swing') {
+        return 0.5 - Math.cos(progress * Math.PI) / 2;
+      }
+
+      if (typeof easing === 'function') {
+        return easing(progress);
+      }
+
+      return progress;
+    },
+    stop: function stop() {
+      if (a.frameId) {
+        window.cancelAnimationFrame(a.frameId);
+      }
+
+      a.animating = false;
+      a.elements.each(function (el) {
+        var element = el;
+        delete element.dom7AnimateInstance;
+      });
+      a.que = [];
+    },
+    done: function done(complete) {
+      a.animating = false;
+      a.elements.each(function (el) {
+        var element = el;
+        delete element.dom7AnimateInstance;
+      });
+      if (complete) complete(els);
+
+      if (a.que.length > 0) {
+        var que = a.que.shift();
+        a.animate(que[0], que[1]);
+      }
+    },
+    animate: function animate(props, params) {
+      if (a.animating) {
+        a.que.push([props, params]);
+        return a;
+      }
+
+      var elements = []; // Define & Cache Initials & Units
+
+      a.elements.each(function (el, index) {
+        var initialFullValue;
+        var initialValue;
+        var unit;
+        var finalValue;
+        var finalFullValue;
+        if (!el.dom7AnimateInstance) a.elements[index].dom7AnimateInstance = a;
+        elements[index] = {
+          container: el
+        };
+        Object.keys(props).forEach(function (prop) {
+          initialFullValue = window.getComputedStyle(el, null).getPropertyValue(prop).replace(',', '.');
+          initialValue = parseFloat(initialFullValue);
+          unit = initialFullValue.replace(initialValue, '');
+          finalValue = parseFloat(props[prop]);
+          finalFullValue = props[prop] + unit;
+          elements[index][prop] = {
+            initialFullValue: initialFullValue,
+            initialValue: initialValue,
+            unit: unit,
+            finalValue: finalValue,
+            finalFullValue: finalFullValue,
+            currentValue: initialValue
+          };
+        });
+      });
+      var startTime = null;
+      var time;
+      var elementsDone = 0;
+      var propsDone = 0;
+      var done;
+      var began = false;
+      a.animating = true;
+
+      function render() {
+        time = new Date().getTime();
+        var progress;
+        var easeProgress; // let el;
+
+        if (!began) {
+          began = true;
+          if (params.begin) params.begin(els);
+        }
+
+        if (startTime === null) {
+          startTime = time;
+        }
+
+        if (params.progress) {
+          // eslint-disable-next-line
+          params.progress(els, Math.max(Math.min((time - startTime) / params.duration, 1), 0), startTime + params.duration - time < 0 ? 0 : startTime + params.duration - time, startTime);
+        }
+
+        elements.forEach(function (element) {
+          var el = element;
+          if (done || el.done) return;
+          Object.keys(props).forEach(function (prop) {
+            if (done || el.done) return;
+            progress = Math.max(Math.min((time - startTime) / params.duration, 1), 0);
+            easeProgress = a.easingProgress(params.easing, progress);
+            var _el$prop = el[prop],
+                initialValue = _el$prop.initialValue,
+                finalValue = _el$prop.finalValue,
+                unit = _el$prop.unit;
+            el[prop].currentValue = initialValue + easeProgress * (finalValue - initialValue);
+            var currentValue = el[prop].currentValue;
+
+            if (finalValue > initialValue && currentValue >= finalValue || finalValue < initialValue && currentValue <= finalValue) {
+              el.container.style[prop] = finalValue + unit;
+              propsDone += 1;
+
+              if (propsDone === Object.keys(props).length) {
+                el.done = true;
+                elementsDone += 1;
+              }
+
+              if (elementsDone === elements.length) {
+                done = true;
+              }
+            }
+
+            if (done) {
+              a.done(params.complete);
+              return;
+            }
+
+            el.container.style[prop] = currentValue + unit;
+          });
+        });
+        if (done) return; // Then call
+
+        a.frameId = window.requestAnimationFrame(render);
+      }
+
+      a.frameId = window.requestAnimationFrame(render);
+      return a;
+    }
+  };
+
+  if (a.elements.length === 0) {
+    return els;
+  }
+
+  var animateInstance;
+
+  for (var i = 0; i < a.elements.length; i += 1) {
+    if (a.elements[i].dom7AnimateInstance) {
+      animateInstance = a.elements[i].dom7AnimateInstance;
+    } else a.elements[i].dom7AnimateInstance = a;
+  }
+
+  if (!animateInstance) {
+    animateInstance = a;
+  }
+
+  if (initialProps === 'stop') {
+    animateInstance.stop();
+  } else {
+    animateInstance.animate(a.props, a.params);
+  }
+
+  return els;
+}
+
+function stop() {
+  var els = this;
+
+  for (var i = 0; i < els.length; i += 1) {
+    if (els[i].dom7AnimateInstance) {
+      els[i].dom7AnimateInstance.stop();
+    }
+  }
+}
+
+var noTrigger = 'resize scroll'.split(' ');
+
+function shortcut(name) {
+  function eventHandler() {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (typeof args[0] === 'undefined') {
+      for (var i = 0; i < this.length; i += 1) {
+        if (noTrigger.indexOf(name) < 0) {
+          if (name in this[i]) this[i][name]();else {
+            $(this[i]).trigger(name);
+          }
+        }
+      }
+
+      return this;
+    }
+
+    return this.on.apply(this, [name].concat(args));
+  }
+
+  return eventHandler;
+}
+
+var click = shortcut('click');
+var blur = shortcut('blur');
+var focus = shortcut('focus');
+var focusin = shortcut('focusin');
+var focusout = shortcut('focusout');
+var keyup = shortcut('keyup');
+var keydown = shortcut('keydown');
+var keypress = shortcut('keypress');
+var submit = shortcut('submit');
+var change = shortcut('change');
+var mousedown = shortcut('mousedown');
+var mousemove = shortcut('mousemove');
+var mouseup = shortcut('mouseup');
+var mouseenter = shortcut('mouseenter');
+var mouseleave = shortcut('mouseleave');
+var mouseout = shortcut('mouseout');
+var mouseover = shortcut('mouseover');
+var touchstart = shortcut('touchstart');
+var touchend = shortcut('touchend');
+var touchmove = shortcut('touchmove');
+var resize = shortcut('resize');
+var scroll = shortcut('scroll');
+
+/* harmony default export */ __webpack_exports__["default"] = ($);
+
+
+
+/***/ }),
+
+/***/ "3Pt+":
+/*!********************************************************************!*\
+  !*** ./node_modules/@angular/forms/__ivy_ngcc__/fesm2015/forms.js ***!
+  \********************************************************************/
+/*! exports provided: AbstractControl, AbstractControlDirective, AbstractFormGroupDirective, COMPOSITION_BUFFER_MODE, CheckboxControlValueAccessor, CheckboxRequiredValidator, ControlContainer, DefaultValueAccessor, EmailValidator, FormArray, FormArrayName, FormBuilder, FormControl, FormControlDirective, FormControlName, FormGroup, FormGroupDirective, FormGroupName, FormsModule, MaxLengthValidator, MinLengthValidator, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, NgControlStatus, NgControlStatusGroup, NgForm, NgModel, NgModelGroup, NgSelectOption, NumberValueAccessor, PatternValidator, RadioControlValueAccessor, RangeValueAccessor, ReactiveFormsModule, RequiredValidator, SelectControlValueAccessor, SelectMultipleControlValueAccessor, VERSION, Validators, ɵInternalFormsSharedModule, ɵNgNoValidate, ɵNgSelectMultipleOption, ɵangular_packages_forms_forms_a, ɵangular_packages_forms_forms_b, ɵangular_packages_forms_forms_ba, ɵangular_packages_forms_forms_bb, ɵangular_packages_forms_forms_bc, ɵangular_packages_forms_forms_bd, ɵangular_packages_forms_forms_be, ɵangular_packages_forms_forms_bf, ɵangular_packages_forms_forms_bg, ɵangular_packages_forms_forms_bh, ɵangular_packages_forms_forms_bi, ɵangular_packages_forms_forms_bj, ɵangular_packages_forms_forms_bk, ɵangular_packages_forms_forms_bl, ɵangular_packages_forms_forms_bm, ɵangular_packages_forms_forms_bn, ɵangular_packages_forms_forms_bo, ɵangular_packages_forms_forms_bp, ɵangular_packages_forms_forms_c, ɵangular_packages_forms_forms_d, ɵangular_packages_forms_forms_e, ɵangular_packages_forms_forms_f, ɵangular_packages_forms_forms_g, ɵangular_packages_forms_forms_h, ɵangular_packages_forms_forms_i, ɵangular_packages_forms_forms_j, ɵangular_packages_forms_forms_k, ɵangular_packages_forms_forms_l, ɵangular_packages_forms_forms_m, ɵangular_packages_forms_forms_n, ɵangular_packages_forms_forms_o, ɵangular_packages_forms_forms_p, ɵangular_packages_forms_forms_q, ɵangular_packages_forms_forms_r, ɵangular_packages_forms_forms_s, ɵangular_packages_forms_forms_t, ɵangular_packages_forms_forms_u, ɵangular_packages_forms_forms_v, ɵangular_packages_forms_forms_w, ɵangular_packages_forms_forms_x, ɵangular_packages_forms_forms_y, ɵangular_packages_forms_forms_z */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractControl", function() { return AbstractControl; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractControlDirective", function() { return AbstractControlDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractFormGroupDirective", function() { return AbstractFormGroupDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COMPOSITION_BUFFER_MODE", function() { return COMPOSITION_BUFFER_MODE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CheckboxControlValueAccessor", function() { return CheckboxControlValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CheckboxRequiredValidator", function() { return CheckboxRequiredValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ControlContainer", function() { return ControlContainer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DefaultValueAccessor", function() { return DefaultValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EmailValidator", function() { return EmailValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormArray", function() { return FormArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormArrayName", function() { return FormArrayName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormBuilder", function() { return FormBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormControl", function() { return FormControl; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormControlDirective", function() { return FormControlDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormControlName", function() { return FormControlName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormGroup", function() { return FormGroup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormGroupDirective", function() { return FormGroupDirective; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormGroupName", function() { return FormGroupName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormsModule", function() { return FormsModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MaxLengthValidator", function() { return MaxLengthValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MinLengthValidator", function() { return MinLengthValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NG_ASYNC_VALIDATORS", function() { return NG_ASYNC_VALIDATORS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NG_VALIDATORS", function() { return NG_VALIDATORS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NG_VALUE_ACCESSOR", function() { return NG_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgControl", function() { return NgControl; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgControlStatus", function() { return NgControlStatus; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgControlStatusGroup", function() { return NgControlStatusGroup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgForm", function() { return NgForm; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgModel", function() { return NgModel; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgModelGroup", function() { return NgModelGroup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgSelectOption", function() { return NgSelectOption; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NumberValueAccessor", function() { return NumberValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PatternValidator", function() { return PatternValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RadioControlValueAccessor", function() { return RadioControlValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RangeValueAccessor", function() { return RangeValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ReactiveFormsModule", function() { return ReactiveFormsModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RequiredValidator", function() { return RequiredValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectControlValueAccessor", function() { return SelectControlValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMultipleControlValueAccessor", function() { return SelectMultipleControlValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VERSION", function() { return VERSION; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Validators", function() { return Validators; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵInternalFormsSharedModule", function() { return ɵInternalFormsSharedModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵNgNoValidate", function() { return ɵNgNoValidate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵNgSelectMultipleOption", function() { return ɵNgSelectMultipleOption; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_a", function() { return SHARED_FORM_DIRECTIVES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_b", function() { return TEMPLATE_DRIVEN_DIRECTIVES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_ba", function() { return ɵNgNoValidate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bb", function() { return REQUIRED_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bc", function() { return CHECKBOX_REQUIRED_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bd", function() { return EMAIL_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_be", function() { return MIN_LENGTH_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bf", function() { return MAX_LENGTH_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bg", function() { return PATTERN_VALIDATOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bh", function() { return minValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bi", function() { return maxValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bj", function() { return requiredValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bk", function() { return requiredTrueValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bl", function() { return emailValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bm", function() { return minLengthValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bn", function() { return maxLengthValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bo", function() { return patternValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_bp", function() { return nullValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_c", function() { return REACTIVE_DRIVEN_DIRECTIVES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_d", function() { return ɵInternalFormsSharedModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_e", function() { return CHECKBOX_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_f", function() { return BuiltInControlValueAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_g", function() { return DEFAULT_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_h", function() { return AbstractControlStatus; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_i", function() { return ngControlStatusHost; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_j", function() { return formDirectiveProvider; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_k", function() { return formControlBinding; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_l", function() { return modelGroupProvider; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_m", function() { return NUMBER_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_n", function() { return RADIO_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_o", function() { return RadioControlRegistryModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_p", function() { return RadioControlRegistry; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_q", function() { return RANGE_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_r", function() { return NG_MODEL_WITH_FORM_CONTROL_WARNING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_s", function() { return formControlBinding$1; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_t", function() { return controlNameBinding; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_u", function() { return formDirectiveProvider$1; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_v", function() { return formGroupNameProvider; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_w", function() { return formArrayNameProvider; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_x", function() { return SELECT_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_y", function() { return SELECT_MULTIPLE_VALUE_ACCESSOR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵangular_packages_forms_forms_z", function() { return ɵNgSelectMultipleOption; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "ofXK");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "qCKp");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
+/**
+ * @license Angular v11.2.9
+ * (c) 2010-2021 Google LLC. https://angular.io/
+ * License: MIT
+ */
+
+
+
+
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Base class for all built-in ControlValueAccessor classes. We use this class to distinguish
+ * between built-in and custom CVAs, so that Forms logic can recognize built-in CVAs and treat
+ * custom ones with higher priority (when both built-in and custom CVAs are present).
+ * Note: this is an *internal-only* class and should not be extended or used directly in
+ * applications code.
+ */
+
+class BuiltInControlValueAccessor {
+}
+/**
+ * Used to provide a `ControlValueAccessor` for form controls.
+ *
+ * See `DefaultValueAccessor` for how to implement one.
+ *
+ * @publicApi
+ */
+const NG_VALUE_ACCESSOR = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('NgValueAccessor');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const CHECKBOX_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => CheckboxControlValueAccessor),
+    multi: true,
+};
+/**
+ * @description
+ * A `ControlValueAccessor` for writing a value and listening to changes on a checkbox input
+ * element.
+ *
+ * @usageNotes
+ *
+ * ### Using a checkbox with a reactive form.
+ *
+ * The following example shows how to use a checkbox with a reactive form.
+ *
+ * ```ts
+ * const rememberLoginControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <input type="checkbox" [formControl]="rememberLoginControl">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class CheckboxControlValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        /**
+         * The registered callback function called when a change event occurs on the input element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+    }
+    /**
+     * Sets the "checked" property on the input element.
+     * @nodoc
+     */
+    writeValue(value) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'checked', value);
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = fn;
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+}
+CheckboxControlValueAccessor.ɵfac = function CheckboxControlValueAccessor_Factory(t) { return new (t || CheckboxControlValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+CheckboxControlValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: CheckboxControlValueAccessor, selectors: [["input", "type", "checkbox", "formControlName", ""], ["input", "type", "checkbox", "formControl", ""], ["input", "type", "checkbox", "ngModel", ""]], hostBindings: function CheckboxControlValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("change", function CheckboxControlValueAccessor_change_HostBindingHandler($event) { return ctx.onChange($event.target.checked); })("blur", function CheckboxControlValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([CHECKBOX_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+CheckboxControlValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](CheckboxControlValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]',
+                host: { '(change)': 'onChange($event.target.checked)', '(blur)': 'onTouched()' },
+                providers: [CHECKBOX_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const DEFAULT_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => DefaultValueAccessor),
+    multi: true
+};
+/**
+ * We must check whether the agent is Android because composition events
+ * behave differently between iOS and Android.
+ */
+function _isAndroid() {
+    const userAgent = Object(_angular_common__WEBPACK_IMPORTED_MODULE_1__["ɵgetDOM"])() ? Object(_angular_common__WEBPACK_IMPORTED_MODULE_1__["ɵgetDOM"])().getUserAgent() : '';
+    return /android (\d+)/.test(userAgent.toLowerCase());
+}
+/**
+ * @description
+ * Provide this token to control if form directives buffer IME input until
+ * the "compositionend" event occurs.
+ * @publicApi
+ */
+const COMPOSITION_BUFFER_MODE = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('CompositionEventMode');
+/**
+ * The default `ControlValueAccessor` for writing a value and listening to changes on input
+ * elements. The accessor is used by the `FormControlDirective`, `FormControlName`, and
+ * `NgModel` directives.
+ *
+ * {@searchKeywords ngDefaultControl}
+ *
+ * @usageNotes
+ *
+ * ### Using the default value accessor
+ *
+ * The following example shows how to use an input element that activates the default value accessor
+ * (in this case, a text field).
+ *
+ * ```ts
+ * const firstNameControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <input type="text" [formControl]="firstNameControl">
+ * ```
+ *
+ * This value accessor is used by default for `<input type="text">` and `<textarea>` elements, but
+ * you could also use it for custom components that have similar behavior and do not require special
+ * processing. In order to attach the default value accessor to a custom element, add the
+ * `ngDefaultControl` attribute as shown below.
+ *
+ * ```
+ * <custom-input-component ngDefaultControl [(ngModel)]="value"></custom-input-component>
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class DefaultValueAccessor {
+    constructor(_renderer, _elementRef, _compositionMode) {
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        this._compositionMode = _compositionMode;
+        /**
+         * The registered callback function called when an input event occurs on the input element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+        /** Whether the user is creating a composition string (IME events). */
+        this._composing = false;
+        if (this._compositionMode == null) {
+            this._compositionMode = !_isAndroid();
+        }
+    }
+    /**
+     * Sets the "value" property on the input element.
+     * @nodoc
+     */
+    writeValue(value) {
+        const normalizedValue = value == null ? '' : value;
+        this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = fn;
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+    /** @internal */
+    _handleInput(value) {
+        if (!this._compositionMode || (this._compositionMode && !this._composing)) {
+            this.onChange(value);
+        }
+    }
+    /** @internal */
+    _compositionStart() {
+        this._composing = true;
+    }
+    /** @internal */
+    _compositionEnd(value) {
+        this._composing = false;
+        this._compositionMode && this.onChange(value);
+    }
+}
+DefaultValueAccessor.ɵfac = function DefaultValueAccessor_Factory(t) { return new (t || DefaultValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](COMPOSITION_BUFFER_MODE, 8)); };
+DefaultValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: DefaultValueAccessor, selectors: [["input", "formControlName", "", 3, "type", "checkbox"], ["textarea", "formControlName", ""], ["input", "formControl", "", 3, "type", "checkbox"], ["textarea", "formControl", ""], ["input", "ngModel", "", 3, "type", "checkbox"], ["textarea", "ngModel", ""], ["", "ngDefaultControl", ""]], hostBindings: function DefaultValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("input", function DefaultValueAccessor_input_HostBindingHandler($event) { return ctx._handleInput($event.target.value); })("blur", function DefaultValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); })("compositionstart", function DefaultValueAccessor_compositionstart_HostBindingHandler() { return ctx._compositionStart(); })("compositionend", function DefaultValueAccessor_compositionend_HostBindingHandler($event) { return ctx._compositionEnd($event.target.value); });
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([DEFAULT_VALUE_ACCESSOR])] });
+DefaultValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: Boolean, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [COMPOSITION_BUFFER_MODE,] }] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](DefaultValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input:not([type=checkbox])[formControlName],textarea[formControlName],input:not([type=checkbox])[formControl],textarea[formControl],input:not([type=checkbox])[ngModel],textarea[ngModel],[ngDefaultControl]',
+                // TODO: vsavkin replace the above selector with the one below it once
+                // https://github.com/angular/angular/issues/3011 is implemented
+                // selector: '[ngModel],[formControl],[formControlName]',
+                host: {
+                    '(input)': '$any(this)._handleInput($event.target.value)',
+                    '(blur)': 'onTouched()',
+                    '(compositionstart)': '$any(this)._compositionStart()',
+                    '(compositionend)': '$any(this)._compositionEnd($event.target.value)'
+                },
+                providers: [DEFAULT_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: Boolean, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [COMPOSITION_BUFFER_MODE]
+            }] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function isEmptyInputValue(value) {
+    // we don't check for string here so it also works with arrays
+    return value == null || value.length === 0;
+}
+function hasValidLength(value) {
+    // non-strict comparison is intentional, to check for both `null` and `undefined` values
+    return value != null && typeof value.length === 'number';
+}
+/**
+ * @description
+ * An `InjectionToken` for registering additional synchronous validators used with
+ * `AbstractControl`s.
+ *
+ * @see `NG_ASYNC_VALIDATORS`
+ *
+ * @usageNotes
+ *
+ * ### Providing a custom validator
+ *
+ * The following example registers a custom validator directive. Adding the validator to the
+ * existing collection of validators requires the `multi: true` option.
+ *
+ * ```typescript
+ * @Directive({
+ *   selector: '[customValidator]',
+ *   providers: [{provide: NG_VALIDATORS, useExisting: CustomValidatorDirective, multi: true}]
+ * })
+ * class CustomValidatorDirective implements Validator {
+ *   validate(control: AbstractControl): ValidationErrors | null {
+ *     return { 'custom': true };
+ *   }
+ * }
+ * ```
+ *
+ * @publicApi
+ */
+const NG_VALIDATORS = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('NgValidators');
+/**
+ * @description
+ * An `InjectionToken` for registering additional asynchronous validators used with
+ * `AbstractControl`s.
+ *
+ * @see `NG_VALIDATORS`
+ *
+ * @publicApi
+ */
+const NG_ASYNC_VALIDATORS = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('NgAsyncValidators');
+/**
+ * A regular expression that matches valid e-mail addresses.
+ *
+ * At a high level, this regexp matches e-mail addresses of the format `local-part@tld`, where:
+ * - `local-part` consists of one or more of the allowed characters (alphanumeric and some
+ *   punctuation symbols).
+ * - `local-part` cannot begin or end with a period (`.`).
+ * - `local-part` cannot be longer than 64 characters.
+ * - `tld` consists of one or more `labels` separated by periods (`.`). For example `localhost` or
+ *   `foo.com`.
+ * - A `label` consists of one or more of the allowed characters (alphanumeric, dashes (`-`) and
+ *   periods (`.`)).
+ * - A `label` cannot begin or end with a dash (`-`) or a period (`.`).
+ * - A `label` cannot be longer than 63 characters.
+ * - The whole address cannot be longer than 254 characters.
+ *
+ * ## Implementation background
+ *
+ * This regexp was ported over from AngularJS (see there for git history):
+ * https://github.com/angular/angular.js/blob/c133ef836/src/ng/directive/input.js#L27
+ * It is based on the
+ * [WHATWG version](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address) with
+ * some enhancements to incorporate more RFC rules (such as rules related to domain names and the
+ * lengths of different parts of the address). The main differences from the WHATWG version are:
+ *   - Disallow `local-part` to begin or end with a period (`.`).
+ *   - Disallow `local-part` length to exceed 64 characters.
+ *   - Disallow total address length to exceed 254 characters.
+ *
+ * See [this commit](https://github.com/angular/angular.js/commit/f3f5cf72e) for more details.
+ */
+const EMAIL_REGEXP = /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+/**
+ * @description
+ * Provides a set of built-in validators that can be used by form controls.
+ *
+ * A validator is a function that processes a `FormControl` or collection of
+ * controls and returns an error map or null. A null map means that validation has passed.
+ *
+ * @see [Form Validation](/guide/form-validation)
+ *
+ * @publicApi
+ */
+class Validators {
+    /**
+     * @description
+     * Validator that requires the control's value to be greater than or equal to the provided number.
+     *
+     * @usageNotes
+     *
+     * ### Validate against a minimum of 3
+     *
+     * ```typescript
+     * const control = new FormControl(2, Validators.min(3));
+     *
+     * console.log(control.errors); // {min: {min: 3, actual: 2}}
+     * ```
+     *
+     * @returns A validator function that returns an error map with the
+     * `min` property if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static min(min) {
+        return minValidator(min);
+    }
+    /**
+     * @description
+     * Validator that requires the control's value to be less than or equal to the provided number.
+     *
+     * @usageNotes
+     *
+     * ### Validate against a maximum of 15
+     *
+     * ```typescript
+     * const control = new FormControl(16, Validators.max(15));
+     *
+     * console.log(control.errors); // {max: {max: 15, actual: 16}}
+     * ```
+     *
+     * @returns A validator function that returns an error map with the
+     * `max` property if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static max(max) {
+        return maxValidator(max);
+    }
+    /**
+     * @description
+     * Validator that requires the control have a non-empty value.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field is non-empty
+     *
+     * ```typescript
+     * const control = new FormControl('', Validators.required);
+     *
+     * console.log(control.errors); // {required: true}
+     * ```
+     *
+     * @returns An error map with the `required` property
+     * if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static required(control) {
+        return requiredValidator(control);
+    }
+    /**
+     * @description
+     * Validator that requires the control's value be true. This validator is commonly
+     * used for required checkboxes.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field value is true
+     *
+     * ```typescript
+     * const control = new FormControl('', Validators.requiredTrue);
+     *
+     * console.log(control.errors); // {required: true}
+     * ```
+     *
+     * @returns An error map that contains the `required` property
+     * set to `true` if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static requiredTrue(control) {
+        return requiredTrueValidator(control);
+    }
+    /**
+     * @description
+     * Validator that requires the control's value pass an email validation test.
+     *
+     * Tests the value using a [regular
+     * expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions)
+     * pattern suitable for common usecases. The pattern is based on the definition of a valid email
+     * address in the [WHATWG HTML
+     * specification](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address) with
+     * some enhancements to incorporate more RFC rules (such as rules related to domain names and the
+     * lengths of different parts of the address).
+     *
+     * The differences from the WHATWG version include:
+     * - Disallow `local-part` (the part before the `@` symbol) to begin or end with a period (`.`).
+     * - Disallow `local-part` to be longer than 64 characters.
+     * - Disallow the whole address to be longer than 254 characters.
+     *
+     * If this pattern does not satisfy your business needs, you can use `Validators.pattern()` to
+     * validate the value against a different pattern.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field matches a valid email pattern
+     *
+     * ```typescript
+     * const control = new FormControl('bad@', Validators.email);
+     *
+     * console.log(control.errors); // {email: true}
+     * ```
+     *
+     * @returns An error map with the `email` property
+     * if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static email(control) {
+        return emailValidator(control);
+    }
+    /**
+     * @description
+     * Validator that requires the length of the control's value to be greater than or equal
+     * to the provided minimum length. This validator is also provided by default if you use the
+     * the HTML5 `minlength` attribute. Note that the `minLength` validator is intended to be used
+     * only for types that have a numeric `length` property, such as strings or arrays. The
+     * `minLength` validator logic is also not invoked for values when their `length` property is 0
+     * (for example in case of an empty string or an empty array), to support optional controls. You
+     * can use the standard `required` validator if empty values should not be considered valid.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field has a minimum of 3 characters
+     *
+     * ```typescript
+     * const control = new FormControl('ng', Validators.minLength(3));
+     *
+     * console.log(control.errors); // {minlength: {requiredLength: 3, actualLength: 2}}
+     * ```
+     *
+     * ```html
+     * <input minlength="5">
+     * ```
+     *
+     * @returns A validator function that returns an error map with the
+     * `minlength` property if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static minLength(minLength) {
+        return minLengthValidator(minLength);
+    }
+    /**
+     * @description
+     * Validator that requires the length of the control's value to be less than or equal
+     * to the provided maximum length. This validator is also provided by default if you use the
+     * the HTML5 `maxlength` attribute. Note that the `maxLength` validator is intended to be used
+     * only for types that have a numeric `length` property, such as strings or arrays.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field has maximum of 5 characters
+     *
+     * ```typescript
+     * const control = new FormControl('Angular', Validators.maxLength(5));
+     *
+     * console.log(control.errors); // {maxlength: {requiredLength: 5, actualLength: 7}}
+     * ```
+     *
+     * ```html
+     * <input maxlength="5">
+     * ```
+     *
+     * @returns A validator function that returns an error map with the
+     * `maxlength` property if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static maxLength(maxLength) {
+        return maxLengthValidator(maxLength);
+    }
+    /**
+     * @description
+     * Validator that requires the control's value to match a regex pattern. This validator is also
+     * provided by default if you use the HTML5 `pattern` attribute.
+     *
+     * @usageNotes
+     *
+     * ### Validate that the field only contains letters or spaces
+     *
+     * ```typescript
+     * const control = new FormControl('1', Validators.pattern('[a-zA-Z ]*'));
+     *
+     * console.log(control.errors); // {pattern: {requiredPattern: '^[a-zA-Z ]*$', actualValue: '1'}}
+     * ```
+     *
+     * ```html
+     * <input pattern="[a-zA-Z ]*">
+     * ```
+     *
+     * ### Pattern matching with the global or sticky flag
+     *
+     * `RegExp` objects created with the `g` or `y` flags that are passed into `Validators.pattern`
+     * can produce different results on the same input when validations are run consecutively. This is
+     * due to how the behavior of `RegExp.prototype.test` is
+     * specified in [ECMA-262](https://tc39.es/ecma262/#sec-regexpbuiltinexec)
+     * (`RegExp` preserves the index of the last match when the global or sticky flag is used).
+     * Due to this behavior, it is recommended that when using
+     * `Validators.pattern` you **do not** pass in a `RegExp` object with either the global or sticky
+     * flag enabled.
+     *
+     * ```typescript
+     * // Not recommended (since the `g` flag is used)
+     * const controlOne = new FormControl('1', Validators.pattern(/foo/g));
+     *
+     * // Good
+     * const controlTwo = new FormControl('1', Validators.pattern(/foo/));
+     * ```
+     *
+     * @param pattern A regular expression to be used as is to test the values, or a string.
+     * If a string is passed, the `^` character is prepended and the `$` character is
+     * appended to the provided string (if not already present), and the resulting regular
+     * expression is used to test the values.
+     *
+     * @returns A validator function that returns an error map with the
+     * `pattern` property if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static pattern(pattern) {
+        return patternValidator(pattern);
+    }
+    /**
+     * @description
+     * Validator that performs no operation.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static nullValidator(control) {
+        return nullValidator(control);
+    }
+    static compose(validators) {
+        return compose(validators);
+    }
+    /**
+     * @description
+     * Compose multiple async validators into a single function that returns the union
+     * of the individual error objects for the provided control.
+     *
+     * @returns A validator function that returns an error map with the
+     * merged error objects of the async validators if the validation check fails, otherwise `null`.
+     *
+     * @see `updateValueAndValidity()`
+     *
+     */
+    static composeAsync(validators) {
+        return composeAsync(validators);
+    }
+}
+/**
+ * Validator that requires the control's value to be greater than or equal to the provided number.
+ * See `Validators.min` for additional information.
+ */
+function minValidator(min) {
+    return (control) => {
+        if (isEmptyInputValue(control.value) || isEmptyInputValue(min)) {
+            return null; // don't validate empty values to allow optional controls
+        }
+        const value = parseFloat(control.value);
+        // Controls with NaN values after parsing should be treated as not having a
+        // minimum, per the HTML forms spec: https://www.w3.org/TR/html5/forms.html#attr-input-min
+        return !isNaN(value) && value < min ? { 'min': { 'min': min, 'actual': control.value } } : null;
+    };
+}
+/**
+ * Validator that requires the control's value to be less than or equal to the provided number.
+ * See `Validators.max` for additional information.
+ */
+function maxValidator(max) {
+    return (control) => {
+        if (isEmptyInputValue(control.value) || isEmptyInputValue(max)) {
+            return null; // don't validate empty values to allow optional controls
+        }
+        const value = parseFloat(control.value);
+        // Controls with NaN values after parsing should be treated as not having a
+        // maximum, per the HTML forms spec: https://www.w3.org/TR/html5/forms.html#attr-input-max
+        return !isNaN(value) && value > max ? { 'max': { 'max': max, 'actual': control.value } } : null;
+    };
+}
+/**
+ * Validator that requires the control have a non-empty value.
+ * See `Validators.required` for additional information.
+ */
+function requiredValidator(control) {
+    return isEmptyInputValue(control.value) ? { 'required': true } : null;
+}
+/**
+ * Validator that requires the control's value be true. This validator is commonly
+ * used for required checkboxes.
+ * See `Validators.requiredTrue` for additional information.
+ */
+function requiredTrueValidator(control) {
+    return control.value === true ? null : { 'required': true };
+}
+/**
+ * Validator that requires the control's value pass an email validation test.
+ * See `Validators.email` for additional information.
+ */
+function emailValidator(control) {
+    if (isEmptyInputValue(control.value)) {
+        return null; // don't validate empty values to allow optional controls
+    }
+    return EMAIL_REGEXP.test(control.value) ? null : { 'email': true };
+}
+/**
+ * Validator that requires the length of the control's value to be greater than or equal
+ * to the provided minimum length. See `Validators.minLength` for additional information.
+ */
+function minLengthValidator(minLength) {
+    return (control) => {
+        if (isEmptyInputValue(control.value) || !hasValidLength(control.value)) {
+            // don't validate empty values to allow optional controls
+            // don't validate values without `length` property
+            return null;
+        }
+        return control.value.length < minLength ?
+            { 'minlength': { 'requiredLength': minLength, 'actualLength': control.value.length } } :
+            null;
+    };
+}
+/**
+ * Validator that requires the length of the control's value to be less than or equal
+ * to the provided maximum length. See `Validators.maxLength` for additional information.
+ */
+function maxLengthValidator(maxLength) {
+    return (control) => {
+        return hasValidLength(control.value) && control.value.length > maxLength ?
+            { 'maxlength': { 'requiredLength': maxLength, 'actualLength': control.value.length } } :
+            null;
+    };
+}
+/**
+ * Validator that requires the control's value to match a regex pattern.
+ * See `Validators.pattern` for additional information.
+ */
+function patternValidator(pattern) {
+    if (!pattern)
+        return nullValidator;
+    let regex;
+    let regexStr;
+    if (typeof pattern === 'string') {
+        regexStr = '';
+        if (pattern.charAt(0) !== '^')
+            regexStr += '^';
+        regexStr += pattern;
+        if (pattern.charAt(pattern.length - 1) !== '$')
+            regexStr += '$';
+        regex = new RegExp(regexStr);
+    }
+    else {
+        regexStr = pattern.toString();
+        regex = pattern;
+    }
+    return (control) => {
+        if (isEmptyInputValue(control.value)) {
+            return null; // don't validate empty values to allow optional controls
+        }
+        const value = control.value;
+        return regex.test(value) ? null :
+            { 'pattern': { 'requiredPattern': regexStr, 'actualValue': value } };
+    };
+}
+/**
+ * Function that has `ValidatorFn` shape, but performs no operation.
+ */
+function nullValidator(control) {
+    return null;
+}
+function isPresent(o) {
+    return o != null;
+}
+function toObservable(r) {
+    const obs = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵisPromise"])(r) ? Object(rxjs__WEBPACK_IMPORTED_MODULE_2__["from"])(r) : r;
+    if (!(Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵisObservable"])(obs)) && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+        throw new Error(`Expected validator to return Promise or Observable.`);
+    }
+    return obs;
+}
+function mergeErrors(arrayOfErrors) {
+    let res = {};
+    // Not using Array.reduce here due to a Chrome 80 bug
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
+    arrayOfErrors.forEach((errors) => {
+        res = errors != null ? Object.assign(Object.assign({}, res), errors) : res;
+    });
+    return Object.keys(res).length === 0 ? null : res;
+}
+function executeValidators(control, validators) {
+    return validators.map(validator => validator(control));
+}
+function isValidatorFn(validator) {
+    return !validator.validate;
+}
+/**
+ * Given the list of validators that may contain both functions as well as classes, return the list
+ * of validator functions (convert validator classes into validator functions). This is needed to
+ * have consistent structure in validators list before composing them.
+ *
+ * @param validators The set of validators that may contain validators both in plain function form
+ *     as well as represented as a validator class.
+ */
+function normalizeValidators(validators) {
+    return validators.map(validator => {
+        return isValidatorFn(validator) ?
+            validator :
+            ((c) => validator.validate(c));
+    });
+}
+/**
+ * Merges synchronous validators into a single validator function.
+ * See `Validators.compose` for additional information.
+ */
+function compose(validators) {
+    if (!validators)
+        return null;
+    const presentValidators = validators.filter(isPresent);
+    if (presentValidators.length == 0)
+        return null;
+    return function (control) {
+        return mergeErrors(executeValidators(control, presentValidators));
+    };
+}
+/**
+ * Accepts a list of validators of different possible shapes (`Validator` and `ValidatorFn`),
+ * normalizes the list (converts everything to `ValidatorFn`) and merges them into a single
+ * validator function.
+ */
+function composeValidators(validators) {
+    return validators != null ? compose(normalizeValidators(validators)) : null;
+}
+/**
+ * Merges asynchronous validators into a single validator function.
+ * See `Validators.composeAsync` for additional information.
+ */
+function composeAsync(validators) {
+    if (!validators)
+        return null;
+    const presentValidators = validators.filter(isPresent);
+    if (presentValidators.length == 0)
+        return null;
+    return function (control) {
+        const observables = executeValidators(control, presentValidators).map(toObservable);
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_2__["forkJoin"])(observables).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(mergeErrors));
+    };
+}
+/**
+ * Accepts a list of async validators of different possible shapes (`AsyncValidator` and
+ * `AsyncValidatorFn`), normalizes the list (converts everything to `AsyncValidatorFn`) and merges
+ * them into a single validator function.
+ */
+function composeAsyncValidators(validators) {
+    return validators != null ? composeAsync(normalizeValidators(validators)) :
+        null;
+}
+/**
+ * Merges raw control validators with a given directive validator and returns the combined list of
+ * validators as an array.
+ */
+function mergeValidators(controlValidators, dirValidator) {
+    if (controlValidators === null)
+        return [dirValidator];
+    return Array.isArray(controlValidators) ? [...controlValidators, dirValidator] :
+        [controlValidators, dirValidator];
+}
+/**
+ * Retrieves the list of raw synchronous validators attached to a given control.
+ */
+function getControlValidators(control) {
+    return control._rawValidators;
+}
+/**
+ * Retrieves the list of raw asynchronous validators attached to a given control.
+ */
+function getControlAsyncValidators(control) {
+    return control._rawAsyncValidators;
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ * Base class for control directives.
+ *
+ * This class is only used internally in the `ReactiveFormsModule` and the `FormsModule`.
+ *
+ * @publicApi
+ */
+class AbstractControlDirective {
+    constructor() {
+        /**
+         * Set of synchronous validators as they were provided while calling `setValidators` function.
+         * @internal
+         */
+        this._rawValidators = [];
+        /**
+         * Set of asynchronous validators as they were provided while calling `setAsyncValidators`
+         * function.
+         * @internal
+         */
+        this._rawAsyncValidators = [];
+        /*
+         * The set of callbacks to be invoked when directive instance is being destroyed.
+         */
+        this._onDestroyCallbacks = [];
+    }
+    /**
+     * @description
+     * Reports the value of the control if it is present, otherwise null.
+     */
+    get value() {
+        return this.control ? this.control.value : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is valid. A control is considered valid if no
+     * validation errors exist with the current value.
+     * If the control is not present, null is returned.
+     */
+    get valid() {
+        return this.control ? this.control.valid : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is invalid, meaning that an error exists in the input value.
+     * If the control is not present, null is returned.
+     */
+    get invalid() {
+        return this.control ? this.control.invalid : null;
+    }
+    /**
+     * @description
+     * Reports whether a control is pending, meaning that that async validation is occurring and
+     * errors are not yet available for the input value. If the control is not present, null is
+     * returned.
+     */
+    get pending() {
+        return this.control ? this.control.pending : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is disabled, meaning that the control is disabled
+     * in the UI and is exempt from validation checks and excluded from aggregate
+     * values of ancestor controls. If the control is not present, null is returned.
+     */
+    get disabled() {
+        return this.control ? this.control.disabled : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is enabled, meaning that the control is included in ancestor
+     * calculations of validity or value. If the control is not present, null is returned.
+     */
+    get enabled() {
+        return this.control ? this.control.enabled : null;
+    }
+    /**
+     * @description
+     * Reports the control's validation errors. If the control is not present, null is returned.
+     */
+    get errors() {
+        return this.control ? this.control.errors : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is pristine, meaning that the user has not yet changed
+     * the value in the UI. If the control is not present, null is returned.
+     */
+    get pristine() {
+        return this.control ? this.control.pristine : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is dirty, meaning that the user has changed
+     * the value in the UI. If the control is not present, null is returned.
+     */
+    get dirty() {
+        return this.control ? this.control.dirty : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is touched, meaning that the user has triggered
+     * a `blur` event on it. If the control is not present, null is returned.
+     */
+    get touched() {
+        return this.control ? this.control.touched : null;
+    }
+    /**
+     * @description
+     * Reports the validation status of the control. Possible values include:
+     * 'VALID', 'INVALID', 'DISABLED', and 'PENDING'.
+     * If the control is not present, null is returned.
+     */
+    get status() {
+        return this.control ? this.control.status : null;
+    }
+    /**
+     * @description
+     * Reports whether the control is untouched, meaning that the user has not yet triggered
+     * a `blur` event on it. If the control is not present, null is returned.
+     */
+    get untouched() {
+        return this.control ? this.control.untouched : null;
+    }
+    /**
+     * @description
+     * Returns a multicasting observable that emits a validation status whenever it is
+     * calculated for the control. If the control is not present, null is returned.
+     */
+    get statusChanges() {
+        return this.control ? this.control.statusChanges : null;
+    }
+    /**
+     * @description
+     * Returns a multicasting observable of value changes for the control that emits every time the
+     * value of the control changes in the UI or programmatically.
+     * If the control is not present, null is returned.
+     */
+    get valueChanges() {
+        return this.control ? this.control.valueChanges : null;
+    }
+    /**
+     * @description
+     * Returns an array that represents the path from the top-level form to this control.
+     * Each index is the string name of the control on that level.
+     */
+    get path() {
+        return null;
+    }
+    /**
+     * Sets synchronous validators for this directive.
+     * @internal
+     */
+    _setValidators(validators) {
+        this._rawValidators = validators || [];
+        this._composedValidatorFn = composeValidators(this._rawValidators);
+    }
+    /**
+     * Sets asynchronous validators for this directive.
+     * @internal
+     */
+    _setAsyncValidators(validators) {
+        this._rawAsyncValidators = validators || [];
+        this._composedAsyncValidatorFn = composeAsyncValidators(this._rawAsyncValidators);
+    }
+    /**
+     * @description
+     * Synchronous validator function composed of all the synchronous validators registered with this
+     * directive.
+     */
+    get validator() {
+        return this._composedValidatorFn || null;
+    }
+    /**
+     * @description
+     * Asynchronous validator function composed of all the asynchronous validators registered with
+     * this directive.
+     */
+    get asyncValidator() {
+        return this._composedAsyncValidatorFn || null;
+    }
+    /**
+     * Internal function to register callbacks that should be invoked
+     * when directive instance is being destroyed.
+     * @internal
+     */
+    _registerOnDestroy(fn) {
+        this._onDestroyCallbacks.push(fn);
+    }
+    /**
+     * Internal function to invoke all registered "on destroy" callbacks.
+     * Note: calling this function also clears the list of callbacks.
+     * @internal
+     */
+    _invokeOnDestroyCallbacks() {
+        this._onDestroyCallbacks.forEach(fn => fn());
+        this._onDestroyCallbacks = [];
+    }
+    /**
+     * @description
+     * Resets the control with the provided value if the control is present.
+     */
+    reset(value = undefined) {
+        if (this.control)
+            this.control.reset(value);
+    }
+    /**
+     * @description
+     * Reports whether the control with the given path has the error specified.
+     *
+     * @param errorCode The code of the error to check
+     * @param path A list of control names that designates how to move from the current control
+     * to the control that should be queried for errors.
+     *
+     * @usageNotes
+     * For example, for the following `FormGroup`:
+     *
+     * ```
+     * form = new FormGroup({
+     *   address: new FormGroup({ street: new FormControl() })
+     * });
+     * ```
+     *
+     * The path to the 'street' control from the root form would be 'address' -> 'street'.
+     *
+     * It can be provided to this method in one of two formats:
+     *
+     * 1. An array of string control names, e.g. `['address', 'street']`
+     * 1. A period-delimited list of control names in one string, e.g. `'address.street'`
+     *
+     * If no path is given, this method checks for the error on the current control.
+     *
+     * @returns whether the given error is present in the control at the given path.
+     *
+     * If the control is not present, false is returned.
+     */
+    hasError(errorCode, path) {
+        return this.control ? this.control.hasError(errorCode, path) : false;
+    }
+    /**
+     * @description
+     * Reports error data for the control with the given path.
+     *
+     * @param errorCode The code of the error to check
+     * @param path A list of control names that designates how to move from the current control
+     * to the control that should be queried for errors.
+     *
+     * @usageNotes
+     * For example, for the following `FormGroup`:
+     *
+     * ```
+     * form = new FormGroup({
+     *   address: new FormGroup({ street: new FormControl() })
+     * });
+     * ```
+     *
+     * The path to the 'street' control from the root form would be 'address' -> 'street'.
+     *
+     * It can be provided to this method in one of two formats:
+     *
+     * 1. An array of string control names, e.g. `['address', 'street']`
+     * 1. A period-delimited list of control names in one string, e.g. `'address.street'`
+     *
+     * @returns error data for that particular error. If the control or error is not present,
+     * null is returned.
+     */
+    getError(errorCode, path) {
+        return this.control ? this.control.getError(errorCode, path) : null;
+    }
+}
+AbstractControlDirective.ɵfac = function AbstractControlDirective_Factory(t) { return new (t || AbstractControlDirective)(); };
+AbstractControlDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: AbstractControlDirective });
+
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ * A base class for directives that contain multiple registered instances of `NgControl`.
+ * Only used by the forms module.
+ *
+ * @publicApi
+ */
+class ControlContainer extends AbstractControlDirective {
+    /**
+     * @description
+     * The top-level form directive for the control.
+     */
+    get formDirective() {
+        return null;
+    }
+    /**
+     * @description
+     * The path to this group.
+     */
+    get path() {
+        return null;
+    }
+}
+ControlContainer.ɵfac = function ControlContainer_Factory(t) { return ɵControlContainer_BaseFactory(t || ControlContainer); };
+ControlContainer.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ControlContainer, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+const ɵControlContainer_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵgetInheritedFactory"](ControlContainer);
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ * A base class that all `FormControl`-based directives extend. It binds a `FormControl`
+ * object to a DOM element.
+ *
+ * @publicApi
+ */
+class NgControl extends AbstractControlDirective {
+    constructor() {
+        super(...arguments);
+        /**
+         * @description
+         * The parent form for the control.
+         *
+         * @internal
+         */
+        this._parent = null;
+        /**
+         * @description
+         * The name for the control
+         */
+        this.name = null;
+        /**
+         * @description
+         * The value accessor for the control
+         */
+        this.valueAccessor = null;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class AbstractControlStatus {
+    constructor(cd) {
+        this._cd = cd;
+    }
+    is(status) {
+        var _a, _b;
+        return !!((_b = (_a = this._cd) === null || _a === void 0 ? void 0 : _a.control) === null || _b === void 0 ? void 0 : _b[status]);
+    }
+}
+const ngControlStatusHost = {
+    '[class.ng-untouched]': 'is("untouched")',
+    '[class.ng-touched]': 'is("touched")',
+    '[class.ng-pristine]': 'is("pristine")',
+    '[class.ng-dirty]': 'is("dirty")',
+    '[class.ng-valid]': 'is("valid")',
+    '[class.ng-invalid]': 'is("invalid")',
+    '[class.ng-pending]': 'is("pending")',
+};
+/**
+ * @description
+ * Directive automatically applied to Angular form controls that sets CSS classes
+ * based on control status.
+ *
+ * @usageNotes
+ *
+ * ### CSS classes applied
+ *
+ * The following classes are applied as the properties become true:
+ *
+ * * ng-valid
+ * * ng-invalid
+ * * ng-pending
+ * * ng-pristine
+ * * ng-dirty
+ * * ng-untouched
+ * * ng-touched
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgControlStatus extends AbstractControlStatus {
+    constructor(cd) {
+        super(cd);
+    }
+}
+NgControlStatus.ɵfac = function NgControlStatus_Factory(t) { return new (t || NgControlStatus)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NgControl, 2)); };
+NgControlStatus.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgControlStatus, selectors: [["", "formControlName", ""], ["", "ngModel", ""], ["", "formControl", ""]], hostVars: 14, hostBindings: function NgControlStatus_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("ng-untouched", ctx.is("untouched"))("ng-touched", ctx.is("touched"))("ng-pristine", ctx.is("pristine"))("ng-dirty", ctx.is("dirty"))("ng-valid", ctx.is("valid"))("ng-invalid", ctx.is("invalid"))("ng-pending", ctx.is("pending"));
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+NgControlStatus.ctorParameters = () => [
+    { type: NgControl, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgControlStatus, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[formControlName],[ngModel],[formControl]', host: ngControlStatusHost }]
+    }], function () { return [{ type: NgControl, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }] }]; }, null); })();
+/**
+ * @description
+ * Directive automatically applied to Angular form groups that sets CSS classes
+ * based on control status (valid/invalid/dirty/etc).
+ *
+ * @see `NgControlStatus`
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgControlStatusGroup extends AbstractControlStatus {
+    constructor(cd) {
+        super(cd);
+    }
+}
+NgControlStatusGroup.ɵfac = function NgControlStatusGroup_Factory(t) { return new (t || NgControlStatusGroup)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 10)); };
+NgControlStatusGroup.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgControlStatusGroup, selectors: [["", "formGroupName", ""], ["", "formArrayName", ""], ["", "ngModelGroup", ""], ["", "formGroup", ""], ["form", 3, "ngNoForm", ""], ["", "ngForm", ""]], hostVars: 14, hostBindings: function NgControlStatusGroup_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("ng-untouched", ctx.is("untouched"))("ng-touched", ctx.is("touched"))("ng-pristine", ctx.is("pristine"))("ng-dirty", ctx.is("dirty"))("ng-valid", ctx.is("valid"))("ng-invalid", ctx.is("invalid"))("ng-pending", ctx.is("pending"));
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+NgControlStatusGroup.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgControlStatusGroup, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[formGroupName],[formArrayName],[ngModelGroup],[formGroup],form:not([ngNoForm]),[ngForm]',
+                host: ngControlStatusHost
+            }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const FormErrorExamples = {
+    formControlName: `
+    <div [formGroup]="myGroup">
+      <input formControlName="firstName">
+    </div>
+
+    In your class:
+
+    this.myGroup = new FormGroup({
+       firstName: new FormControl()
+    });`,
+    formGroupName: `
+    <div [formGroup]="myGroup">
+       <div formGroupName="person">
+          <input formControlName="firstName">
+       </div>
+    </div>
+
+    In your class:
+
+    this.myGroup = new FormGroup({
+       person: new FormGroup({ firstName: new FormControl() })
+    });`,
+    formArrayName: `
+    <div [formGroup]="myGroup">
+      <div formArrayName="cities">
+        <div *ngFor="let city of cityArray.controls; index as i">
+          <input [formControlName]="i">
+        </div>
+      </div>
+    </div>
+
+    In your class:
+
+    this.cityArray = new FormArray([new FormControl('SF')]);
+    this.myGroup = new FormGroup({
+      cities: this.cityArray
+    });`,
+    ngModelGroup: `
+    <form>
+       <div ngModelGroup="person">
+          <input [(ngModel)]="person.name" name="firstName">
+       </div>
+    </form>`,
+    ngModelWithFormGroup: `
+    <div [formGroup]="myGroup">
+       <input formControlName="firstName">
+       <input [(ngModel)]="showMoreControls" [ngModelOptions]="{standalone: true}">
+    </div>
+  `
+};
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class ReactiveErrors {
+    static controlParentException() {
+        throw new Error(`formControlName must be used with a parent formGroup directive.  You'll want to add a formGroup
+       directive and pass it an existing FormGroup instance (you can create one in your class).
+
+      Example:
+
+      ${FormErrorExamples.formControlName}`);
+    }
+    static ngModelGroupException() {
+        throw new Error(`formControlName cannot be used with an ngModelGroup parent. It is only compatible with parents
+       that also have a "form" prefix: formGroupName, formArrayName, or formGroup.
+
+       Option 1:  Update the parent to be formGroupName (reactive form strategy)
+
+        ${FormErrorExamples.formGroupName}
+
+        Option 2: Use ngModel instead of formControlName (template-driven strategy)
+
+        ${FormErrorExamples.ngModelGroup}`);
+    }
+    static missingFormException() {
+        throw new Error(`formGroup expects a FormGroup instance. Please pass one in.
+
+       Example:
+
+       ${FormErrorExamples.formControlName}`);
+    }
+    static groupParentException() {
+        throw new Error(`formGroupName must be used with a parent formGroup directive.  You'll want to add a formGroup
+      directive and pass it an existing FormGroup instance (you can create one in your class).
+
+      Example:
+
+      ${FormErrorExamples.formGroupName}`);
+    }
+    static arrayParentException() {
+        throw new Error(`formArrayName must be used with a parent formGroup directive.  You'll want to add a formGroup
+       directive and pass it an existing FormGroup instance (you can create one in your class).
+
+        Example:
+
+        ${FormErrorExamples.formArrayName}`);
+    }
+    static disabledAttrWarning() {
+        console.warn(`
+      It looks like you're using the disabled attribute with a reactive form directive. If you set disabled to true
+      when you set up this control in your component class, the disabled attribute will actually be set in the DOM for
+      you. We recommend using this approach to avoid 'changed after checked' errors.
+
+      Example:
+      form = new FormGroup({
+        first: new FormControl({value: 'Nancy', disabled: true}, Validators.required),
+        last: new FormControl('Drew', Validators.required)
+      });
+    `);
+    }
+    static ngModelWarning(directiveName) {
+        console.warn(`
+    It looks like you're using ngModel on the same form field as ${directiveName}.
+    Support for using the ngModel input property and ngModelChange event with
+    reactive form directives has been deprecated in Angular v6 and will be removed
+    in a future version of Angular.
+
+    For more information on this, see our API docs here:
+    https://angular.io/api/forms/${directiveName === 'formControl' ? 'FormControlDirective' :
+            'FormControlName'}#use-with-ngmodel
+    `);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function controlPath(name, parent) {
+    return [...parent.path, name];
+}
+/**
+ * Links a Form control and a Form directive by setting up callbacks (such as `onChange`) on both
+ * instances. This function is typically invoked when form directive is being initialized.
+ *
+ * @param control Form control instance that should be linked.
+ * @param dir Directive that should be linked with a given control.
+ */
+function setUpControl(control, dir) {
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        if (!control)
+            _throwError(dir, 'Cannot find control with');
+        if (!dir.valueAccessor)
+            _throwError(dir, 'No value accessor for form control with');
+    }
+    setUpValidators(control, dir, /* handleOnValidatorChange */ true);
+    dir.valueAccessor.writeValue(control.value);
+    setUpViewChangePipeline(control, dir);
+    setUpModelChangePipeline(control, dir);
+    setUpBlurPipeline(control, dir);
+    setUpDisabledChangeHandler(control, dir);
+}
+/**
+ * Reverts configuration performed by the `setUpControl` control function.
+ * Effectively disconnects form control with a given form directive.
+ * This function is typically invoked when corresponding form directive is being destroyed.
+ *
+ * @param control Form control which should be cleaned up.
+ * @param dir Directive that should be disconnected from a given control.
+ * @param validateControlPresenceOnChange Flag that indicates whether onChange handler should
+ *     contain asserts to verify that it's not called once directive is destroyed. We need this flag
+ *     to avoid potentially breaking changes caused by better control cleanup introduced in #39235.
+ */
+function cleanUpControl(control, dir, validateControlPresenceOnChange = true) {
+    const noop = () => {
+        if (validateControlPresenceOnChange && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            _noControlError(dir);
+        }
+    };
+    // The `valueAccessor` field is typically defined on FromControl and FormControlName directive
+    // instances and there is a logic in `selectValueAccessor` function that throws if it's not the
+    // case. We still check the presence of `valueAccessor` before invoking its methods to make sure
+    // that cleanup works correctly if app code or tests are setup to ignore the error thrown from
+    // `selectValueAccessor`. See https://github.com/angular/angular/issues/40521.
+    if (dir.valueAccessor) {
+        dir.valueAccessor.registerOnChange(noop);
+        dir.valueAccessor.registerOnTouched(noop);
+    }
+    cleanUpValidators(control, dir, /* handleOnValidatorChange */ true);
+    if (control) {
+        dir._invokeOnDestroyCallbacks();
+        control._registerOnCollectionChange(() => { });
+    }
+}
+function registerOnValidatorChange(validators, onChange) {
+    validators.forEach((validator) => {
+        if (validator.registerOnValidatorChange)
+            validator.registerOnValidatorChange(onChange);
+    });
+}
+/**
+ * Sets up disabled change handler function on a given form control if ControlValueAccessor
+ * associated with a given directive instance supports the `setDisabledState` call.
+ *
+ * @param control Form control where disabled change handler should be setup.
+ * @param dir Corresponding directive instance associated with this control.
+ */
+function setUpDisabledChangeHandler(control, dir) {
+    if (dir.valueAccessor.setDisabledState) {
+        const onDisabledChange = (isDisabled) => {
+            dir.valueAccessor.setDisabledState(isDisabled);
+        };
+        control.registerOnDisabledChange(onDisabledChange);
+        // Register a callback function to cleanup disabled change handler
+        // from a control instance when a directive is destroyed.
+        dir._registerOnDestroy(() => {
+            control._unregisterOnDisabledChange(onDisabledChange);
+        });
+    }
+}
+/**
+ * Sets up sync and async directive validators on provided form control.
+ * This function merges validators from the directive into the validators of the control.
+ *
+ * @param control Form control where directive validators should be setup.
+ * @param dir Directive instance that contains validators to be setup.
+ * @param handleOnValidatorChange Flag that determines whether directive validators should be setup
+ *     to handle validator input change.
+ */
+function setUpValidators(control, dir, handleOnValidatorChange) {
+    const validators = getControlValidators(control);
+    if (dir.validator !== null) {
+        control.setValidators(mergeValidators(validators, dir.validator));
+    }
+    else if (typeof validators === 'function') {
+        // If sync validators are represented by a single validator function, we force the
+        // `Validators.compose` call to happen by executing the `setValidators` function with
+        // an array that contains that function. We need this to avoid possible discrepancies in
+        // validators behavior, so sync validators are always processed by the `Validators.compose`.
+        // Note: we should consider moving this logic inside the `setValidators` function itself, so we
+        // have consistent behavior on AbstractControl API level. The same applies to the async
+        // validators logic below.
+        control.setValidators([validators]);
+    }
+    const asyncValidators = getControlAsyncValidators(control);
+    if (dir.asyncValidator !== null) {
+        control.setAsyncValidators(mergeValidators(asyncValidators, dir.asyncValidator));
+    }
+    else if (typeof asyncValidators === 'function') {
+        control.setAsyncValidators([asyncValidators]);
+    }
+    // Re-run validation when validator binding changes, e.g. minlength=3 -> minlength=4
+    if (handleOnValidatorChange) {
+        const onValidatorChange = () => control.updateValueAndValidity();
+        registerOnValidatorChange(dir._rawValidators, onValidatorChange);
+        registerOnValidatorChange(dir._rawAsyncValidators, onValidatorChange);
+    }
+}
+/**
+ * Cleans up sync and async directive validators on provided form control.
+ * This function reverts the setup performed by the `setUpValidators` function, i.e.
+ * removes directive-specific validators from a given control instance.
+ *
+ * @param control Form control from where directive validators should be removed.
+ * @param dir Directive instance that contains validators to be removed.
+ * @param handleOnValidatorChange Flag that determines whether directive validators should also be
+ *     cleaned up to stop handling validator input change (if previously configured to do so).
+ * @returns true if a control was updated as a result of this action.
+ */
+function cleanUpValidators(control, dir, handleOnValidatorChange) {
+    let isControlUpdated = false;
+    if (control !== null) {
+        if (dir.validator !== null) {
+            const validators = getControlValidators(control);
+            if (Array.isArray(validators) && validators.length > 0) {
+                // Filter out directive validator function.
+                const updatedValidators = validators.filter(validator => validator !== dir.validator);
+                if (updatedValidators.length !== validators.length) {
+                    isControlUpdated = true;
+                    control.setValidators(updatedValidators);
+                }
+            }
+        }
+        if (dir.asyncValidator !== null) {
+            const asyncValidators = getControlAsyncValidators(control);
+            if (Array.isArray(asyncValidators) && asyncValidators.length > 0) {
+                // Filter out directive async validator function.
+                const updatedAsyncValidators = asyncValidators.filter(asyncValidator => asyncValidator !== dir.asyncValidator);
+                if (updatedAsyncValidators.length !== asyncValidators.length) {
+                    isControlUpdated = true;
+                    control.setAsyncValidators(updatedAsyncValidators);
+                }
+            }
+        }
+    }
+    if (handleOnValidatorChange) {
+        // Clear onValidatorChange callbacks by providing a noop function.
+        const noop = () => { };
+        registerOnValidatorChange(dir._rawValidators, noop);
+        registerOnValidatorChange(dir._rawAsyncValidators, noop);
+    }
+    return isControlUpdated;
+}
+function setUpViewChangePipeline(control, dir) {
+    dir.valueAccessor.registerOnChange((newValue) => {
+        control._pendingValue = newValue;
+        control._pendingChange = true;
+        control._pendingDirty = true;
+        if (control.updateOn === 'change')
+            updateControl(control, dir);
+    });
+}
+function setUpBlurPipeline(control, dir) {
+    dir.valueAccessor.registerOnTouched(() => {
+        control._pendingTouched = true;
+        if (control.updateOn === 'blur' && control._pendingChange)
+            updateControl(control, dir);
+        if (control.updateOn !== 'submit')
+            control.markAsTouched();
+    });
+}
+function updateControl(control, dir) {
+    if (control._pendingDirty)
+        control.markAsDirty();
+    control.setValue(control._pendingValue, { emitModelToViewChange: false });
+    dir.viewToModelUpdate(control._pendingValue);
+    control._pendingChange = false;
+}
+function setUpModelChangePipeline(control, dir) {
+    const onChange = (newValue, emitModelEvent) => {
+        // control -> view
+        dir.valueAccessor.writeValue(newValue);
+        // control -> ngModel
+        if (emitModelEvent)
+            dir.viewToModelUpdate(newValue);
+    };
+    control.registerOnChange(onChange);
+    // Register a callback function to cleanup onChange handler
+    // from a control instance when a directive is destroyed.
+    dir._registerOnDestroy(() => {
+        control._unregisterOnChange(onChange);
+    });
+}
+/**
+ * Links a FormGroup or FormArray instance and corresponding Form directive by setting up validators
+ * present in the view.
+ *
+ * @param control FormGroup or FormArray instance that should be linked.
+ * @param dir Directive that provides view validators.
+ */
+function setUpFormContainer(control, dir) {
+    if (control == null && (typeof ngDevMode === 'undefined' || ngDevMode))
+        _throwError(dir, 'Cannot find control with');
+    setUpValidators(control, dir, /* handleOnValidatorChange */ false);
+}
+/**
+ * Reverts the setup performed by the `setUpFormContainer` function.
+ *
+ * @param control FormGroup or FormArray instance that should be cleaned up.
+ * @param dir Directive that provided view validators.
+ * @returns true if a control was updated as a result of this action.
+ */
+function cleanUpFormContainer(control, dir) {
+    return cleanUpValidators(control, dir, /* handleOnValidatorChange */ false);
+}
+function _noControlError(dir) {
+    return _throwError(dir, 'There is no FormControl instance attached to form control element with');
+}
+function _throwError(dir, message) {
+    let messageEnd;
+    if (dir.path.length > 1) {
+        messageEnd = `path: '${dir.path.join(' -> ')}'`;
+    }
+    else if (dir.path[0]) {
+        messageEnd = `name: '${dir.path}'`;
+    }
+    else {
+        messageEnd = 'unspecified name attribute';
+    }
+    throw new Error(`${message} ${messageEnd}`);
+}
+function isPropertyUpdated(changes, viewModel) {
+    if (!changes.hasOwnProperty('model'))
+        return false;
+    const change = changes['model'];
+    if (change.isFirstChange())
+        return true;
+    return !Object.is(viewModel, change.currentValue);
+}
+function isBuiltInAccessor(valueAccessor) {
+    // Check if a given value accessor is an instance of a class that directly extends
+    // `BuiltInControlValueAccessor` one.
+    return Object.getPrototypeOf(valueAccessor.constructor) === BuiltInControlValueAccessor;
+}
+function syncPendingControls(form, directives) {
+    form._syncPendingControls();
+    directives.forEach(dir => {
+        const control = dir.control;
+        if (control.updateOn === 'submit' && control._pendingChange) {
+            dir.viewToModelUpdate(control._pendingValue);
+            control._pendingChange = false;
+        }
+    });
+}
+// TODO: vsavkin remove it once https://github.com/angular/angular/issues/3011 is implemented
+function selectValueAccessor(dir, valueAccessors) {
+    if (!valueAccessors)
+        return null;
+    if (!Array.isArray(valueAccessors) && (typeof ngDevMode === 'undefined' || ngDevMode))
+        _throwError(dir, 'Value accessor was not provided as an array for form control with');
+    let defaultAccessor = undefined;
+    let builtinAccessor = undefined;
+    let customAccessor = undefined;
+    valueAccessors.forEach((v) => {
+        if (v.constructor === DefaultValueAccessor) {
+            defaultAccessor = v;
+        }
+        else if (isBuiltInAccessor(v)) {
+            if (builtinAccessor && (typeof ngDevMode === 'undefined' || ngDevMode))
+                _throwError(dir, 'More than one built-in value accessor matches form control with');
+            builtinAccessor = v;
+        }
+        else {
+            if (customAccessor && (typeof ngDevMode === 'undefined' || ngDevMode))
+                _throwError(dir, 'More than one custom value accessor matches form control with');
+            customAccessor = v;
+        }
+    });
+    if (customAccessor)
+        return customAccessor;
+    if (builtinAccessor)
+        return builtinAccessor;
+    if (defaultAccessor)
+        return defaultAccessor;
+    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        _throwError(dir, 'No valid value accessor for form control with');
+    }
+    return null;
+}
+function removeListItem(list, el) {
+    const index = list.indexOf(el);
+    if (index > -1)
+        list.splice(index, 1);
+}
+// TODO(kara): remove after deprecation period
+function _ngModelWarning(name, type, instance, warningConfig) {
+    if (warningConfig === 'never')
+        return;
+    if (((warningConfig === null || warningConfig === 'once') && !type._ngModelWarningSentOnce) ||
+        (warningConfig === 'always' && !instance._ngModelWarningSent)) {
+        ReactiveErrors.ngModelWarning(name);
+        type._ngModelWarningSentOnce = true;
+        instance._ngModelWarningSent = true;
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Reports that a FormControl is valid, meaning that no errors exist in the input value.
+ *
+ * @see `status`
+ */
+const VALID = 'VALID';
+/**
+ * Reports that a FormControl is invalid, meaning that an error exists in the input value.
+ *
+ * @see `status`
+ */
+const INVALID = 'INVALID';
+/**
+ * Reports that a FormControl is pending, meaning that that async validation is occurring and
+ * errors are not yet available for the input value.
+ *
+ * @see `markAsPending`
+ * @see `status`
+ */
+const PENDING = 'PENDING';
+/**
+ * Reports that a FormControl is disabled, meaning that the control is exempt from ancestor
+ * calculations of validity or value.
+ *
+ * @see `markAsDisabled`
+ * @see `status`
+ */
+const DISABLED = 'DISABLED';
+function _find(control, path, delimiter) {
+    if (path == null)
+        return null;
+    if (!Array.isArray(path)) {
+        path = path.split(delimiter);
+    }
+    if (Array.isArray(path) && path.length === 0)
+        return null;
+    // Not using Array.reduce here due to a Chrome 80 bug
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
+    let controlToFind = control;
+    path.forEach((name) => {
+        if (controlToFind instanceof FormGroup) {
+            controlToFind = controlToFind.controls.hasOwnProperty(name) ?
+                controlToFind.controls[name] :
+                null;
+        }
+        else if (controlToFind instanceof FormArray) {
+            controlToFind = controlToFind.at(name) || null;
+        }
+        else {
+            controlToFind = null;
+        }
+    });
+    return controlToFind;
+}
+/**
+ * Gets validators from either an options object or given validators.
+ */
+function pickValidators(validatorOrOpts) {
+    return (isOptionsObj(validatorOrOpts) ? validatorOrOpts.validators : validatorOrOpts) || null;
+}
+/**
+ * Creates validator function by combining provided validators.
+ */
+function coerceToValidator(validator) {
+    return Array.isArray(validator) ? composeValidators(validator) : validator || null;
+}
+/**
+ * Gets async validators from either an options object or given validators.
+ */
+function pickAsyncValidators(asyncValidator, validatorOrOpts) {
+    return (isOptionsObj(validatorOrOpts) ? validatorOrOpts.asyncValidators : asyncValidator) || null;
+}
+/**
+ * Creates async validator function by combining provided async validators.
+ */
+function coerceToAsyncValidator(asyncValidator) {
+    return Array.isArray(asyncValidator) ? composeAsyncValidators(asyncValidator) :
+        asyncValidator || null;
+}
+function isOptionsObj(validatorOrOpts) {
+    return validatorOrOpts != null && !Array.isArray(validatorOrOpts) &&
+        typeof validatorOrOpts === 'object';
+}
+/**
+ * This is the base class for `FormControl`, `FormGroup`, and `FormArray`.
+ *
+ * It provides some of the shared behavior that all controls and groups of controls have, like
+ * running validators, calculating status, and resetting state. It also defines the properties
+ * that are shared between all sub-classes, like `value`, `valid`, and `dirty`. It shouldn't be
+ * instantiated directly.
+ *
+ * @see [Forms Guide](/guide/forms)
+ * @see [Reactive Forms Guide](/guide/reactive-forms)
+ * @see [Dynamic Forms Guide](/guide/dynamic-form)
+ *
+ * @publicApi
+ */
+class AbstractControl {
+    /**
+     * Initialize the AbstractControl instance.
+     *
+     * @param validators The function or array of functions that is used to determine the validity of
+     *     this control synchronously.
+     * @param asyncValidators The function or array of functions that is used to determine validity of
+     *     this control asynchronously.
+     */
+    constructor(validators, asyncValidators) {
+        /**
+         * Indicates that a control has its own pending asynchronous validation in progress.
+         *
+         * @internal
+         */
+        this._hasOwnPendingAsyncValidator = false;
+        /** @internal */
+        this._onCollectionChange = () => { };
+        this._parent = null;
+        /**
+         * A control is `pristine` if the user has not yet changed
+         * the value in the UI.
+         *
+         * @returns True if the user has not yet changed the value in the UI; compare `dirty`.
+         * Programmatic changes to a control's value do not mark it dirty.
+         */
+        this.pristine = true;
+        /**
+         * True if the control is marked as `touched`.
+         *
+         * A control is marked `touched` once the user has triggered
+         * a `blur` event on it.
+         */
+        this.touched = false;
+        /** @internal */
+        this._onDisabledChange = [];
+        this._rawValidators = validators;
+        this._rawAsyncValidators = asyncValidators;
+        this._composedValidatorFn = coerceToValidator(this._rawValidators);
+        this._composedAsyncValidatorFn = coerceToAsyncValidator(this._rawAsyncValidators);
+    }
+    /**
+     * The function that is used to determine the validity of this control synchronously.
+     */
+    get validator() {
+        return this._composedValidatorFn;
+    }
+    set validator(validatorFn) {
+        this._rawValidators = this._composedValidatorFn = validatorFn;
+    }
+    /**
+     * The function that is used to determine the validity of this control asynchronously.
+     */
+    get asyncValidator() {
+        return this._composedAsyncValidatorFn;
+    }
+    set asyncValidator(asyncValidatorFn) {
+        this._rawAsyncValidators = this._composedAsyncValidatorFn = asyncValidatorFn;
+    }
+    /**
+     * The parent control.
+     */
+    get parent() {
+        return this._parent;
+    }
+    /**
+     * A control is `valid` when its `status` is `VALID`.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @returns True if the control has passed all of its validation tests,
+     * false otherwise.
+     */
+    get valid() {
+        return this.status === VALID;
+    }
+    /**
+     * A control is `invalid` when its `status` is `INVALID`.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @returns True if this control has failed one or more of its validation checks,
+     * false otherwise.
+     */
+    get invalid() {
+        return this.status === INVALID;
+    }
+    /**
+     * A control is `pending` when its `status` is `PENDING`.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @returns True if this control is in the process of conducting a validation check,
+     * false otherwise.
+     */
+    get pending() {
+        return this.status == PENDING;
+    }
+    /**
+     * A control is `disabled` when its `status` is `DISABLED`.
+     *
+     * Disabled controls are exempt from validation checks and
+     * are not included in the aggregate value of their ancestor
+     * controls.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @returns True if the control is disabled, false otherwise.
+     */
+    get disabled() {
+        return this.status === DISABLED;
+    }
+    /**
+     * A control is `enabled` as long as its `status` is not `DISABLED`.
+     *
+     * @returns True if the control has any status other than 'DISABLED',
+     * false if the status is 'DISABLED'.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     */
+    get enabled() {
+        return this.status !== DISABLED;
+    }
+    /**
+     * A control is `dirty` if the user has changed the value
+     * in the UI.
+     *
+     * @returns True if the user has changed the value of this control in the UI; compare `pristine`.
+     * Programmatic changes to a control's value do not mark it dirty.
+     */
+    get dirty() {
+        return !this.pristine;
+    }
+    /**
+     * True if the control has not been marked as touched
+     *
+     * A control is `untouched` if the user has not yet triggered
+     * a `blur` event on it.
+     */
+    get untouched() {
+        return !this.touched;
+    }
+    /**
+     * Reports the update strategy of the `AbstractControl` (meaning
+     * the event on which the control updates itself).
+     * Possible values: `'change'` | `'blur'` | `'submit'`
+     * Default value: `'change'`
+     */
+    get updateOn() {
+        return this._updateOn ? this._updateOn : (this.parent ? this.parent.updateOn : 'change');
+    }
+    /**
+     * Sets the synchronous validators that are active on this control.  Calling
+     * this overwrites any existing sync validators.
+     *
+     * When you add or remove a validator at run time, you must call
+     * `updateValueAndValidity()` for the new validation to take effect.
+     *
+     */
+    setValidators(newValidator) {
+        this._rawValidators = newValidator;
+        this._composedValidatorFn = coerceToValidator(newValidator);
+    }
+    /**
+     * Sets the async validators that are active on this control. Calling this
+     * overwrites any existing async validators.
+     *
+     * When you add or remove a validator at run time, you must call
+     * `updateValueAndValidity()` for the new validation to take effect.
+     *
+     */
+    setAsyncValidators(newValidator) {
+        this._rawAsyncValidators = newValidator;
+        this._composedAsyncValidatorFn = coerceToAsyncValidator(newValidator);
+    }
+    /**
+     * Empties out the sync validator list.
+     *
+     * When you add or remove a validator at run time, you must call
+     * `updateValueAndValidity()` for the new validation to take effect.
+     *
+     */
+    clearValidators() {
+        this.validator = null;
+    }
+    /**
+     * Empties out the async validator list.
+     *
+     * When you add or remove a validator at run time, you must call
+     * `updateValueAndValidity()` for the new validation to take effect.
+     *
+     */
+    clearAsyncValidators() {
+        this.asyncValidator = null;
+    }
+    /**
+     * Marks the control as `touched`. A control is touched by focus and
+     * blur events that do not change the value.
+     *
+     * @see `markAsUntouched()`
+     * @see `markAsDirty()`
+     * @see `markAsPristine()`
+     *
+     * @param opts Configuration options that determine how the control propagates changes
+     * and emits events after marking is applied.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     */
+    markAsTouched(opts = {}) {
+        this.touched = true;
+        if (this._parent && !opts.onlySelf) {
+            this._parent.markAsTouched(opts);
+        }
+    }
+    /**
+     * Marks the control and all its descendant controls as `touched`.
+     * @see `markAsTouched()`
+     */
+    markAllAsTouched() {
+        this.markAsTouched({ onlySelf: true });
+        this._forEachChild((control) => control.markAllAsTouched());
+    }
+    /**
+     * Marks the control as `untouched`.
+     *
+     * If the control has any children, also marks all children as `untouched`
+     * and recalculates the `touched` status of all parent controls.
+     *
+     * @see `markAsTouched()`
+     * @see `markAsDirty()`
+     * @see `markAsPristine()`
+     *
+     * @param opts Configuration options that determine how the control propagates changes
+     * and emits events after the marking is applied.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     */
+    markAsUntouched(opts = {}) {
+        this.touched = false;
+        this._pendingTouched = false;
+        this._forEachChild((control) => {
+            control.markAsUntouched({ onlySelf: true });
+        });
+        if (this._parent && !opts.onlySelf) {
+            this._parent._updateTouched(opts);
+        }
+    }
+    /**
+     * Marks the control as `dirty`. A control becomes dirty when
+     * the control's value is changed through the UI; compare `markAsTouched`.
+     *
+     * @see `markAsTouched()`
+     * @see `markAsUntouched()`
+     * @see `markAsPristine()`
+     *
+     * @param opts Configuration options that determine how the control propagates changes
+     * and emits events after marking is applied.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     */
+    markAsDirty(opts = {}) {
+        this.pristine = false;
+        if (this._parent && !opts.onlySelf) {
+            this._parent.markAsDirty(opts);
+        }
+    }
+    /**
+     * Marks the control as `pristine`.
+     *
+     * If the control has any children, marks all children as `pristine`,
+     * and recalculates the `pristine` status of all parent
+     * controls.
+     *
+     * @see `markAsTouched()`
+     * @see `markAsUntouched()`
+     * @see `markAsDirty()`
+     *
+     * @param opts Configuration options that determine how the control emits events after
+     * marking is applied.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     */
+    markAsPristine(opts = {}) {
+        this.pristine = true;
+        this._pendingDirty = false;
+        this._forEachChild((control) => {
+            control.markAsPristine({ onlySelf: true });
+        });
+        if (this._parent && !opts.onlySelf) {
+            this._parent._updatePristine(opts);
+        }
+    }
+    /**
+     * Marks the control as `pending`.
+     *
+     * A control is pending while the control performs async validation.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @param opts Configuration options that determine how the control propagates changes and
+     * emits events after marking is applied.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     * * `emitEvent`: When true or not supplied (the default), the `statusChanges`
+     * observable emits an event with the latest status the control is marked pending.
+     * When false, no events are emitted.
+     *
+     */
+    markAsPending(opts = {}) {
+        this.status = PENDING;
+        if (opts.emitEvent !== false) {
+            this.statusChanges.emit(this.status);
+        }
+        if (this._parent && !opts.onlySelf) {
+            this._parent.markAsPending(opts);
+        }
+    }
+    /**
+     * Disables the control. This means the control is exempt from validation checks and
+     * excluded from the aggregate value of any parent. Its status is `DISABLED`.
+     *
+     * If the control has children, all children are also disabled.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @param opts Configuration options that determine how the control propagates
+     * changes and emits events after the control is disabled.
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is disabled.
+     * When false, no events are emitted.
+     */
+    disable(opts = {}) {
+        // If parent has been marked artificially dirty we don't want to re-calculate the
+        // parent's dirtiness based on the children.
+        const skipPristineCheck = this._parentMarkedDirty(opts.onlySelf);
+        this.status = DISABLED;
+        this.errors = null;
+        this._forEachChild((control) => {
+            control.disable(Object.assign(Object.assign({}, opts), { onlySelf: true }));
+        });
+        this._updateValue();
+        if (opts.emitEvent !== false) {
+            this.valueChanges.emit(this.value);
+            this.statusChanges.emit(this.status);
+        }
+        this._updateAncestors(Object.assign(Object.assign({}, opts), { skipPristineCheck }));
+        this._onDisabledChange.forEach((changeFn) => changeFn(true));
+    }
+    /**
+     * Enables the control. This means the control is included in validation checks and
+     * the aggregate value of its parent. Its status recalculates based on its value and
+     * its validators.
+     *
+     * By default, if the control has children, all children are enabled.
+     *
+     * @see {@link AbstractControl.status}
+     *
+     * @param opts Configure options that control how the control propagates changes and
+     * emits events when marked as untouched
+     * * `onlySelf`: When true, mark only this control. When false or not supplied,
+     * marks all direct ancestors. Default is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is enabled.
+     * When false, no events are emitted.
+     */
+    enable(opts = {}) {
+        // If parent has been marked artificially dirty we don't want to re-calculate the
+        // parent's dirtiness based on the children.
+        const skipPristineCheck = this._parentMarkedDirty(opts.onlySelf);
+        this.status = VALID;
+        this._forEachChild((control) => {
+            control.enable(Object.assign(Object.assign({}, opts), { onlySelf: true }));
+        });
+        this.updateValueAndValidity({ onlySelf: true, emitEvent: opts.emitEvent });
+        this._updateAncestors(Object.assign(Object.assign({}, opts), { skipPristineCheck }));
+        this._onDisabledChange.forEach((changeFn) => changeFn(false));
+    }
+    _updateAncestors(opts) {
+        if (this._parent && !opts.onlySelf) {
+            this._parent.updateValueAndValidity(opts);
+            if (!opts.skipPristineCheck) {
+                this._parent._updatePristine();
+            }
+            this._parent._updateTouched();
+        }
+    }
+    /**
+     * @param parent Sets the parent of the control
+     */
+    setParent(parent) {
+        this._parent = parent;
+    }
+    /**
+     * Recalculates the value and validation status of the control.
+     *
+     * By default, it also updates the value and validity of its ancestors.
+     *
+     * @param opts Configuration options determine how the control propagates changes and emits events
+     * after updates and validity checks are applied.
+     * * `onlySelf`: When true, only update this control. When false or not supplied,
+     * update all direct ancestors. Default is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is updated.
+     * When false, no events are emitted.
+     */
+    updateValueAndValidity(opts = {}) {
+        this._setInitialStatus();
+        this._updateValue();
+        if (this.enabled) {
+            this._cancelExistingSubscription();
+            this.errors = this._runValidator();
+            this.status = this._calculateStatus();
+            if (this.status === VALID || this.status === PENDING) {
+                this._runAsyncValidator(opts.emitEvent);
+            }
+        }
+        if (opts.emitEvent !== false) {
+            this.valueChanges.emit(this.value);
+            this.statusChanges.emit(this.status);
+        }
+        if (this._parent && !opts.onlySelf) {
+            this._parent.updateValueAndValidity(opts);
+        }
+    }
+    /** @internal */
+    _updateTreeValidity(opts = { emitEvent: true }) {
+        this._forEachChild((ctrl) => ctrl._updateTreeValidity(opts));
+        this.updateValueAndValidity({ onlySelf: true, emitEvent: opts.emitEvent });
+    }
+    _setInitialStatus() {
+        this.status = this._allControlsDisabled() ? DISABLED : VALID;
+    }
+    _runValidator() {
+        return this.validator ? this.validator(this) : null;
+    }
+    _runAsyncValidator(emitEvent) {
+        if (this.asyncValidator) {
+            this.status = PENDING;
+            this._hasOwnPendingAsyncValidator = true;
+            const obs = toObservable(this.asyncValidator(this));
+            this._asyncValidationSubscription = obs.subscribe((errors) => {
+                this._hasOwnPendingAsyncValidator = false;
+                // This will trigger the recalculation of the validation status, which depends on
+                // the state of the asynchronous validation (whether it is in progress or not). So, it is
+                // necessary that we have updated the `_hasOwnPendingAsyncValidator` boolean flag first.
+                this.setErrors(errors, { emitEvent });
+            });
+        }
+    }
+    _cancelExistingSubscription() {
+        if (this._asyncValidationSubscription) {
+            this._asyncValidationSubscription.unsubscribe();
+            this._hasOwnPendingAsyncValidator = false;
+        }
+    }
+    /**
+     * Sets errors on a form control when running validations manually, rather than automatically.
+     *
+     * Calling `setErrors` also updates the validity of the parent control.
+     *
+     * @usageNotes
+     *
+     * ### Manually set the errors for a control
+     *
+     * ```
+     * const login = new FormControl('someLogin');
+     * login.setErrors({
+     *   notUnique: true
+     * });
+     *
+     * expect(login.valid).toEqual(false);
+     * expect(login.errors).toEqual({ notUnique: true });
+     *
+     * login.setValue('someOtherLogin');
+     *
+     * expect(login.valid).toEqual(true);
+     * ```
+     */
+    setErrors(errors, opts = {}) {
+        this.errors = errors;
+        this._updateControlsErrors(opts.emitEvent !== false);
+    }
+    /**
+     * Retrieves a child control given the control's name or path.
+     *
+     * @param path A dot-delimited string or array of string/number values that define the path to the
+     * control.
+     *
+     * @usageNotes
+     * ### Retrieve a nested control
+     *
+     * For example, to get a `name` control nested within a `person` sub-group:
+     *
+     * * `this.form.get('person.name');`
+     *
+     * -OR-
+     *
+     * * `this.form.get(['person', 'name']);`
+     *
+     * ### Retrieve a control in a FormArray
+     *
+     * When accessing an element inside a FormArray, you can use an element index.
+     * For example, to get a `price` control from the first element in an `items` array you can use:
+     *
+     * * `this.form.get('items.0.price');`
+     *
+     * -OR-
+     *
+     * * `this.form.get(['items', 0, 'price']);`
+     */
+    get(path) {
+        return _find(this, path, '.');
+    }
+    /**
+     * @description
+     * Reports error data for the control with the given path.
+     *
+     * @param errorCode The code of the error to check
+     * @param path A list of control names that designates how to move from the current control
+     * to the control that should be queried for errors.
+     *
+     * @usageNotes
+     * For example, for the following `FormGroup`:
+     *
+     * ```
+     * form = new FormGroup({
+     *   address: new FormGroup({ street: new FormControl() })
+     * });
+     * ```
+     *
+     * The path to the 'street' control from the root form would be 'address' -> 'street'.
+     *
+     * It can be provided to this method in one of two formats:
+     *
+     * 1. An array of string control names, e.g. `['address', 'street']`
+     * 1. A period-delimited list of control names in one string, e.g. `'address.street'`
+     *
+     * @returns error data for that particular error. If the control or error is not present,
+     * null is returned.
+     */
+    getError(errorCode, path) {
+        const control = path ? this.get(path) : this;
+        return control && control.errors ? control.errors[errorCode] : null;
+    }
+    /**
+     * @description
+     * Reports whether the control with the given path has the error specified.
+     *
+     * @param errorCode The code of the error to check
+     * @param path A list of control names that designates how to move from the current control
+     * to the control that should be queried for errors.
+     *
+     * @usageNotes
+     * For example, for the following `FormGroup`:
+     *
+     * ```
+     * form = new FormGroup({
+     *   address: new FormGroup({ street: new FormControl() })
+     * });
+     * ```
+     *
+     * The path to the 'street' control from the root form would be 'address' -> 'street'.
+     *
+     * It can be provided to this method in one of two formats:
+     *
+     * 1. An array of string control names, e.g. `['address', 'street']`
+     * 1. A period-delimited list of control names in one string, e.g. `'address.street'`
+     *
+     * If no path is given, this method checks for the error on the current control.
+     *
+     * @returns whether the given error is present in the control at the given path.
+     *
+     * If the control is not present, false is returned.
+     */
+    hasError(errorCode, path) {
+        return !!this.getError(errorCode, path);
+    }
+    /**
+     * Retrieves the top-level ancestor of this control.
+     */
+    get root() {
+        let x = this;
+        while (x._parent) {
+            x = x._parent;
+        }
+        return x;
+    }
+    /** @internal */
+    _updateControlsErrors(emitEvent) {
+        this.status = this._calculateStatus();
+        if (emitEvent) {
+            this.statusChanges.emit(this.status);
+        }
+        if (this._parent) {
+            this._parent._updateControlsErrors(emitEvent);
+        }
+    }
+    /** @internal */
+    _initObservables() {
+        this.valueChanges = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this.statusChanges = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+    }
+    _calculateStatus() {
+        if (this._allControlsDisabled())
+            return DISABLED;
+        if (this.errors)
+            return INVALID;
+        if (this._hasOwnPendingAsyncValidator || this._anyControlsHaveStatus(PENDING))
+            return PENDING;
+        if (this._anyControlsHaveStatus(INVALID))
+            return INVALID;
+        return VALID;
+    }
+    /** @internal */
+    _anyControlsHaveStatus(status) {
+        return this._anyControls((control) => control.status === status);
+    }
+    /** @internal */
+    _anyControlsDirty() {
+        return this._anyControls((control) => control.dirty);
+    }
+    /** @internal */
+    _anyControlsTouched() {
+        return this._anyControls((control) => control.touched);
+    }
+    /** @internal */
+    _updatePristine(opts = {}) {
+        this.pristine = !this._anyControlsDirty();
+        if (this._parent && !opts.onlySelf) {
+            this._parent._updatePristine(opts);
+        }
+    }
+    /** @internal */
+    _updateTouched(opts = {}) {
+        this.touched = this._anyControlsTouched();
+        if (this._parent && !opts.onlySelf) {
+            this._parent._updateTouched(opts);
+        }
+    }
+    /** @internal */
+    _isBoxedValue(formState) {
+        return typeof formState === 'object' && formState !== null &&
+            Object.keys(formState).length === 2 && 'value' in formState && 'disabled' in formState;
+    }
+    /** @internal */
+    _registerOnCollectionChange(fn) {
+        this._onCollectionChange = fn;
+    }
+    /** @internal */
+    _setUpdateStrategy(opts) {
+        if (isOptionsObj(opts) && opts.updateOn != null) {
+            this._updateOn = opts.updateOn;
+        }
+    }
+    /**
+     * Check to see if parent has been marked artificially dirty.
+     *
+     * @internal
+     */
+    _parentMarkedDirty(onlySelf) {
+        const parentDirty = this._parent && this._parent.dirty;
+        return !onlySelf && !!parentDirty && !this._parent._anyControlsDirty();
+    }
+}
+/**
+ * Tracks the value and validation status of an individual form control.
+ *
+ * This is one of the three fundamental building blocks of Angular forms, along with
+ * `FormGroup` and `FormArray`. It extends the `AbstractControl` class that
+ * implements most of the base functionality for accessing the value, validation status,
+ * user interactions and events. See [usage examples below](#usage-notes).
+ *
+ * @see `AbstractControl`
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ * @see [Usage Notes](#usage-notes)
+ *
+ * @usageNotes
+ *
+ * ### Initializing Form Controls
+ *
+ * Instantiate a `FormControl`, with an initial value.
+ *
+ * ```ts
+ * const control = new FormControl('some value');
+ * console.log(control.value);     // 'some value'
+ *```
+ *
+ * The following example initializes the control with a form state object. The `value`
+ * and `disabled` keys are required in this case.
+ *
+ * ```ts
+ * const control = new FormControl({ value: 'n/a', disabled: true });
+ * console.log(control.value);     // 'n/a'
+ * console.log(control.status);    // 'DISABLED'
+ * ```
+ *
+ * The following example initializes the control with a sync validator.
+ *
+ * ```ts
+ * const control = new FormControl('', Validators.required);
+ * console.log(control.value);      // ''
+ * console.log(control.status);     // 'INVALID'
+ * ```
+ *
+ * The following example initializes the control using an options object.
+ *
+ * ```ts
+ * const control = new FormControl('', {
+ *    validators: Validators.required,
+ *    asyncValidators: myAsyncValidator
+ * });
+ * ```
+ *
+ * ### Configure the control to update on a blur event
+ *
+ * Set the `updateOn` option to `'blur'` to update on the blur `event`.
+ *
+ * ```ts
+ * const control = new FormControl('', { updateOn: 'blur' });
+ * ```
+ *
+ * ### Configure the control to update on a submit event
+ *
+ * Set the `updateOn` option to `'submit'` to update on a submit `event`.
+ *
+ * ```ts
+ * const control = new FormControl('', { updateOn: 'submit' });
+ * ```
+ *
+ * ### Reset the control back to an initial value
+ *
+ * You reset to a specific form state by passing through a standalone
+ * value or a form state object that contains both a value and a disabled state
+ * (these are the only two properties that cannot be calculated).
+ *
+ * ```ts
+ * const control = new FormControl('Nancy');
+ *
+ * console.log(control.value); // 'Nancy'
+ *
+ * control.reset('Drew');
+ *
+ * console.log(control.value); // 'Drew'
+ * ```
+ *
+ * ### Reset the control back to an initial value and disabled
+ *
+ * ```
+ * const control = new FormControl('Nancy');
+ *
+ * console.log(control.value); // 'Nancy'
+ * console.log(control.status); // 'VALID'
+ *
+ * control.reset({ value: 'Drew', disabled: true });
+ *
+ * console.log(control.value); // 'Drew'
+ * console.log(control.status); // 'DISABLED'
+ * ```
+ *
+ * @publicApi
+ */
+class FormControl extends AbstractControl {
+    /**
+     * Creates a new `FormControl` instance.
+     *
+     * @param formState Initializes the control with an initial value,
+     * or an object that defines the initial value and disabled state.
+     *
+     * @param validatorOrOpts A synchronous validator function, or an array of
+     * such functions, or an `AbstractControlOptions` object that contains validation functions
+     * and a validation trigger.
+     *
+     * @param asyncValidator A single async validator or array of async validator functions
+     *
+     */
+    constructor(formState = null, validatorOrOpts, asyncValidator) {
+        super(pickValidators(validatorOrOpts), pickAsyncValidators(asyncValidator, validatorOrOpts));
+        /** @internal */
+        this._onChange = [];
+        this._applyFormState(formState);
+        this._setUpdateStrategy(validatorOrOpts);
+        this._initObservables();
+        this.updateValueAndValidity({
+            onlySelf: true,
+            // If `asyncValidator` is present, it will trigger control status change from `PENDING` to
+            // `VALID` or `INVALID`.
+            // The status should be broadcasted via the `statusChanges` observable, so we set `emitEvent`
+            // to `true` to allow that during the control creation process.
+            emitEvent: !!asyncValidator
+        });
+    }
+    /**
+     * Sets a new value for the form control.
+     *
+     * @param value The new value for the control.
+     * @param options Configuration options that determine how the control propagates changes
+     * and emits events when the value changes.
+     * The configuration options are passed to the {@link AbstractControl#updateValueAndValidity
+     * updateValueAndValidity} method.
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default is
+     * false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control value is updated.
+     * When false, no events are emitted.
+     * * `emitModelToViewChange`: When true or not supplied  (the default), each change triggers an
+     * `onChange` event to
+     * update the view.
+     * * `emitViewToModelChange`: When true or not supplied (the default), each change triggers an
+     * `ngModelChange`
+     * event to update the model.
+     *
+     */
+    setValue(value, options = {}) {
+        this.value = this._pendingValue = value;
+        if (this._onChange.length && options.emitModelToViewChange !== false) {
+            this._onChange.forEach((changeFn) => changeFn(this.value, options.emitViewToModelChange !== false));
+        }
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * Patches the value of a control.
+     *
+     * This function is functionally the same as {@link FormControl#setValue setValue} at this level.
+     * It exists for symmetry with {@link FormGroup#patchValue patchValue} on `FormGroups` and
+     * `FormArrays`, where it does behave differently.
+     *
+     * @see `setValue` for options
+     */
+    patchValue(value, options = {}) {
+        this.setValue(value, options);
+    }
+    /**
+     * Resets the form control, marking it `pristine` and `untouched`, and setting
+     * the value to null.
+     *
+     * @param formState Resets the control with an initial value,
+     * or an object that defines the initial value and disabled state.
+     *
+     * @param options Configuration options that determine how the control propagates changes
+     * and emits events after the value changes.
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default is
+     * false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is reset.
+     * When false, no events are emitted.
+     *
+     */
+    reset(formState = null, options = {}) {
+        this._applyFormState(formState);
+        this.markAsPristine(options);
+        this.markAsUntouched(options);
+        this.setValue(this.value, options);
+        this._pendingChange = false;
+    }
+    /**
+     * @internal
+     */
+    _updateValue() { }
+    /**
+     * @internal
+     */
+    _anyControls(condition) {
+        return false;
+    }
+    /**
+     * @internal
+     */
+    _allControlsDisabled() {
+        return this.disabled;
+    }
+    /**
+     * Register a listener for change events.
+     *
+     * @param fn The method that is called when the value changes
+     */
+    registerOnChange(fn) {
+        this._onChange.push(fn);
+    }
+    /**
+     * Internal function to unregister a change events listener.
+     * @internal
+     */
+    _unregisterOnChange(fn) {
+        removeListItem(this._onChange, fn);
+    }
+    /**
+     * Register a listener for disabled events.
+     *
+     * @param fn The method that is called when the disabled status changes.
+     */
+    registerOnDisabledChange(fn) {
+        this._onDisabledChange.push(fn);
+    }
+    /**
+     * Internal function to unregister a disabled event listener.
+     * @internal
+     */
+    _unregisterOnDisabledChange(fn) {
+        removeListItem(this._onDisabledChange, fn);
+    }
+    /**
+     * @internal
+     */
+    _forEachChild(cb) { }
+    /** @internal */
+    _syncPendingControls() {
+        if (this.updateOn === 'submit') {
+            if (this._pendingDirty)
+                this.markAsDirty();
+            if (this._pendingTouched)
+                this.markAsTouched();
+            if (this._pendingChange) {
+                this.setValue(this._pendingValue, { onlySelf: true, emitModelToViewChange: false });
+                return true;
+            }
+        }
+        return false;
+    }
+    _applyFormState(formState) {
+        if (this._isBoxedValue(formState)) {
+            this.value = this._pendingValue = formState.value;
+            formState.disabled ? this.disable({ onlySelf: true, emitEvent: false }) :
+                this.enable({ onlySelf: true, emitEvent: false });
+        }
+        else {
+            this.value = this._pendingValue = formState;
+        }
+    }
+}
+/**
+ * Tracks the value and validity state of a group of `FormControl` instances.
+ *
+ * A `FormGroup` aggregates the values of each child `FormControl` into one object,
+ * with each control name as the key.  It calculates its status by reducing the status values
+ * of its children. For example, if one of the controls in a group is invalid, the entire
+ * group becomes invalid.
+ *
+ * `FormGroup` is one of the three fundamental building blocks used to define forms in Angular,
+ * along with `FormControl` and `FormArray`.
+ *
+ * When instantiating a `FormGroup`, pass in a collection of child controls as the first
+ * argument. The key for each child registers the name for the control.
+ *
+ * @usageNotes
+ *
+ * ### Create a form group with 2 controls
+ *
+ * ```
+ * const form = new FormGroup({
+ *   first: new FormControl('Nancy', Validators.minLength(2)),
+ *   last: new FormControl('Drew'),
+ * });
+ *
+ * console.log(form.value);   // {first: 'Nancy', last; 'Drew'}
+ * console.log(form.status);  // 'VALID'
+ * ```
+ *
+ * ### Create a form group with a group-level validator
+ *
+ * You include group-level validators as the second arg, or group-level async
+ * validators as the third arg. These come in handy when you want to perform validation
+ * that considers the value of more than one child control.
+ *
+ * ```
+ * const form = new FormGroup({
+ *   password: new FormControl('', Validators.minLength(2)),
+ *   passwordConfirm: new FormControl('', Validators.minLength(2)),
+ * }, passwordMatchValidator);
+ *
+ *
+ * function passwordMatchValidator(g: FormGroup) {
+ *    return g.get('password').value === g.get('passwordConfirm').value
+ *       ? null : {'mismatch': true};
+ * }
+ * ```
+ *
+ * Like `FormControl` instances, you choose to pass in
+ * validators and async validators as part of an options object.
+ *
+ * ```
+ * const form = new FormGroup({
+ *   password: new FormControl('')
+ *   passwordConfirm: new FormControl('')
+ * }, { validators: passwordMatchValidator, asyncValidators: otherValidator });
+ * ```
+ *
+ * ### Set the updateOn property for all controls in a form group
+ *
+ * The options object is used to set a default value for each child
+ * control's `updateOn` property. If you set `updateOn` to `'blur'` at the
+ * group level, all child controls default to 'blur', unless the child
+ * has explicitly specified a different `updateOn` value.
+ *
+ * ```ts
+ * const c = new FormGroup({
+ *   one: new FormControl()
+ * }, { updateOn: 'blur' });
+ * ```
+ *
+ * @publicApi
+ */
+class FormGroup extends AbstractControl {
+    /**
+     * Creates a new `FormGroup` instance.
+     *
+     * @param controls A collection of child controls. The key for each child is the name
+     * under which it is registered.
+     *
+     * @param validatorOrOpts A synchronous validator function, or an array of
+     * such functions, or an `AbstractControlOptions` object that contains validation functions
+     * and a validation trigger.
+     *
+     * @param asyncValidator A single async validator or array of async validator functions
+     *
+     */
+    constructor(controls, validatorOrOpts, asyncValidator) {
+        super(pickValidators(validatorOrOpts), pickAsyncValidators(asyncValidator, validatorOrOpts));
+        this.controls = controls;
+        this._initObservables();
+        this._setUpdateStrategy(validatorOrOpts);
+        this._setUpControls();
+        this.updateValueAndValidity({
+            onlySelf: true,
+            // If `asyncValidator` is present, it will trigger control status change from `PENDING` to
+            // `VALID` or `INVALID`. The status should be broadcasted via the `statusChanges` observable,
+            // so we set `emitEvent` to `true` to allow that during the control creation process.
+            emitEvent: !!asyncValidator
+        });
+    }
+    /**
+     * Registers a control with the group's list of controls.
+     *
+     * This method does not update the value or validity of the control.
+     * Use {@link FormGroup#addControl addControl} instead.
+     *
+     * @param name The control name to register in the collection
+     * @param control Provides the control for the given name
+     */
+    registerControl(name, control) {
+        if (this.controls[name])
+            return this.controls[name];
+        this.controls[name] = control;
+        control.setParent(this);
+        control._registerOnCollectionChange(this._onCollectionChange);
+        return control;
+    }
+    /**
+     * Add a control to this group.
+     *
+     * This method also updates the value and validity of the control.
+     *
+     * @param name The control name to add to the collection
+     * @param control Provides the control for the given name
+     */
+    addControl(name, control) {
+        this.registerControl(name, control);
+        this.updateValueAndValidity();
+        this._onCollectionChange();
+    }
+    /**
+     * Remove a control from this group.
+     *
+     * @param name The control name to remove from the collection
+     */
+    removeControl(name) {
+        if (this.controls[name])
+            this.controls[name]._registerOnCollectionChange(() => { });
+        delete (this.controls[name]);
+        this.updateValueAndValidity();
+        this._onCollectionChange();
+    }
+    /**
+     * Replace an existing control.
+     *
+     * @param name The control name to replace in the collection
+     * @param control Provides the control for the given name
+     */
+    setControl(name, control) {
+        if (this.controls[name])
+            this.controls[name]._registerOnCollectionChange(() => { });
+        delete (this.controls[name]);
+        if (control)
+            this.registerControl(name, control);
+        this.updateValueAndValidity();
+        this._onCollectionChange();
+    }
+    /**
+     * Check whether there is an enabled control with the given name in the group.
+     *
+     * Reports false for disabled controls. If you'd like to check for existence in the group
+     * only, use {@link AbstractControl#get get} instead.
+     *
+     * @param controlName The control name to check for existence in the collection
+     *
+     * @returns false for disabled controls, true otherwise.
+     */
+    contains(controlName) {
+        return this.controls.hasOwnProperty(controlName) && this.controls[controlName].enabled;
+    }
+    /**
+     * Sets the value of the `FormGroup`. It accepts an object that matches
+     * the structure of the group, with control names as keys.
+     *
+     * @usageNotes
+     * ### Set the complete value for the form group
+     *
+     * ```
+     * const form = new FormGroup({
+     *   first: new FormControl(),
+     *   last: new FormControl()
+     * });
+     *
+     * console.log(form.value);   // {first: null, last: null}
+     *
+     * form.setValue({first: 'Nancy', last: 'Drew'});
+     * console.log(form.value);   // {first: 'Nancy', last: 'Drew'}
+     * ```
+     *
+     * @throws When strict checks fail, such as setting the value of a control
+     * that doesn't exist or if you exclude a value of a control that does exist.
+     *
+     * @param value The new value for the control that matches the structure of the group.
+     * @param options Configuration options that determine how the control propagates changes
+     * and emits events after the value changes.
+     * The configuration options are passed to the {@link AbstractControl#updateValueAndValidity
+     * updateValueAndValidity} method.
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default is
+     * false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control value is updated.
+     * When false, no events are emitted.
+     */
+    setValue(value, options = {}) {
+        this._checkAllValuesPresent(value);
+        Object.keys(value).forEach(name => {
+            this._throwIfControlMissing(name);
+            this.controls[name].setValue(value[name], { onlySelf: true, emitEvent: options.emitEvent });
+        });
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * Patches the value of the `FormGroup`. It accepts an object with control
+     * names as keys, and does its best to match the values to the correct controls
+     * in the group.
+     *
+     * It accepts both super-sets and sub-sets of the group without throwing an error.
+     *
+     * @usageNotes
+     * ### Patch the value for a form group
+     *
+     * ```
+     * const form = new FormGroup({
+     *    first: new FormControl(),
+     *    last: new FormControl()
+     * });
+     * console.log(form.value);   // {first: null, last: null}
+     *
+     * form.patchValue({first: 'Nancy'});
+     * console.log(form.value);   // {first: 'Nancy', last: null}
+     * ```
+     *
+     * @param value The object that matches the structure of the group.
+     * @param options Configuration options that determine how the control propagates changes and
+     * emits events after the value is patched.
+     * * `onlySelf`: When true, each change only affects this control and not its parent. Default is
+     * true.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges` observables emit events with the latest status and value when the control value
+     * is updated. When false, no events are emitted. The configuration options are passed to
+     * the {@link AbstractControl#updateValueAndValidity updateValueAndValidity} method.
+     */
+    patchValue(value, options = {}) {
+        // Even though the `value` argument type doesn't allow `null` and `undefined` values, the
+        // `patchValue` can be called recursively and inner data structures might have these values, so
+        // we just ignore such cases when a field containing FormGroup instance receives `null` or
+        // `undefined` as a value.
+        if (value == null /* both `null` and `undefined` */)
+            return;
+        Object.keys(value).forEach(name => {
+            if (this.controls[name]) {
+                this.controls[name].patchValue(value[name], { onlySelf: true, emitEvent: options.emitEvent });
+            }
+        });
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * Resets the `FormGroup`, marks all descendants `pristine` and `untouched` and sets
+     * the value of all descendants to null.
+     *
+     * You reset to a specific form state by passing in a map of states
+     * that matches the structure of your form, with control names as keys. The state
+     * is a standalone value or a form state object with both a value and a disabled
+     * status.
+     *
+     * @param value Resets the control with an initial value,
+     * or an object that defines the initial value and disabled state.
+     *
+     * @param options Configuration options that determine how the control propagates changes
+     * and emits events when the group is reset.
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default is
+     * false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is reset.
+     * When false, no events are emitted.
+     * The configuration options are passed to the {@link AbstractControl#updateValueAndValidity
+     * updateValueAndValidity} method.
+     *
+     * @usageNotes
+     *
+     * ### Reset the form group values
+     *
+     * ```ts
+     * const form = new FormGroup({
+     *   first: new FormControl('first name'),
+     *   last: new FormControl('last name')
+     * });
+     *
+     * console.log(form.value);  // {first: 'first name', last: 'last name'}
+     *
+     * form.reset({ first: 'name', last: 'last name' });
+     *
+     * console.log(form.value);  // {first: 'name', last: 'last name'}
+     * ```
+     *
+     * ### Reset the form group values and disabled status
+     *
+     * ```
+     * const form = new FormGroup({
+     *   first: new FormControl('first name'),
+     *   last: new FormControl('last name')
+     * });
+     *
+     * form.reset({
+     *   first: {value: 'name', disabled: true},
+     *   last: 'last'
+     * });
+     *
+     * console.log(form.value);  // {last: 'last'}
+     * console.log(form.get('first').status);  // 'DISABLED'
+     * ```
+     */
+    reset(value = {}, options = {}) {
+        this._forEachChild((control, name) => {
+            control.reset(value[name], { onlySelf: true, emitEvent: options.emitEvent });
+        });
+        this._updatePristine(options);
+        this._updateTouched(options);
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * The aggregate value of the `FormGroup`, including any disabled controls.
+     *
+     * Retrieves all values regardless of disabled status.
+     * The `value` property is the best way to get the value of the group, because
+     * it excludes disabled controls in the `FormGroup`.
+     */
+    getRawValue() {
+        return this._reduceChildren({}, (acc, control, name) => {
+            acc[name] = control instanceof FormControl ? control.value : control.getRawValue();
+            return acc;
+        });
+    }
+    /** @internal */
+    _syncPendingControls() {
+        let subtreeUpdated = this._reduceChildren(false, (updated, child) => {
+            return child._syncPendingControls() ? true : updated;
+        });
+        if (subtreeUpdated)
+            this.updateValueAndValidity({ onlySelf: true });
+        return subtreeUpdated;
+    }
+    /** @internal */
+    _throwIfControlMissing(name) {
+        if (!Object.keys(this.controls).length) {
+            throw new Error(`
+        There are no form controls registered with this group yet. If you're using ngModel,
+        you may want to check next tick (e.g. use setTimeout).
+      `);
+        }
+        if (!this.controls[name]) {
+            throw new Error(`Cannot find form control with name: ${name}.`);
+        }
+    }
+    /** @internal */
+    _forEachChild(cb) {
+        Object.keys(this.controls).forEach(key => {
+            // The list of controls can change (for ex. controls might be removed) while the loop
+            // is running (as a result of invoking Forms API in `valueChanges` subscription), so we
+            // have to null check before invoking the callback.
+            const control = this.controls[key];
+            control && cb(control, key);
+        });
+    }
+    /** @internal */
+    _setUpControls() {
+        this._forEachChild((control) => {
+            control.setParent(this);
+            control._registerOnCollectionChange(this._onCollectionChange);
+        });
+    }
+    /** @internal */
+    _updateValue() {
+        this.value = this._reduceValue();
+    }
+    /** @internal */
+    _anyControls(condition) {
+        for (const controlName of Object.keys(this.controls)) {
+            const control = this.controls[controlName];
+            if (this.contains(controlName) && condition(control)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /** @internal */
+    _reduceValue() {
+        return this._reduceChildren({}, (acc, control, name) => {
+            if (control.enabled || this.disabled) {
+                acc[name] = control.value;
+            }
+            return acc;
+        });
+    }
+    /** @internal */
+    _reduceChildren(initValue, fn) {
+        let res = initValue;
+        this._forEachChild((control, name) => {
+            res = fn(res, control, name);
+        });
+        return res;
+    }
+    /** @internal */
+    _allControlsDisabled() {
+        for (const controlName of Object.keys(this.controls)) {
+            if (this.controls[controlName].enabled) {
+                return false;
+            }
+        }
+        return Object.keys(this.controls).length > 0 || this.disabled;
+    }
+    /** @internal */
+    _checkAllValuesPresent(value) {
+        this._forEachChild((control, name) => {
+            if (value[name] === undefined) {
+                throw new Error(`Must supply a value for form control with name: '${name}'.`);
+            }
+        });
+    }
+}
+/**
+ * Tracks the value and validity state of an array of `FormControl`,
+ * `FormGroup` or `FormArray` instances.
+ *
+ * A `FormArray` aggregates the values of each child `FormControl` into an array.
+ * It calculates its status by reducing the status values of its children. For example, if one of
+ * the controls in a `FormArray` is invalid, the entire array becomes invalid.
+ *
+ * `FormArray` is one of the three fundamental building blocks used to define forms in Angular,
+ * along with `FormControl` and `FormGroup`.
+ *
+ * @usageNotes
+ *
+ * ### Create an array of form controls
+ *
+ * ```
+ * const arr = new FormArray([
+ *   new FormControl('Nancy', Validators.minLength(2)),
+ *   new FormControl('Drew'),
+ * ]);
+ *
+ * console.log(arr.value);   // ['Nancy', 'Drew']
+ * console.log(arr.status);  // 'VALID'
+ * ```
+ *
+ * ### Create a form array with array-level validators
+ *
+ * You include array-level validators and async validators. These come in handy
+ * when you want to perform validation that considers the value of more than one child
+ * control.
+ *
+ * The two types of validators are passed in separately as the second and third arg
+ * respectively, or together as part of an options object.
+ *
+ * ```
+ * const arr = new FormArray([
+ *   new FormControl('Nancy'),
+ *   new FormControl('Drew')
+ * ], {validators: myValidator, asyncValidators: myAsyncValidator});
+ * ```
+ *
+ * ### Set the updateOn property for all controls in a form array
+ *
+ * The options object is used to set a default value for each child
+ * control's `updateOn` property. If you set `updateOn` to `'blur'` at the
+ * array level, all child controls default to 'blur', unless the child
+ * has explicitly specified a different `updateOn` value.
+ *
+ * ```ts
+ * const arr = new FormArray([
+ *    new FormControl()
+ * ], {updateOn: 'blur'});
+ * ```
+ *
+ * ### Adding or removing controls from a form array
+ *
+ * To change the controls in the array, use the `push`, `insert`, `removeAt` or `clear` methods
+ * in `FormArray` itself. These methods ensure the controls are properly tracked in the
+ * form's hierarchy. Do not modify the array of `AbstractControl`s used to instantiate
+ * the `FormArray` directly, as that result in strange and unexpected behavior such
+ * as broken change detection.
+ *
+ * @publicApi
+ */
+class FormArray extends AbstractControl {
+    /**
+     * Creates a new `FormArray` instance.
+     *
+     * @param controls An array of child controls. Each child control is given an index
+     * where it is registered.
+     *
+     * @param validatorOrOpts A synchronous validator function, or an array of
+     * such functions, or an `AbstractControlOptions` object that contains validation functions
+     * and a validation trigger.
+     *
+     * @param asyncValidator A single async validator or array of async validator functions
+     *
+     */
+    constructor(controls, validatorOrOpts, asyncValidator) {
+        super(pickValidators(validatorOrOpts), pickAsyncValidators(asyncValidator, validatorOrOpts));
+        this.controls = controls;
+        this._initObservables();
+        this._setUpdateStrategy(validatorOrOpts);
+        this._setUpControls();
+        this.updateValueAndValidity({
+            onlySelf: true,
+            // If `asyncValidator` is present, it will trigger control status change from `PENDING` to
+            // `VALID` or `INVALID`.
+            // The status should be broadcasted via the `statusChanges` observable, so we set `emitEvent`
+            // to `true` to allow that during the control creation process.
+            emitEvent: !!asyncValidator
+        });
+    }
+    /**
+     * Get the `AbstractControl` at the given `index` in the array.
+     *
+     * @param index Index in the array to retrieve the control
+     */
+    at(index) {
+        return this.controls[index];
+    }
+    /**
+     * Insert a new `AbstractControl` at the end of the array.
+     *
+     * @param control Form control to be inserted
+     */
+    push(control) {
+        this.controls.push(control);
+        this._registerControl(control);
+        this.updateValueAndValidity();
+        this._onCollectionChange();
+    }
+    /**
+     * Insert a new `AbstractControl` at the given `index` in the array.
+     *
+     * @param index Index in the array to insert the control
+     * @param control Form control to be inserted
+     */
+    insert(index, control) {
+        this.controls.splice(index, 0, control);
+        this._registerControl(control);
+        this.updateValueAndValidity();
+    }
+    /**
+     * Remove the control at the given `index` in the array.
+     *
+     * @param index Index in the array to remove the control
+     */
+    removeAt(index) {
+        if (this.controls[index])
+            this.controls[index]._registerOnCollectionChange(() => { });
+        this.controls.splice(index, 1);
+        this.updateValueAndValidity();
+    }
+    /**
+     * Replace an existing control.
+     *
+     * @param index Index in the array to replace the control
+     * @param control The `AbstractControl` control to replace the existing control
+     */
+    setControl(index, control) {
+        if (this.controls[index])
+            this.controls[index]._registerOnCollectionChange(() => { });
+        this.controls.splice(index, 1);
+        if (control) {
+            this.controls.splice(index, 0, control);
+            this._registerControl(control);
+        }
+        this.updateValueAndValidity();
+        this._onCollectionChange();
+    }
+    /**
+     * Length of the control array.
+     */
+    get length() {
+        return this.controls.length;
+    }
+    /**
+     * Sets the value of the `FormArray`. It accepts an array that matches
+     * the structure of the control.
+     *
+     * This method performs strict checks, and throws an error if you try
+     * to set the value of a control that doesn't exist or if you exclude the
+     * value of a control.
+     *
+     * @usageNotes
+     * ### Set the values for the controls in the form array
+     *
+     * ```
+     * const arr = new FormArray([
+     *   new FormControl(),
+     *   new FormControl()
+     * ]);
+     * console.log(arr.value);   // [null, null]
+     *
+     * arr.setValue(['Nancy', 'Drew']);
+     * console.log(arr.value);   // ['Nancy', 'Drew']
+     * ```
+     *
+     * @param value Array of values for the controls
+     * @param options Configure options that determine how the control propagates changes and
+     * emits events after the value changes
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default
+     * is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control value is updated.
+     * When false, no events are emitted.
+     * The configuration options are passed to the {@link AbstractControl#updateValueAndValidity
+     * updateValueAndValidity} method.
+     */
+    setValue(value, options = {}) {
+        this._checkAllValuesPresent(value);
+        value.forEach((newValue, index) => {
+            this._throwIfControlMissing(index);
+            this.at(index).setValue(newValue, { onlySelf: true, emitEvent: options.emitEvent });
+        });
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * Patches the value of the `FormArray`. It accepts an array that matches the
+     * structure of the control, and does its best to match the values to the correct
+     * controls in the group.
+     *
+     * It accepts both super-sets and sub-sets of the array without throwing an error.
+     *
+     * @usageNotes
+     * ### Patch the values for controls in a form array
+     *
+     * ```
+     * const arr = new FormArray([
+     *    new FormControl(),
+     *    new FormControl()
+     * ]);
+     * console.log(arr.value);   // [null, null]
+     *
+     * arr.patchValue(['Nancy']);
+     * console.log(arr.value);   // ['Nancy', null]
+     * ```
+     *
+     * @param value Array of latest values for the controls
+     * @param options Configure options that determine how the control propagates changes and
+     * emits events after the value changes
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default
+     * is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges` observables emit events with the latest status and value when the control value
+     * is updated. When false, no events are emitted. The configuration options are passed to
+     * the {@link AbstractControl#updateValueAndValidity updateValueAndValidity} method.
+     */
+    patchValue(value, options = {}) {
+        // Even though the `value` argument type doesn't allow `null` and `undefined` values, the
+        // `patchValue` can be called recursively and inner data structures might have these values, so
+        // we just ignore such cases when a field containing FormArray instance receives `null` or
+        // `undefined` as a value.
+        if (value == null /* both `null` and `undefined` */)
+            return;
+        value.forEach((newValue, index) => {
+            if (this.at(index)) {
+                this.at(index).patchValue(newValue, { onlySelf: true, emitEvent: options.emitEvent });
+            }
+        });
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * Resets the `FormArray` and all descendants are marked `pristine` and `untouched`, and the
+     * value of all descendants to null or null maps.
+     *
+     * You reset to a specific form state by passing in an array of states
+     * that matches the structure of the control. The state is a standalone value
+     * or a form state object with both a value and a disabled status.
+     *
+     * @usageNotes
+     * ### Reset the values in a form array
+     *
+     * ```ts
+     * const arr = new FormArray([
+     *    new FormControl(),
+     *    new FormControl()
+     * ]);
+     * arr.reset(['name', 'last name']);
+     *
+     * console.log(this.arr.value);  // ['name', 'last name']
+     * ```
+     *
+     * ### Reset the values in a form array and the disabled status for the first control
+     *
+     * ```
+     * this.arr.reset([
+     *   {value: 'name', disabled: true},
+     *   'last'
+     * ]);
+     *
+     * console.log(this.arr.value);  // ['name', 'last name']
+     * console.log(this.arr.get(0).status);  // 'DISABLED'
+     * ```
+     *
+     * @param value Array of values for the controls
+     * @param options Configure options that determine how the control propagates changes and
+     * emits events after the value changes
+     *
+     * * `onlySelf`: When true, each change only affects this control, and not its parent. Default
+     * is false.
+     * * `emitEvent`: When true or not supplied (the default), both the `statusChanges` and
+     * `valueChanges`
+     * observables emit events with the latest status and value when the control is reset.
+     * When false, no events are emitted.
+     * The configuration options are passed to the {@link AbstractControl#updateValueAndValidity
+     * updateValueAndValidity} method.
+     */
+    reset(value = [], options = {}) {
+        this._forEachChild((control, index) => {
+            control.reset(value[index], { onlySelf: true, emitEvent: options.emitEvent });
+        });
+        this._updatePristine(options);
+        this._updateTouched(options);
+        this.updateValueAndValidity(options);
+    }
+    /**
+     * The aggregate value of the array, including any disabled controls.
+     *
+     * Reports all values regardless of disabled status.
+     * For enabled controls only, the `value` property is the best way to get the value of the array.
+     */
+    getRawValue() {
+        return this.controls.map((control) => {
+            return control instanceof FormControl ? control.value : control.getRawValue();
+        });
+    }
+    /**
+     * Remove all controls in the `FormArray`.
+     *
+     * @usageNotes
+     * ### Remove all elements from a FormArray
+     *
+     * ```ts
+     * const arr = new FormArray([
+     *    new FormControl(),
+     *    new FormControl()
+     * ]);
+     * console.log(arr.length);  // 2
+     *
+     * arr.clear();
+     * console.log(arr.length);  // 0
+     * ```
+     *
+     * It's a simpler and more efficient alternative to removing all elements one by one:
+     *
+     * ```ts
+     * const arr = new FormArray([
+     *    new FormControl(),
+     *    new FormControl()
+     * ]);
+     *
+     * while (arr.length) {
+     *    arr.removeAt(0);
+     * }
+     * ```
+     */
+    clear() {
+        if (this.controls.length < 1)
+            return;
+        this._forEachChild((control) => control._registerOnCollectionChange(() => { }));
+        this.controls.splice(0);
+        this.updateValueAndValidity();
+    }
+    /** @internal */
+    _syncPendingControls() {
+        let subtreeUpdated = this.controls.reduce((updated, child) => {
+            return child._syncPendingControls() ? true : updated;
+        }, false);
+        if (subtreeUpdated)
+            this.updateValueAndValidity({ onlySelf: true });
+        return subtreeUpdated;
+    }
+    /** @internal */
+    _throwIfControlMissing(index) {
+        if (!this.controls.length) {
+            throw new Error(`
+        There are no form controls registered with this array yet. If you're using ngModel,
+        you may want to check next tick (e.g. use setTimeout).
+      `);
+        }
+        if (!this.at(index)) {
+            throw new Error(`Cannot find form control at index ${index}`);
+        }
+    }
+    /** @internal */
+    _forEachChild(cb) {
+        this.controls.forEach((control, index) => {
+            cb(control, index);
+        });
+    }
+    /** @internal */
+    _updateValue() {
+        this.value =
+            this.controls.filter((control) => control.enabled || this.disabled)
+                .map((control) => control.value);
+    }
+    /** @internal */
+    _anyControls(condition) {
+        return this.controls.some((control) => control.enabled && condition(control));
+    }
+    /** @internal */
+    _setUpControls() {
+        this._forEachChild((control) => this._registerControl(control));
+    }
+    /** @internal */
+    _checkAllValuesPresent(value) {
+        this._forEachChild((control, i) => {
+            if (value[i] === undefined) {
+                throw new Error(`Must supply a value for form control at index: ${i}.`);
+            }
+        });
+    }
+    /** @internal */
+    _allControlsDisabled() {
+        for (const control of this.controls) {
+            if (control.enabled)
+                return false;
+        }
+        return this.controls.length > 0 || this.disabled;
+    }
+    _registerControl(control) {
+        control.setParent(this);
+        control._registerOnCollectionChange(this._onCollectionChange);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const formDirectiveProvider = {
+    provide: ControlContainer,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => NgForm)
+};
+const ɵ0 = () => Promise.resolve(null);
+const resolvedPromise = (ɵ0)();
+/**
+ * @description
+ * Creates a top-level `FormGroup` instance and binds it to a form
+ * to track aggregate form value and validation status.
+ *
+ * As soon as you import the `FormsModule`, this directive becomes active by default on
+ * all `<form>` tags.  You don't need to add a special selector.
+ *
+ * You optionally export the directive into a local template variable using `ngForm` as the key
+ * (ex: `#myForm="ngForm"`). This is optional, but useful.  Many properties from the underlying
+ * `FormGroup` instance are duplicated on the directive itself, so a reference to it
+ * gives you access to the aggregate value and validity status of the form, as well as
+ * user interaction properties like `dirty` and `touched`.
+ *
+ * To register child controls with the form, use `NgModel` with a `name`
+ * attribute. You may use `NgModelGroup` to create sub-groups within the form.
+ *
+ * If necessary, listen to the directive's `ngSubmit` event to be notified when the user has
+ * triggered a form submission. The `ngSubmit` event emits the original form
+ * submission event.
+ *
+ * In template driven forms, all `<form>` tags are automatically tagged as `NgForm`.
+ * To import the `FormsModule` but skip its usage in some forms,
+ * for example, to use native HTML5 validation, add the `ngNoForm` and the `<form>`
+ * tags won't create an `NgForm` directive. In reactive forms, using `ngNoForm` is
+ * unnecessary because the `<form>` tags are inert. In that case, you would
+ * refrain from using the `formGroup` directive.
+ *
+ * @usageNotes
+ *
+ * ### Listening for form submission
+ *
+ * The following example shows how to capture the form values from the "ngSubmit" event.
+ *
+ * {@example forms/ts/simpleForm/simple_form_example.ts region='Component'}
+ *
+ * ### Setting the update options
+ *
+ * The following example shows you how to change the "updateOn" option from its default using
+ * ngFormOptions.
+ *
+ * ```html
+ * <form [ngFormOptions]="{updateOn: 'blur'}">
+ *    <input name="one" ngModel>  <!-- this ngModel will update on blur -->
+ * </form>
+ * ```
+ *
+ * ### Native DOM validation UI
+ *
+ * In order to prevent the native DOM form validation UI from interfering with Angular's form
+ * validation, Angular automatically adds the `novalidate` attribute on any `<form>` whenever
+ * `FormModule` or `ReactiveFormModule` are imported into the application.
+ * If you want to explicitly enable native DOM validation UI with Angular forms, you can add the
+ * `ngNativeValidate` attribute to the `<form>` element:
+ *
+ * ```html
+ * <form ngNativeValidate>
+ *   ...
+ * </form>
+ * ```
+ *
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgForm extends ControlContainer {
+    constructor(validators, asyncValidators) {
+        super();
+        /**
+         * @description
+         * Returns whether the form submission has been triggered.
+         */
+        this.submitted = false;
+        this._directives = [];
+        /**
+         * @description
+         * Event emitter for the "ngSubmit" event
+         */
+        this.ngSubmit = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this.form =
+            new FormGroup({}, composeValidators(validators), composeAsyncValidators(asyncValidators));
+    }
+    /** @nodoc */
+    ngAfterViewInit() {
+        this._setUpdateStrategy();
+    }
+    /**
+     * @description
+     * The directive instance.
+     */
+    get formDirective() {
+        return this;
+    }
+    /**
+     * @description
+     * The internal `FormGroup` instance.
+     */
+    get control() {
+        return this.form;
+    }
+    /**
+     * @description
+     * Returns an array representing the path to this group. Because this directive
+     * always lives at the top level of a form, it is always an empty array.
+     */
+    get path() {
+        return [];
+    }
+    /**
+     * @description
+     * Returns a map of the controls in this group.
+     */
+    get controls() {
+        return this.form.controls;
+    }
+    /**
+     * @description
+     * Method that sets up the control directive in this group, re-calculates its value
+     * and validity, and adds the instance to the internal list of directives.
+     *
+     * @param dir The `NgModel` directive instance.
+     */
+    addControl(dir) {
+        resolvedPromise.then(() => {
+            const container = this._findContainer(dir.path);
+            dir.control =
+                container.registerControl(dir.name, dir.control);
+            setUpControl(dir.control, dir);
+            dir.control.updateValueAndValidity({ emitEvent: false });
+            this._directives.push(dir);
+        });
+    }
+    /**
+     * @description
+     * Retrieves the `FormControl` instance from the provided `NgModel` directive.
+     *
+     * @param dir The `NgModel` directive instance.
+     */
+    getControl(dir) {
+        return this.form.get(dir.path);
+    }
+    /**
+     * @description
+     * Removes the `NgModel` instance from the internal list of directives
+     *
+     * @param dir The `NgModel` directive instance.
+     */
+    removeControl(dir) {
+        resolvedPromise.then(() => {
+            const container = this._findContainer(dir.path);
+            if (container) {
+                container.removeControl(dir.name);
+            }
+            removeListItem(this._directives, dir);
+        });
+    }
+    /**
+     * @description
+     * Adds a new `NgModelGroup` directive instance to the form.
+     *
+     * @param dir The `NgModelGroup` directive instance.
+     */
+    addFormGroup(dir) {
+        resolvedPromise.then(() => {
+            const container = this._findContainer(dir.path);
+            const group = new FormGroup({});
+            setUpFormContainer(group, dir);
+            container.registerControl(dir.name, group);
+            group.updateValueAndValidity({ emitEvent: false });
+        });
+    }
+    /**
+     * @description
+     * Removes the `NgModelGroup` directive instance from the form.
+     *
+     * @param dir The `NgModelGroup` directive instance.
+     */
+    removeFormGroup(dir) {
+        resolvedPromise.then(() => {
+            const container = this._findContainer(dir.path);
+            if (container) {
+                container.removeControl(dir.name);
+            }
+        });
+    }
+    /**
+     * @description
+     * Retrieves the `FormGroup` for a provided `NgModelGroup` directive instance
+     *
+     * @param dir The `NgModelGroup` directive instance.
+     */
+    getFormGroup(dir) {
+        return this.form.get(dir.path);
+    }
+    /**
+     * Sets the new value for the provided `NgControl` directive.
+     *
+     * @param dir The `NgControl` directive instance.
+     * @param value The new value for the directive's control.
+     */
+    updateModel(dir, value) {
+        resolvedPromise.then(() => {
+            const ctrl = this.form.get(dir.path);
+            ctrl.setValue(value);
+        });
+    }
+    /**
+     * @description
+     * Sets the value for this `FormGroup`.
+     *
+     * @param value The new value
+     */
+    setValue(value) {
+        this.control.setValue(value);
+    }
+    /**
+     * @description
+     * Method called when the "submit" event is triggered on the form.
+     * Triggers the `ngSubmit` emitter to emit the "submit" event as its payload.
+     *
+     * @param $event The "submit" event object
+     */
+    onSubmit($event) {
+        this.submitted = true;
+        syncPendingControls(this.form, this._directives);
+        this.ngSubmit.emit($event);
+        return false;
+    }
+    /**
+     * @description
+     * Method called when the "reset" event is triggered on the form.
+     */
+    onReset() {
+        this.resetForm();
+    }
+    /**
+     * @description
+     * Resets the form to an initial value and resets its submitted status.
+     *
+     * @param value The new value for the form.
+     */
+    resetForm(value = undefined) {
+        this.form.reset(value);
+        this.submitted = false;
+    }
+    _setUpdateStrategy() {
+        if (this.options && this.options.updateOn != null) {
+            this.form._updateOn = this.options.updateOn;
+        }
+    }
+    /** @internal */
+    _findContainer(path) {
+        path.pop();
+        return path.length ? this.form.get(path) : this.form;
+    }
+}
+NgForm.ɵfac = function NgForm_Factory(t) { return new (t || NgForm)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10)); };
+NgForm.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgForm, selectors: [["form", 3, "ngNoForm", "", 3, "formGroup", ""], ["ng-form"], ["", "ngForm", ""]], hostBindings: function NgForm_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("submit", function NgForm_submit_HostBindingHandler($event) { return ctx.onSubmit($event); })("reset", function NgForm_reset_HostBindingHandler() { return ctx.onReset(); });
+    } }, inputs: { options: ["ngFormOptions", "options"] }, outputs: { ngSubmit: "ngSubmit" }, exportAs: ["ngForm"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formDirectiveProvider]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+NgForm.ctorParameters = () => [
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] }
+];
+NgForm.propDecorators = {
+    options: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngFormOptions',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgForm, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'form:not([ngNoForm]):not([formGroup]),ng-form,[ngForm]',
+                providers: [formDirectiveProvider],
+                host: { '(submit)': 'onSubmit($event)', '(reset)': 'onReset()' },
+                outputs: ['ngSubmit'],
+                exportAs: 'ngForm'
+            }]
+    }], function () { return [{ type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }]; }, { options: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngFormOptions']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ * A base class for code shared between the `NgModelGroup` and `FormGroupName` directives.
+ *
+ * @publicApi
+ */
+class AbstractFormGroupDirective extends ControlContainer {
+    /** @nodoc */
+    ngOnInit() {
+        this._checkParentType();
+        // Register the group with its parent group.
+        this.formDirective.addFormGroup(this);
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this.formDirective) {
+            // Remove the group from its parent group.
+            this.formDirective.removeFormGroup(this);
+        }
+    }
+    /**
+     * @description
+     * The `FormGroup` bound to this directive.
+     */
+    get control() {
+        return this.formDirective.getFormGroup(this);
+    }
+    /**
+     * @description
+     * The path to this group from the top-level directive.
+     */
+    get path() {
+        return controlPath(this.name == null ? this.name : this.name.toString(), this._parent);
+    }
+    /**
+     * @description
+     * The top-level directive for this group if present, otherwise null.
+     */
+    get formDirective() {
+        return this._parent ? this._parent.formDirective : null;
+    }
+    /** @internal */
+    _checkParentType() { }
+}
+AbstractFormGroupDirective.ɵfac = function AbstractFormGroupDirective_Factory(t) { return ɵAbstractFormGroupDirective_BaseFactory(t || AbstractFormGroupDirective); };
+AbstractFormGroupDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: AbstractFormGroupDirective, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+const ɵAbstractFormGroupDirective_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵgetInheritedFactory"](AbstractFormGroupDirective);
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](AbstractFormGroupDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+class TemplateDrivenErrors {
+    static modelParentException() {
+        throw new Error(`
+      ngModel cannot be used to register form controls with a parent formGroup directive.  Try using
+      formGroup's partner directive "formControlName" instead.  Example:
+
+      ${FormErrorExamples.formControlName}
+
+      Or, if you'd like to avoid registering this form control, indicate that it's standalone in ngModelOptions:
+
+      Example:
+
+      ${FormErrorExamples.ngModelWithFormGroup}`);
+    }
+    static formGroupNameException() {
+        throw new Error(`
+      ngModel cannot be used to register form controls with a parent formGroupName or formArrayName directive.
+
+      Option 1: Use formControlName instead of ngModel (reactive strategy):
+
+      ${FormErrorExamples.formGroupName}
+
+      Option 2:  Update ngModel's parent be ngModelGroup (template-driven strategy):
+
+      ${FormErrorExamples.ngModelGroup}`);
+    }
+    static missingNameException() {
+        throw new Error(`If ngModel is used within a form tag, either the name attribute must be set or the form
+      control must be defined as 'standalone' in ngModelOptions.
+
+      Example 1: <input [(ngModel)]="person.firstName" name="first">
+      Example 2: <input [(ngModel)]="person.firstName" [ngModelOptions]="{standalone: true}">`);
+    }
+    static modelGroupParentException() {
+        throw new Error(`
+      ngModelGroup cannot be used with a parent formGroup directive.
+
+      Option 1: Use formGroupName instead of ngModelGroup (reactive strategy):
+
+      ${FormErrorExamples.formGroupName}
+
+      Option 2:  Use a regular form tag instead of the formGroup directive (template-driven strategy):
+
+      ${FormErrorExamples.ngModelGroup}`);
+    }
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const modelGroupProvider = {
+    provide: ControlContainer,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => NgModelGroup)
+};
+/**
+ * @description
+ * Creates and binds a `FormGroup` instance to a DOM element.
+ *
+ * This directive can only be used as a child of `NgForm` (within `<form>` tags).
+ *
+ * Use this directive to validate a sub-group of your form separately from the
+ * rest of your form, or if some values in your domain model make more sense
+ * to consume together in a nested object.
+ *
+ * Provide a name for the sub-group and it will become the key
+ * for the sub-group in the form's full value. If you need direct access, export the directive into
+ * a local template variable using `ngModelGroup` (ex: `#myGroup="ngModelGroup"`).
+ *
+ * @usageNotes
+ *
+ * ### Consuming controls in a grouping
+ *
+ * The following example shows you how to combine controls together in a sub-group
+ * of the form.
+ *
+ * {@example forms/ts/ngModelGroup/ng_model_group_example.ts region='Component'}
+ *
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgModelGroup extends AbstractFormGroupDirective {
+    constructor(parent, validators, asyncValidators) {
+        super();
+        this._parent = parent;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+    }
+    /** @internal */
+    _checkParentType() {
+        if (!(this._parent instanceof NgModelGroup) && !(this._parent instanceof NgForm) &&
+            (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            TemplateDrivenErrors.modelGroupParentException();
+        }
+    }
+}
+NgModelGroup.ɵfac = function NgModelGroup_Factory(t) { return new (t || NgModelGroup)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 5), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10)); };
+NgModelGroup.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgModelGroup, selectors: [["", "ngModelGroup", ""]], inputs: { name: ["ngModelGroup", "name"] }, exportAs: ["ngModelGroup"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([modelGroupProvider]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+NgModelGroup.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] }
+];
+NgModelGroup.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngModelGroup',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgModelGroup, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[ngModelGroup]', providers: [modelGroupProvider], exportAs: 'ngModelGroup' }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }]; }, { name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngModelGroup']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const formControlBinding = {
+    provide: NgControl,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => NgModel)
+};
+const ɵ0$1 = () => Promise.resolve(null);
+/**
+ * `ngModel` forces an additional change detection run when its inputs change:
+ * E.g.:
+ * ```
+ * <div>{{myModel.valid}}</div>
+ * <input [(ngModel)]="myValue" #myModel="ngModel">
+ * ```
+ * I.e. `ngModel` can export itself on the element and then be used in the template.
+ * Normally, this would result in expressions before the `input` that use the exported directive
+ * to have an old value as they have been
+ * dirty checked before. As this is a very common case for `ngModel`, we added this second change
+ * detection run.
+ *
+ * Notes:
+ * - this is just one extra run no matter how many `ngModel`s have been changed.
+ * - this is a general problem when using `exportAs` for directives!
+ */
+const resolvedPromise$1 = (ɵ0$1)();
+/**
+ * @description
+ * Creates a `FormControl` instance from a domain model and binds it
+ * to a form control element.
+ *
+ * The `FormControl` instance tracks the value, user interaction, and
+ * validation status of the control and keeps the view synced with the model. If used
+ * within a parent form, the directive also registers itself with the form as a child
+ * control.
+ *
+ * This directive is used by itself or as part of a larger form. Use the
+ * `ngModel` selector to activate it.
+ *
+ * It accepts a domain model as an optional `Input`. If you have a one-way binding
+ * to `ngModel` with `[]` syntax, changing the domain model's value in the component
+ * class sets the value in the view. If you have a two-way binding with `[()]` syntax
+ * (also known as 'banana-in-a-box syntax'), the value in the UI always syncs back to
+ * the domain model in your class.
+ *
+ * To inspect the properties of the associated `FormControl` (like the validity state),
+ * export the directive into a local template variable using `ngModel` as the key (ex:
+ * `#myVar="ngModel"`). You can then access the control using the directive's `control` property.
+ * However, the most commonly used properties (like `valid` and `dirty`) also exist on the control
+ * for direct access. See a full list of properties directly available in
+ * `AbstractControlDirective`.
+ *
+ * @see `RadioControlValueAccessor`
+ * @see `SelectControlValueAccessor`
+ *
+ * @usageNotes
+ *
+ * ### Using ngModel on a standalone control
+ *
+ * The following examples show a simple standalone control using `ngModel`:
+ *
+ * {@example forms/ts/simpleNgModel/simple_ng_model_example.ts region='Component'}
+ *
+ * When using the `ngModel` within `<form>` tags, you'll also need to supply a `name` attribute
+ * so that the control can be registered with the parent form under that name.
+ *
+ * In the context of a parent form, it's often unnecessary to include one-way or two-way binding,
+ * as the parent form syncs the value for you. You access its properties by exporting it into a
+ * local template variable using `ngForm` such as (`#f="ngForm"`). Use the variable where
+ * needed on form submission.
+ *
+ * If you do need to populate initial values into your form, using a one-way binding for
+ * `ngModel` tends to be sufficient as long as you use the exported form's value rather
+ * than the domain model's value on submit.
+ *
+ * ### Using ngModel within a form
+ *
+ * The following example shows controls using `ngModel` within a form:
+ *
+ * {@example forms/ts/simpleForm/simple_form_example.ts region='Component'}
+ *
+ * ### Using a standalone ngModel within a group
+ *
+ * The following example shows you how to use a standalone ngModel control
+ * within a form. This controls the display of the form, but doesn't contain form data.
+ *
+ * ```html
+ * <form>
+ *   <input name="login" ngModel placeholder="Login">
+ *   <input type="checkbox" ngModel [ngModelOptions]="{standalone: true}"> Show more options?
+ * </form>
+ * <!-- form value: {login: ''} -->
+ * ```
+ *
+ * ### Setting the ngModel `name` attribute through options
+ *
+ * The following example shows you an alternate way to set the name attribute. Here,
+ * an attribute identified as name is used within a custom form control component. To still be able
+ * to specify the NgModel's name, you must specify it using the `ngModelOptions` input instead.
+ *
+ * ```html
+ * <form>
+ *   <my-custom-form-control name="Nancy" ngModel [ngModelOptions]="{name: 'user'}">
+ *   </my-custom-form-control>
+ * </form>
+ * <!-- form value: {user: ''} -->
+ * ```
+ *
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgModel extends NgControl {
+    constructor(parent, validators, asyncValidators, valueAccessors) {
+        super();
+        this.control = new FormControl();
+        /** @internal */
+        this._registered = false;
+        /**
+         * @description
+         * Event emitter for producing the `ngModelChange` event after
+         * the view model updates.
+         */
+        this.update = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this._parent = parent;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+        this.valueAccessor = selectValueAccessor(this, valueAccessors);
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        this._checkForErrors();
+        if (!this._registered)
+            this._setUpControl();
+        if ('isDisabled' in changes) {
+            this._updateDisabled(changes);
+        }
+        if (isPropertyUpdated(changes, this.viewModel)) {
+            this._updateValue(this.model);
+            this.viewModel = this.model;
+        }
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        this.formDirective && this.formDirective.removeControl(this);
+    }
+    /**
+     * @description
+     * Returns an array that represents the path from the top-level form to this control.
+     * Each index is the string name of the control on that level.
+     */
+    get path() {
+        return this._parent ? controlPath(this.name, this._parent) : [this.name];
+    }
+    /**
+     * @description
+     * The top-level directive for this control if present, otherwise null.
+     */
+    get formDirective() {
+        return this._parent ? this._parent.formDirective : null;
+    }
+    /**
+     * @description
+     * Sets the new value for the view model and emits an `ngModelChange` event.
+     *
+     * @param newValue The new value emitted by `ngModelChange`.
+     */
+    viewToModelUpdate(newValue) {
+        this.viewModel = newValue;
+        this.update.emit(newValue);
+    }
+    _setUpControl() {
+        this._setUpdateStrategy();
+        this._isStandalone() ? this._setUpStandalone() : this.formDirective.addControl(this);
+        this._registered = true;
+    }
+    _setUpdateStrategy() {
+        if (this.options && this.options.updateOn != null) {
+            this.control._updateOn = this.options.updateOn;
+        }
+    }
+    _isStandalone() {
+        return !this._parent || !!(this.options && this.options.standalone);
+    }
+    _setUpStandalone() {
+        setUpControl(this.control, this);
+        this.control.updateValueAndValidity({ emitEvent: false });
+    }
+    _checkForErrors() {
+        if (!this._isStandalone()) {
+            this._checkParentType();
+        }
+        this._checkName();
+    }
+    _checkParentType() {
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
+            if (!(this._parent instanceof NgModelGroup) &&
+                this._parent instanceof AbstractFormGroupDirective) {
+                TemplateDrivenErrors.formGroupNameException();
+            }
+            else if (!(this._parent instanceof NgModelGroup) && !(this._parent instanceof NgForm)) {
+                TemplateDrivenErrors.modelParentException();
+            }
+        }
+    }
+    _checkName() {
+        if (this.options && this.options.name)
+            this.name = this.options.name;
+        if (!this._isStandalone() && !this.name && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            TemplateDrivenErrors.missingNameException();
+        }
+    }
+    _updateValue(value) {
+        resolvedPromise$1.then(() => {
+            this.control.setValue(value, { emitViewToModelChange: false });
+        });
+    }
+    _updateDisabled(changes) {
+        const disabledValue = changes['isDisabled'].currentValue;
+        const isDisabled = disabledValue === '' || (disabledValue && disabledValue !== 'false');
+        resolvedPromise$1.then(() => {
+            if (isDisabled && !this.control.disabled) {
+                this.control.disable();
+            }
+            else if (!isDisabled && this.control.disabled) {
+                this.control.enable();
+            }
+        });
+    }
+}
+NgModel.ɵfac = function NgModel_Factory(t) { return new (t || NgModel)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 9), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALUE_ACCESSOR, 10)); };
+NgModel.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgModel, selectors: [["", "ngModel", "", 3, "formControlName", "", 3, "formControl", ""]], inputs: { name: "name", isDisabled: ["disabled", "isDisabled"], model: ["ngModel", "model"], options: ["ngModelOptions", "options"] }, outputs: { update: "ngModelChange" }, exportAs: ["ngModel"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formControlBinding]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+NgModel.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALUE_ACCESSOR,] }] }
+];
+NgModel.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    isDisabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['disabled',] }],
+    model: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngModel',] }],
+    options: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngModelOptions',] }],
+    update: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['ngModelChange',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgModel, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[ngModel]:not([formControlName]):not([formControl])',
+                providers: [formControlBinding],
+                exportAs: 'ngModel'
+            }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALUE_ACCESSOR]
+            }] }]; }, { update: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['ngModelChange']
+        }], name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], isDisabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['disabled']
+        }], model: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngModel']
+        }], options: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngModelOptions']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ *
+ * Adds `novalidate` attribute to all forms by default.
+ *
+ * `novalidate` is used to disable browser's native form validation.
+ *
+ * If you want to use native validation with Angular forms, just add `ngNativeValidate` attribute:
+ *
+ * ```
+ * <form ngNativeValidate></form>
+ * ```
+ *
+ * @publicApi
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ */
+class ɵNgNoValidate {
+}
+ɵNgNoValidate.ɵfac = function ɵNgNoValidate_Factory(t) { return new (t || ɵNgNoValidate)(); };
+ɵNgNoValidate.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ɵNgNoValidate, selectors: [["form", 3, "ngNoForm", "", 3, "ngNativeValidate", ""]], hostAttrs: ["novalidate", ""] });
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ɵNgNoValidate, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'form:not([ngNoForm]):not([ngNativeValidate])',
+                host: { 'novalidate': '' }
+            }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const NUMBER_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => NumberValueAccessor),
+    multi: true
+};
+/**
+ * @description
+ * The `ControlValueAccessor` for writing a number value and listening to number input changes.
+ * The value accessor is used by the `FormControlDirective`, `FormControlName`, and `NgModel`
+ * directives.
+ *
+ * @usageNotes
+ *
+ * ### Using a number input with a reactive form.
+ *
+ * The following example shows how to use a number input with a reactive form.
+ *
+ * ```ts
+ * const totalCountControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <input type="number" [formControl]="totalCountControl">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NumberValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        /**
+         * The registered callback function called when a change or input event occurs on the input
+         * element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+    }
+    /**
+     * Sets the "value" property on the input element.
+     * @nodoc
+     */
+    writeValue(value) {
+        // The value needs to be normalized for IE9, otherwise it is set to 'null' when null
+        const normalizedValue = value == null ? '' : value;
+        this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = (value) => {
+            fn(value == '' ? null : parseFloat(value));
+        };
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+}
+NumberValueAccessor.ɵfac = function NumberValueAccessor_Factory(t) { return new (t || NumberValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+NumberValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NumberValueAccessor, selectors: [["input", "type", "number", "formControlName", ""], ["input", "type", "number", "formControl", ""], ["input", "type", "number", "ngModel", ""]], hostBindings: function NumberValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("input", function NumberValueAccessor_input_HostBindingHandler($event) { return ctx.onChange($event.target.value); })("blur", function NumberValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([NUMBER_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+NumberValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NumberValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input[type=number][formControlName],input[type=number][formControl],input[type=number][ngModel]',
+                host: { '(input)': 'onChange($event.target.value)', '(blur)': 'onTouched()' },
+                providers: [NUMBER_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const RADIO_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => RadioControlValueAccessor),
+    multi: true
+};
+function throwNameError() {
+    throw new Error(`
+      If you define both a name and a formControlName attribute on your radio button, their values
+      must match. Ex: <input type="radio" formControlName="food" name="food">
+    `);
+}
+/**
+ * Internal-only NgModule that works as a host for the `RadioControlRegistry` tree-shakable
+ * provider. Note: the `InternalFormsSharedModule` can not be used here directly, since it's
+ * declared *after* the `RadioControlRegistry` class and the `providedIn` doesn't support
+ * `forwardRef` logic.
+ */
+class RadioControlRegistryModule {
+}
+RadioControlRegistryModule.ɵfac = function RadioControlRegistryModule_Factory(t) { return new (t || RadioControlRegistryModule)(); };
+RadioControlRegistryModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: RadioControlRegistryModule });
+RadioControlRegistryModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({});
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](RadioControlRegistryModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"]
+    }], null, null); })();
+/**
+ * @description
+ * Class used by Angular to track radio buttons. For internal use only.
+ */
+class RadioControlRegistry {
+    constructor() {
+        this._accessors = [];
+    }
+    /**
+     * @description
+     * Adds a control to the internal registry. For internal use only.
+     */
+    add(control, accessor) {
+        this._accessors.push([control, accessor]);
+    }
+    /**
+     * @description
+     * Removes a control from the internal registry. For internal use only.
+     */
+    remove(accessor) {
+        for (let i = this._accessors.length - 1; i >= 0; --i) {
+            if (this._accessors[i][1] === accessor) {
+                this._accessors.splice(i, 1);
+                return;
+            }
+        }
+    }
+    /**
+     * @description
+     * Selects a radio button. For internal use only.
+     */
+    select(accessor) {
+        this._accessors.forEach((c) => {
+            if (this._isSameGroup(c, accessor) && c[1] !== accessor) {
+                c[1].fireUncheck(accessor.value);
+            }
+        });
+    }
+    _isSameGroup(controlPair, accessor) {
+        if (!controlPair[0].control)
+            return false;
+        return controlPair[0]._parent === accessor._control._parent &&
+            controlPair[1].name === accessor.name;
+    }
+}
+RadioControlRegistry.ɵfac = function RadioControlRegistry_Factory(t) { return new (t || RadioControlRegistry)(); };
+RadioControlRegistry.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function RadioControlRegistry_Factory() { return new RadioControlRegistry(); }, token: RadioControlRegistry, providedIn: RadioControlRegistryModule });
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](RadioControlRegistry, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: RadioControlRegistryModule }]
+    }], function () { return []; }, null); })();
+/**
+ * @description
+ * The `ControlValueAccessor` for writing radio control values and listening to radio control
+ * changes. The value accessor is used by the `FormControlDirective`, `FormControlName`, and
+ * `NgModel` directives.
+ *
+ * @usageNotes
+ *
+ * ### Using radio buttons with reactive form directives
+ *
+ * The follow example shows how to use radio buttons in a reactive form. When using radio buttons in
+ * a reactive form, radio buttons in the same group should have the same `formControlName`.
+ * Providing a `name` attribute is optional.
+ *
+ * {@example forms/ts/reactiveRadioButtons/reactive_radio_button_example.ts region='Reactive'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class RadioControlValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef, _registry, _injector) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        this._registry = _registry;
+        this._injector = _injector;
+        /**
+         * The registered callback function called when a change event occurs on the input element.
+         * @nodoc
+         */
+        this.onChange = () => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+    }
+    /** @nodoc */
+    ngOnInit() {
+        this._control = this._injector.get(NgControl);
+        this._checkName();
+        this._registry.add(this._control, this);
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        this._registry.remove(this);
+    }
+    /**
+     * Sets the "checked" property value on the radio input element.
+     * @nodoc
+     */
+    writeValue(value) {
+        this._state = value === this.value;
+        this._renderer.setProperty(this._elementRef.nativeElement, 'checked', this._state);
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this._fn = fn;
+        this.onChange = () => {
+            fn(this.value);
+            this._registry.select(this);
+        };
+    }
+    /**
+     * Sets the "value" on the radio input element and unchecks it.
+     *
+     * @param value
+     */
+    fireUncheck(value) {
+        this.writeValue(value);
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+    _checkName() {
+        if (this.name && this.formControlName && this.name !== this.formControlName &&
+            (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            throwNameError();
+        }
+        if (!this.name && this.formControlName)
+            this.name = this.formControlName;
+    }
+}
+RadioControlValueAccessor.ɵfac = function RadioControlValueAccessor_Factory(t) { return new (t || RadioControlValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](RadioControlRegistry), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injector"])); };
+RadioControlValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: RadioControlValueAccessor, selectors: [["input", "type", "radio", "formControlName", ""], ["input", "type", "radio", "formControl", ""], ["input", "type", "radio", "ngModel", ""]], hostBindings: function RadioControlValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("change", function RadioControlValueAccessor_change_HostBindingHandler() { return ctx.onChange(); })("blur", function RadioControlValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, inputs: { name: "name", formControlName: "formControlName", value: "value" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([RADIO_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+RadioControlValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: RadioControlRegistry },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injector"] }
+];
+RadioControlValueAccessor.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    formControlName: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    value: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](RadioControlValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input[type=radio][formControlName],input[type=radio][formControl],input[type=radio][ngModel]',
+                host: { '(change)': 'onChange()', '(blur)': 'onTouched()' },
+                providers: [RADIO_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: RadioControlRegistry }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injector"] }]; }, { name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], formControlName: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], value: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const RANGE_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => RangeValueAccessor),
+    multi: true
+};
+/**
+ * @description
+ * The `ControlValueAccessor` for writing a range value and listening to range input changes.
+ * The value accessor is used by the `FormControlDirective`, `FormControlName`, and  `NgModel`
+ * directives.
+ *
+ * @usageNotes
+ *
+ * ### Using a range input with a reactive form
+ *
+ * The following example shows how to use a range input with a reactive form.
+ *
+ * ```ts
+ * const ageControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <input type="range" [formControl]="ageControl">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class RangeValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        /**
+         * The registered callback function called when a change or input event occurs on the input
+         * element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+    }
+    /**
+     * Sets the "value" property on the input element.
+     * @nodoc
+     */
+    writeValue(value) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'value', parseFloat(value));
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = (value) => {
+            fn(value == '' ? null : parseFloat(value));
+        };
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the range input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+}
+RangeValueAccessor.ɵfac = function RangeValueAccessor_Factory(t) { return new (t || RangeValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+RangeValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: RangeValueAccessor, selectors: [["input", "type", "range", "formControlName", ""], ["input", "type", "range", "formControl", ""], ["input", "type", "range", "ngModel", ""]], hostBindings: function RangeValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("change", function RangeValueAccessor_change_HostBindingHandler($event) { return ctx.onChange($event.target.value); })("input", function RangeValueAccessor_input_HostBindingHandler($event) { return ctx.onChange($event.target.value); })("blur", function RangeValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([RANGE_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+RangeValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](RangeValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input[type=range][formControlName],input[type=range][formControl],input[type=range][ngModel]',
+                host: {
+                    '(change)': 'onChange($event.target.value)',
+                    '(input)': 'onChange($event.target.value)',
+                    '(blur)': 'onTouched()'
+                },
+                providers: [RANGE_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Token to provide to turn off the ngModel warning on formControl and formControlName.
+ */
+const NG_MODEL_WITH_FORM_CONTROL_WARNING = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["InjectionToken"]('NgModelWithFormControlWarning');
+const formControlBinding$1 = {
+    provide: NgControl,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => FormControlDirective)
+};
+/**
+ * @description
+ * Synchronizes a standalone `FormControl` instance to a form control element.
+ *
+ * Note that support for using the `ngModel` input property and `ngModelChange` event with reactive
+ * form directives was deprecated in Angular v6 and is scheduled for removal in
+ * a future version of Angular.
+ * For details, see [Deprecated features](guide/deprecations#ngmodel-with-reactive-forms).
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ * @see `FormControl`
+ * @see `AbstractControl`
+ *
+ * @usageNotes
+ *
+ * The following example shows how to register a standalone control and set its value.
+ *
+ * {@example forms/ts/simpleFormControl/simple_form_control_example.ts region='Component'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class FormControlDirective extends NgControl {
+    constructor(validators, asyncValidators, valueAccessors, _ngModelWarningConfig) {
+        super();
+        this._ngModelWarningConfig = _ngModelWarningConfig;
+        /** @deprecated as of v6 */
+        this.update = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        /**
+         * @description
+         * Instance property used to track whether an ngModel warning has been sent out for this
+         * particular `FormControlDirective` instance. Used to support warning config of "always".
+         *
+         * @internal
+         */
+        this._ngModelWarningSent = false;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+        this.valueAccessor = selectValueAccessor(this, valueAccessors);
+    }
+    /**
+     * @description
+     * Triggers a warning in dev mode that this input should not be used with reactive forms.
+     */
+    set isDisabled(isDisabled) {
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
+            ReactiveErrors.disabledAttrWarning();
+        }
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        if (this._isControlChanged(changes)) {
+            const previousForm = changes['form'].previousValue;
+            if (previousForm) {
+                cleanUpControl(previousForm, this, /* validateControlPresenceOnChange */ false);
+            }
+            setUpControl(this.form, this);
+            if (this.control.disabled && this.valueAccessor.setDisabledState) {
+                this.valueAccessor.setDisabledState(true);
+            }
+            this.form.updateValueAndValidity({ emitEvent: false });
+        }
+        if (isPropertyUpdated(changes, this.viewModel)) {
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                _ngModelWarning('formControl', FormControlDirective, this, this._ngModelWarningConfig);
+            }
+            this.form.setValue(this.model);
+            this.viewModel = this.model;
+        }
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this.form) {
+            cleanUpControl(this.form, this, /* validateControlPresenceOnChange */ false);
+        }
+    }
+    /**
+     * @description
+     * Returns an array that represents the path from the top-level form to this control.
+     * Each index is the string name of the control on that level.
+     */
+    get path() {
+        return [];
+    }
+    /**
+     * @description
+     * The `FormControl` bound to this directive.
+     */
+    get control() {
+        return this.form;
+    }
+    /**
+     * @description
+     * Sets the new value for the view model and emits an `ngModelChange` event.
+     *
+     * @param newValue The new value for the view model.
+     */
+    viewToModelUpdate(newValue) {
+        this.viewModel = newValue;
+        this.update.emit(newValue);
+    }
+    _isControlChanged(changes) {
+        return changes.hasOwnProperty('form');
+    }
+}
+FormControlDirective.ɵfac = function FormControlDirective_Factory(t) { return new (t || FormControlDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALUE_ACCESSOR, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_MODEL_WITH_FORM_CONTROL_WARNING, 8)); };
+FormControlDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: FormControlDirective, selectors: [["", "formControl", ""]], inputs: { isDisabled: ["disabled", "isDisabled"], form: ["formControl", "form"], model: ["ngModel", "model"] }, outputs: { update: "ngModelChange" }, exportAs: ["ngForm"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formControlBinding$1]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+/**
+ * @description
+ * Static property used to track whether any ngModel warnings have been sent across
+ * all instances of FormControlDirective. Used to support warning config of "once".
+ *
+ * @internal
+ */
+FormControlDirective._ngModelWarningSentOnce = false;
+FormControlDirective.ctorParameters = () => [
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALUE_ACCESSOR,] }] },
+    { type: String, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_MODEL_WITH_FORM_CONTROL_WARNING,] }] }
+];
+FormControlDirective.propDecorators = {
+    form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['formControl',] }],
+    isDisabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['disabled',] }],
+    model: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngModel',] }],
+    update: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['ngModelChange',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormControlDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[formControl]', providers: [formControlBinding$1], exportAs: 'ngForm' }]
+    }], function () { return [{ type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALUE_ACCESSOR]
+            }] }, { type: String, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_MODEL_WITH_FORM_CONTROL_WARNING]
+            }] }]; }, { update: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['ngModelChange']
+        }], isDisabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['disabled']
+        }], form: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['formControl']
+        }], model: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngModel']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const formDirectiveProvider$1 = {
+    provide: ControlContainer,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => FormGroupDirective)
+};
+/**
+ * @description
+ *
+ * Binds an existing `FormGroup` to a DOM element.
+ *
+ * This directive accepts an existing `FormGroup` instance. It will then use this
+ * `FormGroup` instance to match any child `FormControl`, `FormGroup`,
+ * and `FormArray` instances to child `FormControlName`, `FormGroupName`,
+ * and `FormArrayName` directives.
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ * @see `AbstractControl`
+ *
+ * @usageNotes
+ * ### Register Form Group
+ *
+ * The following example registers a `FormGroup` with first name and last name controls,
+ * and listens for the *ngSubmit* event when the button is clicked.
+ *
+ * {@example forms/ts/simpleFormGroup/simple_form_group_example.ts region='Component'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class FormGroupDirective extends ControlContainer {
+    constructor(validators, asyncValidators) {
+        super();
+        this.validators = validators;
+        this.asyncValidators = asyncValidators;
+        /**
+         * @description
+         * Reports whether the form submission has been triggered.
+         */
+        this.submitted = false;
+        /**
+         * Callback that should be invoked when controls in FormGroup or FormArray collection change
+         * (added or removed). This callback triggers corresponding DOM updates.
+         */
+        this._onCollectionChange = () => this._updateDomValue();
+        /**
+         * @description
+         * Tracks the list of added `FormControlName` instances
+         */
+        this.directives = [];
+        /**
+         * @description
+         * Tracks the `FormGroup` bound to this directive.
+         */
+        this.form = null;
+        /**
+         * @description
+         * Emits an event when the form submission has been triggered.
+         */
+        this.ngSubmit = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        this._checkFormPresent();
+        if (changes.hasOwnProperty('form')) {
+            this._updateValidators();
+            this._updateDomValue();
+            this._updateRegistrations();
+            this._oldForm = this.form;
+        }
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this.form) {
+            cleanUpValidators(this.form, this, /* handleOnValidatorChange */ false);
+            // Currently the `onCollectionChange` callback is rewritten each time the
+            // `_registerOnCollectionChange` function is invoked. The implication is that cleanup should
+            // happen *only* when the `onCollectionChange` callback was set by this directive instance.
+            // Otherwise it might cause overriding a callback of some other directive instances. We should
+            // consider updating this logic later to make it similar to how `onChange` callbacks are
+            // handled, see https://github.com/angular/angular/issues/39732 for additional info.
+            if (this.form._onCollectionChange === this._onCollectionChange) {
+                this.form._registerOnCollectionChange(() => { });
+            }
+        }
+    }
+    /**
+     * @description
+     * Returns this directive's instance.
+     */
+    get formDirective() {
+        return this;
+    }
+    /**
+     * @description
+     * Returns the `FormGroup` bound to this directive.
+     */
+    get control() {
+        return this.form;
+    }
+    /**
+     * @description
+     * Returns an array representing the path to this group. Because this directive
+     * always lives at the top level of a form, it always an empty array.
+     */
+    get path() {
+        return [];
+    }
+    /**
+     * @description
+     * Method that sets up the control directive in this group, re-calculates its value
+     * and validity, and adds the instance to the internal list of directives.
+     *
+     * @param dir The `FormControlName` directive instance.
+     */
+    addControl(dir) {
+        const ctrl = this.form.get(dir.path);
+        setUpControl(ctrl, dir);
+        ctrl.updateValueAndValidity({ emitEvent: false });
+        this.directives.push(dir);
+        return ctrl;
+    }
+    /**
+     * @description
+     * Retrieves the `FormControl` instance from the provided `FormControlName` directive
+     *
+     * @param dir The `FormControlName` directive instance.
+     */
+    getControl(dir) {
+        return this.form.get(dir.path);
+    }
+    /**
+     * @description
+     * Removes the `FormControlName` instance from the internal list of directives
+     *
+     * @param dir The `FormControlName` directive instance.
+     */
+    removeControl(dir) {
+        cleanUpControl(dir.control || null, dir, /* validateControlPresenceOnChange */ false);
+        removeListItem(this.directives, dir);
+    }
+    /**
+     * Adds a new `FormGroupName` directive instance to the form.
+     *
+     * @param dir The `FormGroupName` directive instance.
+     */
+    addFormGroup(dir) {
+        this._setUpFormContainer(dir);
+    }
+    /**
+     * Performs the necessary cleanup when a `FormGroupName` directive instance is removed from the
+     * view.
+     *
+     * @param dir The `FormGroupName` directive instance.
+     */
+    removeFormGroup(dir) {
+        this._cleanUpFormContainer(dir);
+    }
+    /**
+     * @description
+     * Retrieves the `FormGroup` for a provided `FormGroupName` directive instance
+     *
+     * @param dir The `FormGroupName` directive instance.
+     */
+    getFormGroup(dir) {
+        return this.form.get(dir.path);
+    }
+    /**
+     * Performs the necessary setup when a `FormArrayName` directive instance is added to the view.
+     *
+     * @param dir The `FormArrayName` directive instance.
+     */
+    addFormArray(dir) {
+        this._setUpFormContainer(dir);
+    }
+    /**
+     * Performs the necessary cleanup when a `FormArrayName` directive instance is removed from the
+     * view.
+     *
+     * @param dir The `FormArrayName` directive instance.
+     */
+    removeFormArray(dir) {
+        this._cleanUpFormContainer(dir);
+    }
+    /**
+     * @description
+     * Retrieves the `FormArray` for a provided `FormArrayName` directive instance.
+     *
+     * @param dir The `FormArrayName` directive instance.
+     */
+    getFormArray(dir) {
+        return this.form.get(dir.path);
+    }
+    /**
+     * Sets the new value for the provided `FormControlName` directive.
+     *
+     * @param dir The `FormControlName` directive instance.
+     * @param value The new value for the directive's control.
+     */
+    updateModel(dir, value) {
+        const ctrl = this.form.get(dir.path);
+        ctrl.setValue(value);
+    }
+    /**
+     * @description
+     * Method called with the "submit" event is triggered on the form.
+     * Triggers the `ngSubmit` emitter to emit the "submit" event as its payload.
+     *
+     * @param $event The "submit" event object
+     */
+    onSubmit($event) {
+        this.submitted = true;
+        syncPendingControls(this.form, this.directives);
+        this.ngSubmit.emit($event);
+        return false;
+    }
+    /**
+     * @description
+     * Method called when the "reset" event is triggered on the form.
+     */
+    onReset() {
+        this.resetForm();
+    }
+    /**
+     * @description
+     * Resets the form to an initial value and resets its submitted status.
+     *
+     * @param value The new value for the form.
+     */
+    resetForm(value = undefined) {
+        this.form.reset(value);
+        this.submitted = false;
+    }
+    /** @internal */
+    _updateDomValue() {
+        this.directives.forEach(dir => {
+            const oldCtrl = dir.control;
+            const newCtrl = this.form.get(dir.path);
+            if (oldCtrl !== newCtrl) {
+                // Note: the value of the `dir.control` may not be defined, for example when it's a first
+                // `FormControl` that is added to a `FormGroup` instance (via `addControl` call).
+                cleanUpControl(oldCtrl || null, dir);
+                // Check whether new control at the same location inside the corresponding `FormGroup` is an
+                // instance of `FormControl` and perform control setup only if that's the case.
+                // Note: we don't need to clear the list of directives (`this.directives`) here, it would be
+                // taken care of in the `removeControl` method invoked when corresponding `formControlName`
+                // directive instance is being removed (invoked from `FormControlName.ngOnDestroy`).
+                if (newCtrl instanceof FormControl) {
+                    setUpControl(newCtrl, dir);
+                    dir.control = newCtrl;
+                }
+            }
+        });
+        this.form._updateTreeValidity({ emitEvent: false });
+    }
+    _setUpFormContainer(dir) {
+        const ctrl = this.form.get(dir.path);
+        setUpFormContainer(ctrl, dir);
+        // NOTE: this operation looks unnecessary in case no new validators were added in
+        // `setUpFormContainer` call. Consider updating this code to match the logic in
+        // `_cleanUpFormContainer` function.
+        ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+    _cleanUpFormContainer(dir) {
+        if (this.form) {
+            const ctrl = this.form.get(dir.path);
+            if (ctrl) {
+                const isControlUpdated = cleanUpFormContainer(ctrl, dir);
+                if (isControlUpdated) {
+                    // Run validity check only in case a control was updated (i.e. view validators were
+                    // removed) as removing view validators might cause validity to change.
+                    ctrl.updateValueAndValidity({ emitEvent: false });
+                }
+            }
+        }
+    }
+    _updateRegistrations() {
+        this.form._registerOnCollectionChange(this._onCollectionChange);
+        if (this._oldForm) {
+            this._oldForm._registerOnCollectionChange(() => { });
+        }
+    }
+    _updateValidators() {
+        setUpValidators(this.form, this, /* handleOnValidatorChange */ false);
+        if (this._oldForm) {
+            cleanUpValidators(this._oldForm, this, /* handleOnValidatorChange */ false);
+        }
+    }
+    _checkFormPresent() {
+        if (!this.form && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            ReactiveErrors.missingFormException();
+        }
+    }
+}
+FormGroupDirective.ɵfac = function FormGroupDirective_Factory(t) { return new (t || FormGroupDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10)); };
+FormGroupDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: FormGroupDirective, selectors: [["", "formGroup", ""]], hostBindings: function FormGroupDirective_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("submit", function FormGroupDirective_submit_HostBindingHandler($event) { return ctx.onSubmit($event); })("reset", function FormGroupDirective_reset_HostBindingHandler() { return ctx.onReset(); });
+    } }, inputs: { form: ["formGroup", "form"] }, outputs: { ngSubmit: "ngSubmit" }, exportAs: ["ngForm"], features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formDirectiveProvider$1]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+FormGroupDirective.ctorParameters = () => [
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] }
+];
+FormGroupDirective.propDecorators = {
+    form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['formGroup',] }],
+    ngSubmit: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormGroupDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[formGroup]',
+                providers: [formDirectiveProvider$1],
+                host: { '(submit)': 'onSubmit($event)', '(reset)': 'onReset()' },
+                exportAs: 'ngForm'
+            }]
+    }], function () { return [{ type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }]; }, { form: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['formGroup']
+        }], ngSubmit: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const formGroupNameProvider = {
+    provide: ControlContainer,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => FormGroupName)
+};
+/**
+ * @description
+ *
+ * Syncs a nested `FormGroup` to a DOM element.
+ *
+ * This directive can only be used with a parent `FormGroupDirective`.
+ *
+ * It accepts the string name of the nested `FormGroup` to link, and
+ * looks for a `FormGroup` registered with that name in the parent
+ * `FormGroup` instance you passed into `FormGroupDirective`.
+ *
+ * Use nested form groups to validate a sub-group of a
+ * form separately from the rest or to group the values of certain
+ * controls into their own nested object.
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ *
+ * @usageNotes
+ *
+ * ### Access the group by name
+ *
+ * The following example uses the {@link AbstractControl#get get} method to access the
+ * associated `FormGroup`
+ *
+ * ```ts
+ *   this.form.get('name');
+ * ```
+ *
+ * ### Access individual controls in the group
+ *
+ * The following example uses the {@link AbstractControl#get get} method to access
+ * individual controls within the group using dot syntax.
+ *
+ * ```ts
+ *   this.form.get('name.first');
+ * ```
+ *
+ * ### Register a nested `FormGroup`.
+ *
+ * The following example registers a nested *name* `FormGroup` within an existing `FormGroup`,
+ * and provides methods to retrieve the nested `FormGroup` and individual controls.
+ *
+ * {@example forms/ts/nestedFormGroup/nested_form_group_example.ts region='Component'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class FormGroupName extends AbstractFormGroupDirective {
+    constructor(parent, validators, asyncValidators) {
+        super();
+        this._parent = parent;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+    }
+    /** @internal */
+    _checkParentType() {
+        if (_hasInvalidParent(this._parent) && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            ReactiveErrors.groupParentException();
+        }
+    }
+}
+FormGroupName.ɵfac = function FormGroupName_Factory(t) { return new (t || FormGroupName)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 13), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10)); };
+FormGroupName.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: FormGroupName, selectors: [["", "formGroupName", ""]], inputs: { name: ["formGroupName", "name"] }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formGroupNameProvider]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+FormGroupName.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] }
+];
+FormGroupName.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['formGroupName',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormGroupName, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[formGroupName]', providers: [formGroupNameProvider] }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }]; }, { name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['formGroupName']
+        }] }); })();
+const formArrayNameProvider = {
+    provide: ControlContainer,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => FormArrayName)
+};
+/**
+ * @description
+ *
+ * Syncs a nested `FormArray` to a DOM element.
+ *
+ * This directive is designed to be used with a parent `FormGroupDirective` (selector:
+ * `[formGroup]`).
+ *
+ * It accepts the string name of the nested `FormArray` you want to link, and
+ * will look for a `FormArray` registered with that name in the parent
+ * `FormGroup` instance you passed into `FormGroupDirective`.
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ * @see `AbstractControl`
+ *
+ * @usageNotes
+ *
+ * ### Example
+ *
+ * {@example forms/ts/nestedFormArray/nested_form_array_example.ts region='Component'}
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class FormArrayName extends ControlContainer {
+    constructor(parent, validators, asyncValidators) {
+        super();
+        this._parent = parent;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+    }
+    /**
+     * A lifecycle method called when the directive's inputs are initialized. For internal use only.
+     * @throws If the directive does not have a valid parent.
+     * @nodoc
+     */
+    ngOnInit() {
+        this._checkParentType();
+        this.formDirective.addFormArray(this);
+    }
+    /**
+     * A lifecycle method called before the directive's instance is destroyed. For internal use only.
+     * @nodoc
+     */
+    ngOnDestroy() {
+        if (this.formDirective) {
+            this.formDirective.removeFormArray(this);
+        }
+    }
+    /**
+     * @description
+     * The `FormArray` bound to this directive.
+     */
+    get control() {
+        return this.formDirective.getFormArray(this);
+    }
+    /**
+     * @description
+     * The top-level directive for this group if present, otherwise null.
+     */
+    get formDirective() {
+        return this._parent ? this._parent.formDirective : null;
+    }
+    /**
+     * @description
+     * Returns an array that represents the path from the top-level form to this control.
+     * Each index is the string name of the control on that level.
+     */
+    get path() {
+        return controlPath(this.name == null ? this.name : this.name.toString(), this._parent);
+    }
+    _checkParentType() {
+        if (_hasInvalidParent(this._parent) && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            ReactiveErrors.arrayParentException();
+        }
+    }
+}
+FormArrayName.ɵfac = function FormArrayName_Factory(t) { return new (t || FormArrayName)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 13), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10)); };
+FormArrayName.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: FormArrayName, selectors: [["", "formArrayName", ""]], inputs: { name: ["formArrayName", "name"] }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([formArrayNameProvider]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+FormArrayName.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] }
+];
+FormArrayName.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['formArrayName',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormArrayName, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[formArrayName]', providers: [formArrayNameProvider] }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }]; }, { name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['formArrayName']
+        }] }); })();
+function _hasInvalidParent(parent) {
+    return !(parent instanceof FormGroupName) && !(parent instanceof FormGroupDirective) &&
+        !(parent instanceof FormArrayName);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const controlNameBinding = {
+    provide: NgControl,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => FormControlName)
+};
+/**
+ * @description
+ * Syncs a `FormControl` in an existing `FormGroup` to a form control
+ * element by name.
+ *
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ * @see `FormControl`
+ * @see `AbstractControl`
+ *
+ * @usageNotes
+ *
+ * ### Register `FormControl` within a group
+ *
+ * The following example shows how to register multiple form controls within a form group
+ * and set their value.
+ *
+ * {@example forms/ts/simpleFormGroup/simple_form_group_example.ts region='Component'}
+ *
+ * To see `formControlName` examples with different form control types, see:
+ *
+ * * Radio buttons: `RadioControlValueAccessor`
+ * * Selects: `SelectControlValueAccessor`
+ *
+ * ### Use with ngModel is deprecated
+ *
+ * Support for using the `ngModel` input property and `ngModelChange` event with reactive
+ * form directives has been deprecated in Angular v6 and is scheduled for removal in
+ * a future version of Angular.
+ *
+ * For details, see [Deprecated features](guide/deprecations#ngmodel-with-reactive-forms).
+ *
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class FormControlName extends NgControl {
+    constructor(parent, validators, asyncValidators, valueAccessors, _ngModelWarningConfig) {
+        super();
+        this._ngModelWarningConfig = _ngModelWarningConfig;
+        this._added = false;
+        /** @deprecated as of v6 */
+        this.update = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        /**
+         * @description
+         * Instance property used to track whether an ngModel warning has been sent out for this
+         * particular FormControlName instance. Used to support warning config of "always".
+         *
+         * @internal
+         */
+        this._ngModelWarningSent = false;
+        this._parent = parent;
+        this._setValidators(validators);
+        this._setAsyncValidators(asyncValidators);
+        this.valueAccessor = selectValueAccessor(this, valueAccessors);
+    }
+    /**
+     * @description
+     * Triggers a warning in dev mode that this input should not be used with reactive forms.
+     */
+    set isDisabled(isDisabled) {
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
+            ReactiveErrors.disabledAttrWarning();
+        }
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        if (!this._added)
+            this._setUpControl();
+        if (isPropertyUpdated(changes, this.viewModel)) {
+            if (typeof ngDevMode === 'undefined' || ngDevMode) {
+                _ngModelWarning('formControlName', FormControlName, this, this._ngModelWarningConfig);
+            }
+            this.viewModel = this.model;
+            this.formDirective.updateModel(this, this.model);
+        }
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this.formDirective) {
+            this.formDirective.removeControl(this);
+        }
+    }
+    /**
+     * @description
+     * Sets the new value for the view model and emits an `ngModelChange` event.
+     *
+     * @param newValue The new value for the view model.
+     */
+    viewToModelUpdate(newValue) {
+        this.viewModel = newValue;
+        this.update.emit(newValue);
+    }
+    /**
+     * @description
+     * Returns an array that represents the path from the top-level form to this control.
+     * Each index is the string name of the control on that level.
+     */
+    get path() {
+        return controlPath(this.name == null ? this.name : this.name.toString(), this._parent);
+    }
+    /**
+     * @description
+     * The top-level directive for this group if present, otherwise null.
+     */
+    get formDirective() {
+        return this._parent ? this._parent.formDirective : null;
+    }
+    _checkParentType() {
+        if (typeof ngDevMode === 'undefined' || ngDevMode) {
+            if (!(this._parent instanceof FormGroupName) &&
+                this._parent instanceof AbstractFormGroupDirective) {
+                ReactiveErrors.ngModelGroupException();
+            }
+            else if (!(this._parent instanceof FormGroupName) &&
+                !(this._parent instanceof FormGroupDirective) &&
+                !(this._parent instanceof FormArrayName)) {
+                ReactiveErrors.controlParentException();
+            }
+        }
+    }
+    _setUpControl() {
+        this._checkParentType();
+        this.control = this.formDirective.addControl(this);
+        if (this.control.disabled && this.valueAccessor.setDisabledState) {
+            this.valueAccessor.setDisabledState(true);
+        }
+        this._added = true;
+    }
+}
+FormControlName.ɵfac = function FormControlName_Factory(t) { return new (t || FormControlName)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](ControlContainer, 13), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_ASYNC_VALIDATORS, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_VALUE_ACCESSOR, 10), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](NG_MODEL_WITH_FORM_CONTROL_WARNING, 8)); };
+FormControlName.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: FormControlName, selectors: [["", "formControlName", ""]], inputs: { isDisabled: ["disabled", "isDisabled"], name: ["formControlName", "name"], model: ["ngModel", "model"] }, outputs: { update: "ngModelChange" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([controlNameBinding]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+/**
+ * @description
+ * Static property used to track whether any ngModel warnings have been sent across
+ * all instances of FormControlName. Used to support warning config of "once".
+ *
+ * @internal
+ */
+FormControlName._ngModelWarningSentOnce = false;
+FormControlName.ctorParameters = () => [
+    { type: ControlContainer, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_ASYNC_VALIDATORS,] }] },
+    { type: Array, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_VALUE_ACCESSOR,] }] },
+    { type: String, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [NG_MODEL_WITH_FORM_CONTROL_WARNING,] }] }
+];
+FormControlName.propDecorators = {
+    name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['formControlName',] }],
+    isDisabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['disabled',] }],
+    model: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngModel',] }],
+    update: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['ngModelChange',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormControlName, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: '[formControlName]', providers: [controlNameBinding] }]
+    }], function () { return [{ type: ControlContainer, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_ASYNC_VALIDATORS]
+            }] }, { type: Array, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Self"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_VALUE_ACCESSOR]
+            }] }, { type: String, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [NG_MODEL_WITH_FORM_CONTROL_WARNING]
+            }] }]; }, { update: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['ngModelChange']
+        }], isDisabled: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['disabled']
+        }], name: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['formControlName']
+        }], model: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngModel']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const SELECT_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => SelectControlValueAccessor),
+    multi: true
+};
+function _buildValueString(id, value) {
+    if (id == null)
+        return `${value}`;
+    if (value && typeof value === 'object')
+        value = 'Object';
+    return `${id}: ${value}`.slice(0, 50);
+}
+function _extractId(valueString) {
+    return valueString.split(':')[0];
+}
+/**
+ * @description
+ * The `ControlValueAccessor` for writing select control values and listening to select control
+ * changes. The value accessor is used by the `FormControlDirective`, `FormControlName`, and
+ * `NgModel` directives.
+ *
+ * @usageNotes
+ *
+ * ### Using select controls in a reactive form
+ *
+ * The following examples show how to use a select control in a reactive form.
+ *
+ * {@example forms/ts/reactiveSelectControl/reactive_select_control_example.ts region='Component'}
+ *
+ * ### Using select controls in a template-driven form
+ *
+ * To use a select in a template-driven form, simply add an `ngModel` and a `name`
+ * attribute to the main `<select>` tag.
+ *
+ * {@example forms/ts/selectControl/select_control_example.ts region='Component'}
+ *
+ * ### Customizing option selection
+ *
+ * Angular uses object identity to select option. It's possible for the identities of items
+ * to change while the data does not. This can happen, for example, if the items are produced
+ * from an RPC to the server, and that RPC is re-run. Even if the data hasn't changed, the
+ * second response will produce objects with different identities.
+ *
+ * To customize the default option comparison algorithm, `<select>` supports `compareWith` input.
+ * `compareWith` takes a **function** which has two arguments: `option1` and `option2`.
+ * If `compareWith` is given, Angular selects option by the return value of the function.
+ *
+ * ```ts
+ * const selectedCountriesControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <select [compareWith]="compareFn"  [formControl]="selectedCountriesControl">
+ *     <option *ngFor="let country of countries" [ngValue]="country">
+ *         {{country.name}}
+ *     </option>
+ * </select>
+ *
+ * compareFn(c1: Country, c2: Country): boolean {
+ *     return c1 && c2 ? c1.id === c2.id : c1 === c2;
+ * }
+ * ```
+ *
+ * **Note:** We listen to the 'change' event because 'input' events aren't fired
+ * for selects in IE, see:
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event#browser_compatibility
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class SelectControlValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        /** @internal */
+        this._optionMap = new Map();
+        /** @internal */
+        this._idCounter = 0;
+        /**
+         * The registered callback function called when a change event occurs on the input element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+        this._compareWith = Object.is;
+    }
+    /**
+     * @description
+     * Tracks the option comparison algorithm for tracking identities when
+     * checking for changes.
+     */
+    set compareWith(fn) {
+        if (typeof fn !== 'function' && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            throw new Error(`compareWith must be a function, but received ${JSON.stringify(fn)}`);
+        }
+        this._compareWith = fn;
+    }
+    /**
+     * Sets the "value" property on the input element. The "selectedIndex"
+     * property is also set if an ID is provided on the option element.
+     * @nodoc
+     */
+    writeValue(value) {
+        this.value = value;
+        const id = this._getOptionId(value);
+        if (id == null) {
+            this._renderer.setProperty(this._elementRef.nativeElement, 'selectedIndex', -1);
+        }
+        const valueString = _buildValueString(id, value);
+        this._renderer.setProperty(this._elementRef.nativeElement, 'value', valueString);
+    }
+    /**
+     * Registers a function called when the control value changes.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = (valueString) => {
+            this.value = this._getOptionValue(valueString);
+            fn(this.value);
+        };
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the select input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+    /** @internal */
+    _registerOption() {
+        return (this._idCounter++).toString();
+    }
+    /** @internal */
+    _getOptionId(value) {
+        for (const id of Array.from(this._optionMap.keys())) {
+            if (this._compareWith(this._optionMap.get(id), value))
+                return id;
+        }
+        return null;
+    }
+    /** @internal */
+    _getOptionValue(valueString) {
+        const id = _extractId(valueString);
+        return this._optionMap.has(id) ? this._optionMap.get(id) : valueString;
+    }
+}
+SelectControlValueAccessor.ɵfac = function SelectControlValueAccessor_Factory(t) { return new (t || SelectControlValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+SelectControlValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: SelectControlValueAccessor, selectors: [["select", "formControlName", "", 3, "multiple", ""], ["select", "formControl", "", 3, "multiple", ""], ["select", "ngModel", "", 3, "multiple", ""]], hostBindings: function SelectControlValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("change", function SelectControlValueAccessor_change_HostBindingHandler($event) { return ctx.onChange($event.target.value); })("blur", function SelectControlValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, inputs: { compareWith: "compareWith" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([SELECT_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+SelectControlValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+SelectControlValueAccessor.propDecorators = {
+    compareWith: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SelectControlValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'select:not([multiple])[formControlName],select:not([multiple])[formControl],select:not([multiple])[ngModel]',
+                host: { '(change)': 'onChange($event.target.value)', '(blur)': 'onTouched()' },
+                providers: [SELECT_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, { compareWith: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * @description
+ * Marks `<option>` as dynamic, so Angular can be notified when options change.
+ *
+ * @see `SelectControlValueAccessor`
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class NgSelectOption {
+    constructor(_element, _renderer, _select) {
+        this._element = _element;
+        this._renderer = _renderer;
+        this._select = _select;
+        if (this._select)
+            this.id = this._select._registerOption();
+    }
+    /**
+     * @description
+     * Tracks the value bound to the option element. Unlike the value binding,
+     * ngValue supports binding to objects.
+     */
+    set ngValue(value) {
+        if (this._select == null)
+            return;
+        this._select._optionMap.set(this.id, value);
+        this._setElementValue(_buildValueString(this.id, value));
+        this._select.writeValue(this._select.value);
+    }
+    /**
+     * @description
+     * Tracks simple string values bound to the option element.
+     * For objects, use the `ngValue` input binding.
+     */
+    set value(value) {
+        this._setElementValue(value);
+        if (this._select)
+            this._select.writeValue(this._select.value);
+    }
+    /** @internal */
+    _setElementValue(value) {
+        this._renderer.setProperty(this._element.nativeElement, 'value', value);
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this._select) {
+            this._select._optionMap.delete(this.id);
+            this._select.writeValue(this._select.value);
+        }
+    }
+}
+NgSelectOption.ɵfac = function NgSelectOption_Factory(t) { return new (t || NgSelectOption)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](SelectControlValueAccessor, 9)); };
+NgSelectOption.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: NgSelectOption, selectors: [["option"]], inputs: { ngValue: "ngValue", value: "value" } });
+NgSelectOption.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: SelectControlValueAccessor, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }] }
+];
+NgSelectOption.propDecorators = {
+    ngValue: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngValue',] }],
+    value: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['value',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](NgSelectOption, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: 'option' }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: SelectControlValueAccessor, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }] }]; }, { ngValue: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngValue']
+        }], value: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['value']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const SELECT_MULTIPLE_VALUE_ACCESSOR = {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => SelectMultipleControlValueAccessor),
+    multi: true
+};
+function _buildValueString$1(id, value) {
+    if (id == null)
+        return `${value}`;
+    if (typeof value === 'string')
+        value = `'${value}'`;
+    if (value && typeof value === 'object')
+        value = 'Object';
+    return `${id}: ${value}`.slice(0, 50);
+}
+function _extractId$1(valueString) {
+    return valueString.split(':')[0];
+}
+/** Mock interface for HTMLCollection */
+class HTMLCollection {
+}
+/**
+ * @description
+ * The `ControlValueAccessor` for writing multi-select control values and listening to multi-select
+ * control changes. The value accessor is used by the `FormControlDirective`, `FormControlName`, and
+ * `NgModel` directives.
+ *
+ * @see `SelectControlValueAccessor`
+ *
+ * @usageNotes
+ *
+ * ### Using a multi-select control
+ *
+ * The follow example shows you how to use a multi-select control with a reactive form.
+ *
+ * ```ts
+ * const countryControl = new FormControl();
+ * ```
+ *
+ * ```
+ * <select multiple name="countries" [formControl]="countryControl">
+ *   <option *ngFor="let country of countries" [ngValue]="country">
+ *     {{ country.name }}
+ *   </option>
+ * </select>
+ * ```
+ *
+ * ### Customizing option selection
+ *
+ * To customize the default option comparison algorithm, `<select>` supports `compareWith` input.
+ * See the `SelectControlValueAccessor` for usage.
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class SelectMultipleControlValueAccessor extends BuiltInControlValueAccessor {
+    constructor(_renderer, _elementRef) {
+        super();
+        this._renderer = _renderer;
+        this._elementRef = _elementRef;
+        /** @internal */
+        this._optionMap = new Map();
+        /** @internal */
+        this._idCounter = 0;
+        /**
+         * The registered callback function called when a change event occurs on the input element.
+         * @nodoc
+         */
+        this.onChange = (_) => { };
+        /**
+         * The registered callback function called when a blur event occurs on the input element.
+         * @nodoc
+         */
+        this.onTouched = () => { };
+        this._compareWith = Object.is;
+    }
+    /**
+     * @description
+     * Tracks the option comparison algorithm for tracking identities when
+     * checking for changes.
+     */
+    set compareWith(fn) {
+        if (typeof fn !== 'function' && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+            throw new Error(`compareWith must be a function, but received ${JSON.stringify(fn)}`);
+        }
+        this._compareWith = fn;
+    }
+    /**
+     * Sets the "value" property on one or of more of the select's options.
+     * @nodoc
+     */
+    writeValue(value) {
+        this.value = value;
+        let optionSelectedStateSetter;
+        if (Array.isArray(value)) {
+            // convert values to ids
+            const ids = value.map((v) => this._getOptionId(v));
+            optionSelectedStateSetter = (opt, o) => {
+                opt._setSelected(ids.indexOf(o.toString()) > -1);
+            };
+        }
+        else {
+            optionSelectedStateSetter = (opt, o) => {
+                opt._setSelected(false);
+            };
+        }
+        this._optionMap.forEach(optionSelectedStateSetter);
+    }
+    /**
+     * Registers a function called when the control value changes
+     * and writes an array of the selected options.
+     * @nodoc
+     */
+    registerOnChange(fn) {
+        this.onChange = (_) => {
+            const selected = [];
+            if (_.selectedOptions !== undefined) {
+                const options = _.selectedOptions;
+                for (let i = 0; i < options.length; i++) {
+                    const opt = options.item(i);
+                    const val = this._getOptionValue(opt.value);
+                    selected.push(val);
+                }
+            }
+            // Degrade on IE
+            else {
+                const options = _.options;
+                for (let i = 0; i < options.length; i++) {
+                    const opt = options.item(i);
+                    if (opt.selected) {
+                        const val = this._getOptionValue(opt.value);
+                        selected.push(val);
+                    }
+                }
+            }
+            this.value = selected;
+            fn(selected);
+        };
+    }
+    /**
+     * Registers a function called when the control is touched.
+     * @nodoc
+     */
+    registerOnTouched(fn) {
+        this.onTouched = fn;
+    }
+    /**
+     * Sets the "disabled" property on the select input element.
+     * @nodoc
+     */
+    setDisabledState(isDisabled) {
+        this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
+    }
+    /** @internal */
+    _registerOption(value) {
+        const id = (this._idCounter++).toString();
+        this._optionMap.set(id, value);
+        return id;
+    }
+    /** @internal */
+    _getOptionId(value) {
+        for (const id of Array.from(this._optionMap.keys())) {
+            if (this._compareWith(this._optionMap.get(id)._value, value))
+                return id;
+        }
+        return null;
+    }
+    /** @internal */
+    _getOptionValue(valueString) {
+        const id = _extractId$1(valueString);
+        return this._optionMap.has(id) ? this._optionMap.get(id)._value : valueString;
+    }
+}
+SelectMultipleControlValueAccessor.ɵfac = function SelectMultipleControlValueAccessor_Factory(t) { return new (t || SelectMultipleControlValueAccessor)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"])); };
+SelectMultipleControlValueAccessor.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: SelectMultipleControlValueAccessor, selectors: [["select", "multiple", "", "formControlName", ""], ["select", "multiple", "", "formControl", ""], ["select", "multiple", "", "ngModel", ""]], hostBindings: function SelectMultipleControlValueAccessor_HostBindings(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵlistener"]("change", function SelectMultipleControlValueAccessor_change_HostBindingHandler($event) { return ctx.onChange($event.target); })("blur", function SelectMultipleControlValueAccessor_blur_HostBindingHandler() { return ctx.onTouched(); });
+    } }, inputs: { compareWith: "compareWith" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([SELECT_MULTIPLE_VALUE_ACCESSOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+SelectMultipleControlValueAccessor.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }
+];
+SelectMultipleControlValueAccessor.propDecorators = {
+    compareWith: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SelectMultipleControlValueAccessor, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'select[multiple][formControlName],select[multiple][formControl],select[multiple][ngModel]',
+                host: { '(change)': 'onChange($event.target)', '(blur)': 'onTouched()' },
+                providers: [SELECT_MULTIPLE_VALUE_ACCESSOR]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }]; }, { compareWith: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * @description
+ * Marks `<option>` as dynamic, so Angular can be notified when options change.
+ *
+ * @see `SelectMultipleControlValueAccessor`
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class ɵNgSelectMultipleOption {
+    constructor(_element, _renderer, _select) {
+        this._element = _element;
+        this._renderer = _renderer;
+        this._select = _select;
+        if (this._select) {
+            this.id = this._select._registerOption(this);
+        }
+    }
+    /**
+     * @description
+     * Tracks the value bound to the option element. Unlike the value binding,
+     * ngValue supports binding to objects.
+     */
+    set ngValue(value) {
+        if (this._select == null)
+            return;
+        this._value = value;
+        this._setElementValue(_buildValueString$1(this.id, value));
+        this._select.writeValue(this._select.value);
+    }
+    /**
+     * @description
+     * Tracks simple string values bound to the option element.
+     * For objects, use the `ngValue` input binding.
+     */
+    set value(value) {
+        if (this._select) {
+            this._value = value;
+            this._setElementValue(_buildValueString$1(this.id, value));
+            this._select.writeValue(this._select.value);
+        }
+        else {
+            this._setElementValue(value);
+        }
+    }
+    /** @internal */
+    _setElementValue(value) {
+        this._renderer.setProperty(this._element.nativeElement, 'value', value);
+    }
+    /** @internal */
+    _setSelected(selected) {
+        this._renderer.setProperty(this._element.nativeElement, 'selected', selected);
+    }
+    /** @nodoc */
+    ngOnDestroy() {
+        if (this._select) {
+            this._select._optionMap.delete(this.id);
+            this._select.writeValue(this._select.value);
+        }
+    }
+}
+ɵNgSelectMultipleOption.ɵfac = function ɵNgSelectMultipleOption_Factory(t) { return new (t || ɵNgSelectMultipleOption)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](SelectMultipleControlValueAccessor, 9)); };
+ɵNgSelectMultipleOption.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: ɵNgSelectMultipleOption, selectors: [["option"]], inputs: { ngValue: "ngValue", value: "value" } });
+ɵNgSelectMultipleOption.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] },
+    { type: SelectMultipleControlValueAccessor, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"] }] }
+];
+ɵNgSelectMultipleOption.propDecorators = {
+    ngValue: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['ngValue',] }],
+    value: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"], args: ['value',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ɵNgSelectMultipleOption, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{ selector: 'option' }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Renderer2"] }, { type: SelectMultipleControlValueAccessor, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"]
+            }, {
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Host"]
+            }] }]; }, { ngValue: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['ngValue']
+        }], value: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"],
+            args: ['value']
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @description
+ * Provider which adds `RequiredValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const REQUIRED_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => RequiredValidator),
+    multi: true
+};
+/**
+ * @description
+ * Provider which adds `CheckboxRequiredValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const CHECKBOX_REQUIRED_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => CheckboxRequiredValidator),
+    multi: true
+};
+/**
+ * @description
+ * A directive that adds the `required` validator to any controls marked with the
+ * `required` attribute. The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding a required validator using template-driven forms
+ *
+ * ```
+ * <input name="fullName" ngModel required>
+ * ```
+ *
+ * @ngModule FormsModule
+ * @ngModule ReactiveFormsModule
+ * @publicApi
+ */
+class RequiredValidator {
+    constructor() {
+        this._required = false;
+    }
+    /**
+     * @description
+     * Tracks changes to the required attribute bound to this directive.
+     */
+    get required() {
+        return this._required;
+    }
+    set required(value) {
+        this._required = value != null && value !== false && `${value}` !== 'false';
+        if (this._onChange)
+            this._onChange();
+    }
+    /**
+     * Method that validates whether the control is empty.
+     * Returns the validation result if enabled, otherwise null.
+     * @nodoc
+     */
+    validate(control) {
+        return this.required ? requiredValidator(control) : null;
+    }
+    /**
+     * Registers a callback function to call when the validator inputs change.
+     * @nodoc
+     */
+    registerOnValidatorChange(fn) {
+        this._onChange = fn;
+    }
+}
+RequiredValidator.ɵfac = function RequiredValidator_Factory(t) { return new (t || RequiredValidator)(); };
+RequiredValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: RequiredValidator, selectors: [["", "required", "", "formControlName", "", 3, "type", "checkbox"], ["", "required", "", "formControl", "", 3, "type", "checkbox"], ["", "required", "", "ngModel", "", 3, "type", "checkbox"]], hostVars: 1, hostBindings: function RequiredValidator_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("required", ctx.required ? "" : null);
+    } }, inputs: { required: "required" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([REQUIRED_VALIDATOR])] });
+RequiredValidator.propDecorators = {
+    required: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](RequiredValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: ':not([type=checkbox])[required][formControlName],:not([type=checkbox])[required][formControl],:not([type=checkbox])[required][ngModel]',
+                providers: [REQUIRED_VALIDATOR],
+                host: { '[attr.required]': 'required ? "" : null' }
+            }]
+    }], function () { return []; }, { required: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * A Directive that adds the `required` validator to checkbox controls marked with the
+ * `required` attribute. The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding a required checkbox validator using template-driven forms
+ *
+ * The following example shows how to add a checkbox required validator to an input attached to an
+ * ngModel binding.
+ *
+ * ```
+ * <input type="checkbox" name="active" ngModel required>
+ * ```
+ *
+ * @publicApi
+ * @ngModule FormsModule
+ * @ngModule ReactiveFormsModule
+ */
+class CheckboxRequiredValidator extends RequiredValidator {
+    /**
+     * Method that validates whether or not the checkbox has been checked.
+     * Returns the validation result if enabled, otherwise null.
+     * @nodoc
+     */
+    validate(control) {
+        return this.required ? requiredTrueValidator(control) : null;
+    }
+}
+CheckboxRequiredValidator.ɵfac = function CheckboxRequiredValidator_Factory(t) { return ɵCheckboxRequiredValidator_BaseFactory(t || CheckboxRequiredValidator); };
+CheckboxRequiredValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: CheckboxRequiredValidator, selectors: [["input", "type", "checkbox", "required", "", "formControlName", ""], ["input", "type", "checkbox", "required", "", "formControl", ""], ["input", "type", "checkbox", "required", "", "ngModel", ""]], hostVars: 1, hostBindings: function CheckboxRequiredValidator_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("required", ctx.required ? "" : null);
+    } }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([CHECKBOX_REQUIRED_VALIDATOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵInheritDefinitionFeature"]] });
+const ɵCheckboxRequiredValidator_BaseFactory = /*@__PURE__*/ _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵgetInheritedFactory"](CheckboxRequiredValidator);
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](CheckboxRequiredValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'input[type=checkbox][required][formControlName],input[type=checkbox][required][formControl],input[type=checkbox][required][ngModel]',
+                providers: [CHECKBOX_REQUIRED_VALIDATOR],
+                host: { '[attr.required]': 'required ? "" : null' }
+            }]
+    }], null, null); })();
+/**
+ * @description
+ * Provider which adds `EmailValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const EMAIL_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => EmailValidator),
+    multi: true
+};
+/**
+ * A directive that adds the `email` validator to controls marked with the
+ * `email` attribute. The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding an email validator
+ *
+ * The following example shows how to add an email validator to an input attached to an ngModel
+ * binding.
+ *
+ * ```
+ * <input type="email" name="email" ngModel email>
+ * <input type="email" name="email" ngModel email="true">
+ * <input type="email" name="email" ngModel [email]="true">
+ * ```
+ *
+ * @publicApi
+ * @ngModule FormsModule
+ * @ngModule ReactiveFormsModule
+ */
+class EmailValidator {
+    constructor() {
+        this._enabled = false;
+    }
+    /**
+     * @description
+     * Tracks changes to the email attribute bound to this directive.
+     */
+    set email(value) {
+        this._enabled = value === '' || value === true || value === 'true';
+        if (this._onChange)
+            this._onChange();
+    }
+    /**
+     * Method that validates whether an email address is valid.
+     * Returns the validation result if enabled, otherwise null.
+     * @nodoc
+     */
+    validate(control) {
+        return this._enabled ? emailValidator(control) : null;
+    }
+    /**
+     * Registers a callback function to call when the validator inputs change.
+     * @nodoc
+     */
+    registerOnValidatorChange(fn) {
+        this._onChange = fn;
+    }
+}
+EmailValidator.ɵfac = function EmailValidator_Factory(t) { return new (t || EmailValidator)(); };
+EmailValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: EmailValidator, selectors: [["", "email", "", "formControlName", ""], ["", "email", "", "formControl", ""], ["", "email", "", "ngModel", ""]], inputs: { email: "email" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([EMAIL_VALIDATOR])] });
+EmailValidator.propDecorators = {
+    email: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](EmailValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[email][formControlName],[email][formControl],[email][ngModel]',
+                providers: [EMAIL_VALIDATOR]
+            }]
+    }], function () { return []; }, { email: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * @description
+ * Provider which adds `MinLengthValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const MIN_LENGTH_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => MinLengthValidator),
+    multi: true
+};
+/**
+ * A directive that adds minimum length validation to controls marked with the
+ * `minlength` attribute. The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding a minimum length validator
+ *
+ * The following example shows how to add a minimum length validator to an input attached to an
+ * ngModel binding.
+ *
+ * ```html
+ * <input name="firstName" ngModel minlength="4">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class MinLengthValidator {
+    constructor() {
+        this._validator = nullValidator;
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        if ('minlength' in changes) {
+            this._createValidator();
+            if (this._onChange)
+                this._onChange();
+        }
+    }
+    /**
+     * Method that validates whether the value meets a minimum length requirement.
+     * Returns the validation result if enabled, otherwise null.
+     * @nodoc
+     */
+    validate(control) {
+        return this.minlength == null ? null : this._validator(control);
+    }
+    /**
+     * Registers a callback function to call when the validator inputs change.
+     * @nodoc
+     */
+    registerOnValidatorChange(fn) {
+        this._onChange = fn;
+    }
+    _createValidator() {
+        this._validator = minLengthValidator(typeof this.minlength === 'number' ? this.minlength : parseInt(this.minlength, 10));
+    }
+}
+MinLengthValidator.ɵfac = function MinLengthValidator_Factory(t) { return new (t || MinLengthValidator)(); };
+MinLengthValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: MinLengthValidator, selectors: [["", "minlength", "", "formControlName", ""], ["", "minlength", "", "formControl", ""], ["", "minlength", "", "ngModel", ""]], hostVars: 1, hostBindings: function MinLengthValidator_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("minlength", ctx.minlength ? ctx.minlength : null);
+    } }, inputs: { minlength: "minlength" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([MIN_LENGTH_VALIDATOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+MinLengthValidator.propDecorators = {
+    minlength: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](MinLengthValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[minlength][formControlName],[minlength][formControl],[minlength][ngModel]',
+                providers: [MIN_LENGTH_VALIDATOR],
+                host: { '[attr.minlength]': 'minlength ? minlength : null' }
+            }]
+    }], function () { return []; }, { minlength: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * @description
+ * Provider which adds `MaxLengthValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const MAX_LENGTH_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => MaxLengthValidator),
+    multi: true
+};
+/**
+ * A directive that adds max length validation to controls marked with the
+ * `maxlength` attribute. The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding a maximum length validator
+ *
+ * The following example shows how to add a maximum length validator to an input attached to an
+ * ngModel binding.
+ *
+ * ```html
+ * <input name="firstName" ngModel maxlength="25">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class MaxLengthValidator {
+    constructor() {
+        this._validator = nullValidator;
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        if ('maxlength' in changes) {
+            this._createValidator();
+            if (this._onChange)
+                this._onChange();
+        }
+    }
+    /**
+     * Method that validates whether the value exceeds the maximum length requirement.
+     * @nodoc
+     */
+    validate(control) {
+        return this.maxlength != null ? this._validator(control) : null;
+    }
+    /**
+     * Registers a callback function to call when the validator inputs change.
+     * @nodoc
+     */
+    registerOnValidatorChange(fn) {
+        this._onChange = fn;
+    }
+    _createValidator() {
+        this._validator = maxLengthValidator(typeof this.maxlength === 'number' ? this.maxlength : parseInt(this.maxlength, 10));
+    }
+}
+MaxLengthValidator.ɵfac = function MaxLengthValidator_Factory(t) { return new (t || MaxLengthValidator)(); };
+MaxLengthValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: MaxLengthValidator, selectors: [["", "maxlength", "", "formControlName", ""], ["", "maxlength", "", "formControl", ""], ["", "maxlength", "", "ngModel", ""]], hostVars: 1, hostBindings: function MaxLengthValidator_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("maxlength", ctx.maxlength ? ctx.maxlength : null);
+    } }, inputs: { maxlength: "maxlength" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([MAX_LENGTH_VALIDATOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+MaxLengthValidator.propDecorators = {
+    maxlength: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](MaxLengthValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[maxlength][formControlName],[maxlength][formControl],[maxlength][ngModel]',
+                providers: [MAX_LENGTH_VALIDATOR],
+                host: { '[attr.maxlength]': 'maxlength ? maxlength : null' }
+            }]
+    }], function () { return []; }, { maxlength: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+/**
+ * @description
+ * Provider which adds `PatternValidator` to the `NG_VALIDATORS` multi-provider list.
+ */
+const PATTERN_VALIDATOR = {
+    provide: NG_VALIDATORS,
+    useExisting: Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["forwardRef"])(() => PatternValidator),
+    multi: true
+};
+/**
+ * @description
+ * A directive that adds regex pattern validation to controls marked with the
+ * `pattern` attribute. The regex must match the entire control value.
+ * The directive is provided with the `NG_VALIDATORS` multi-provider list.
+ *
+ * @see [Form Validation](guide/form-validation)
+ *
+ * @usageNotes
+ *
+ * ### Adding a pattern validator
+ *
+ * The following example shows how to add a pattern validator to an input attached to an
+ * ngModel binding.
+ *
+ * ```html
+ * <input name="firstName" ngModel pattern="[a-zA-Z ]*">
+ * ```
+ *
+ * @ngModule ReactiveFormsModule
+ * @ngModule FormsModule
+ * @publicApi
+ */
+class PatternValidator {
+    constructor() {
+        this._validator = nullValidator;
+    }
+    /** @nodoc */
+    ngOnChanges(changes) {
+        if ('pattern' in changes) {
+            this._createValidator();
+            if (this._onChange)
+                this._onChange();
+        }
+    }
+    /**
+     * Method that validates whether the value matches the pattern requirement.
+     * @nodoc
+     */
+    validate(control) {
+        return this._validator(control);
+    }
+    /**
+     * Registers a callback function to call when the validator inputs change.
+     * @nodoc
+     */
+    registerOnValidatorChange(fn) {
+        this._onChange = fn;
+    }
+    _createValidator() {
+        this._validator = patternValidator(this.pattern);
+    }
+}
+PatternValidator.ɵfac = function PatternValidator_Factory(t) { return new (t || PatternValidator)(); };
+PatternValidator.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: PatternValidator, selectors: [["", "pattern", "", "formControlName", ""], ["", "pattern", "", "formControl", ""], ["", "pattern", "", "ngModel", ""]], hostVars: 1, hostBindings: function PatternValidator_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("pattern", ctx.pattern ? ctx.pattern : null);
+    } }, inputs: { pattern: "pattern" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵProvidersFeature"]([PATTERN_VALIDATOR]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]] });
+PatternValidator.propDecorators = {
+    pattern: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](PatternValidator, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: '[pattern][formControlName],[pattern][formControl],[pattern][ngModel]',
+                providers: [PATTERN_VALIDATOR],
+                host: { '[attr.pattern]': 'pattern ? pattern : null' }
+            }]
+    }], function () { return []; }, { pattern: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+const SHARED_FORM_DIRECTIVES = [
+    ɵNgNoValidate,
+    NgSelectOption,
+    ɵNgSelectMultipleOption,
+    DefaultValueAccessor,
+    NumberValueAccessor,
+    RangeValueAccessor,
+    CheckboxControlValueAccessor,
+    SelectControlValueAccessor,
+    SelectMultipleControlValueAccessor,
+    RadioControlValueAccessor,
+    NgControlStatus,
+    NgControlStatusGroup,
+    RequiredValidator,
+    MinLengthValidator,
+    MaxLengthValidator,
+    PatternValidator,
+    CheckboxRequiredValidator,
+    EmailValidator,
+];
+const TEMPLATE_DRIVEN_DIRECTIVES = [NgModel, NgModelGroup, NgForm];
+const REACTIVE_DRIVEN_DIRECTIVES = [FormControlDirective, FormGroupDirective, FormControlName, FormGroupName, FormArrayName];
+/**
+ * Internal module used for sharing directives between FormsModule and ReactiveFormsModule
+ */
+class ɵInternalFormsSharedModule {
+}
+ɵInternalFormsSharedModule.ɵfac = function ɵInternalFormsSharedModule_Factory(t) { return new (t || ɵInternalFormsSharedModule)(); };
+ɵInternalFormsSharedModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: ɵInternalFormsSharedModule });
+ɵInternalFormsSharedModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [[RadioControlRegistryModule]] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](ɵInternalFormsSharedModule, { declarations: [ɵNgNoValidate, NgSelectOption, ɵNgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, RangeValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, SelectMultipleControlValueAccessor, RadioControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MinLengthValidator, MaxLengthValidator, PatternValidator, CheckboxRequiredValidator, EmailValidator], imports: [RadioControlRegistryModule], exports: [ɵNgNoValidate, NgSelectOption, ɵNgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, RangeValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, SelectMultipleControlValueAccessor, RadioControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MinLengthValidator, MaxLengthValidator, PatternValidator, CheckboxRequiredValidator, EmailValidator] }); })();
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ɵInternalFormsSharedModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                declarations: SHARED_FORM_DIRECTIVES,
+                imports: [RadioControlRegistryModule],
+                exports: SHARED_FORM_DIRECTIVES
+            }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * Exports the required providers and directives for template-driven forms,
+ * making them available for import by NgModules that import this module.
+ *
+ * Providers associated with this module:
+ * * `RadioControlRegistry`
+ *
+ * @see [Forms Overview](/guide/forms-overview)
+ * @see [Template-driven Forms Guide](/guide/forms)
+ *
+ * @publicApi
+ */
+class FormsModule {
+}
+FormsModule.ɵfac = function FormsModule_Factory(t) { return new (t || FormsModule)(); };
+FormsModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: FormsModule });
+FormsModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [ɵInternalFormsSharedModule] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](FormsModule, { declarations: [NgModel, NgModelGroup, NgForm], exports: [ɵInternalFormsSharedModule, NgModel, NgModelGroup, NgForm] }); })();
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormsModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                declarations: TEMPLATE_DRIVEN_DIRECTIVES,
+                exports: [ɵInternalFormsSharedModule, TEMPLATE_DRIVEN_DIRECTIVES]
+            }]
+    }], null, null); })();
+/**
+ * Exports the required infrastructure and directives for reactive forms,
+ * making them available for import by NgModules that import this module.
+ *
+ * Providers associated with this module:
+ * * `FormBuilder`
+ * * `RadioControlRegistry`
+ *
+ * @see [Forms Overview](guide/forms-overview)
+ * @see [Reactive Forms Guide](guide/reactive-forms)
+ *
+ * @publicApi
+ */
+class ReactiveFormsModule {
+    /**
+     * @description
+     * Provides options for configuring the reactive forms module.
+     *
+     * @param opts An object of configuration options
+     * * `warnOnNgModelWithFormControl` Configures when to emit a warning when an `ngModel`
+     * binding is used with reactive form directives.
+     */
+    static withConfig(opts) {
+        return {
+            ngModule: ReactiveFormsModule,
+            providers: [
+                { provide: NG_MODEL_WITH_FORM_CONTROL_WARNING, useValue: opts.warnOnNgModelWithFormControl }
+            ]
+        };
+    }
+}
+ReactiveFormsModule.ɵfac = function ReactiveFormsModule_Factory(t) { return new (t || ReactiveFormsModule)(); };
+ReactiveFormsModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: ReactiveFormsModule });
+ReactiveFormsModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [ɵInternalFormsSharedModule] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](ReactiveFormsModule, { declarations: [FormControlDirective, FormGroupDirective, FormControlName, FormGroupName, FormArrayName], exports: [ɵInternalFormsSharedModule, FormControlDirective, FormGroupDirective, FormControlName, FormGroupName, FormArrayName] }); })();
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](ReactiveFormsModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                declarations: [REACTIVE_DRIVEN_DIRECTIVES],
+                exports: [ɵInternalFormsSharedModule, REACTIVE_DRIVEN_DIRECTIVES]
+            }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+function isAbstractControlOptions(options) {
+    return options.asyncValidators !== undefined ||
+        options.validators !== undefined ||
+        options.updateOn !== undefined;
+}
+/**
+ * @description
+ * Creates an `AbstractControl` from a user-specified configuration.
+ *
+ * The `FormBuilder` provides syntactic sugar that shortens creating instances of a `FormControl`,
+ * `FormGroup`, or `FormArray`. It reduces the amount of boilerplate needed to build complex
+ * forms.
+ *
+ * @see [Reactive Forms Guide](/guide/reactive-forms)
+ *
+ * @publicApi
+ */
+class FormBuilder {
+    group(controlsConfig, options = null) {
+        const controls = this._reduceControls(controlsConfig);
+        let validators = null;
+        let asyncValidators = null;
+        let updateOn = undefined;
+        if (options != null) {
+            if (isAbstractControlOptions(options)) {
+                // `options` are `AbstractControlOptions`
+                validators = options.validators != null ? options.validators : null;
+                asyncValidators = options.asyncValidators != null ? options.asyncValidators : null;
+                updateOn = options.updateOn != null ? options.updateOn : undefined;
+            }
+            else {
+                // `options` are legacy form group options
+                validators = options['validator'] != null ? options['validator'] : null;
+                asyncValidators = options['asyncValidator'] != null ? options['asyncValidator'] : null;
+            }
+        }
+        return new FormGroup(controls, { asyncValidators, updateOn, validators });
+    }
+    /**
+     * @description
+     * Construct a new `FormControl` with the given state, validators and options.
+     *
+     * @param formState Initializes the control with an initial state value, or
+     * with an object that contains both a value and a disabled status.
+     *
+     * @param validatorOrOpts A synchronous validator function, or an array of
+     * such functions, or an `AbstractControlOptions` object that contains
+     * validation functions and a validation trigger.
+     *
+     * @param asyncValidator A single async validator or array of async validator
+     * functions.
+     *
+     * @usageNotes
+     *
+     * ### Initialize a control as disabled
+     *
+     * The following example returns a control with an initial value in a disabled state.
+     *
+     * <code-example path="forms/ts/formBuilder/form_builder_example.ts" region="disabled-control">
+     * </code-example>
+     */
+    control(formState, validatorOrOpts, asyncValidator) {
+        return new FormControl(formState, validatorOrOpts, asyncValidator);
+    }
+    /**
+     * Constructs a new `FormArray` from the given array of configurations,
+     * validators and options.
+     *
+     * @param controlsConfig An array of child controls or control configs. Each
+     * child control is given an index when it is registered.
+     *
+     * @param validatorOrOpts A synchronous validator function, or an array of
+     * such functions, or an `AbstractControlOptions` object that contains
+     * validation functions and a validation trigger.
+     *
+     * @param asyncValidator A single async validator or array of async validator
+     * functions.
+     */
+    array(controlsConfig, validatorOrOpts, asyncValidator) {
+        const controls = controlsConfig.map(c => this._createControl(c));
+        return new FormArray(controls, validatorOrOpts, asyncValidator);
+    }
+    /** @internal */
+    _reduceControls(controlsConfig) {
+        const controls = {};
+        Object.keys(controlsConfig).forEach(controlName => {
+            controls[controlName] = this._createControl(controlsConfig[controlName]);
+        });
+        return controls;
+    }
+    /** @internal */
+    _createControl(controlConfig) {
+        if (controlConfig instanceof FormControl || controlConfig instanceof FormGroup ||
+            controlConfig instanceof FormArray) {
+            return controlConfig;
+        }
+        else if (Array.isArray(controlConfig)) {
+            const value = controlConfig[0];
+            const validator = controlConfig.length > 1 ? controlConfig[1] : null;
+            const asyncValidator = controlConfig.length > 2 ? controlConfig[2] : null;
+            return this.control(value, validator, asyncValidator);
+        }
+        else {
+            return this.control(controlConfig);
+        }
+    }
+}
+FormBuilder.ɵfac = function FormBuilder_Factory(t) { return new (t || FormBuilder)(); };
+FormBuilder.ɵprov = Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"])({ factory: function FormBuilder_Factory() { return new FormBuilder(); }, token: FormBuilder, providedIn: ReactiveFormsModule });
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](FormBuilder, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"],
+        args: [{ providedIn: ReactiveFormsModule }]
+    }], null, null); })();
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+/**
+ * @publicApi
+ */
+const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["Version"]('11.2.9');
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+// This file only reexports content of the `src` folder. Keep it that way.
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=forms.js.map
+
+/***/ }),
+
 /***/ "3UWI":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/auditTime.js ***!
@@ -2987,6 +13104,105 @@ function auditTime(duration, scheduler = _scheduler_async__WEBPACK_IMPORTED_MODU
     return Object(_audit__WEBPACK_IMPORTED_MODULE_1__["audit"])(() => Object(_observable_timer__WEBPACK_IMPORTED_MODULE_2__["timer"])(duration, scheduler));
 }
 //# sourceMappingURL=auditTime.js.map
+
+/***/ }),
+
+/***/ "42op":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/effect-fade/effect-fade.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+var Fade = {
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    var slides = swiper.slides;
+
+    for (var i = 0; i < slides.length; i += 1) {
+      var $slideEl = swiper.slides.eq(i);
+      var offset = $slideEl[0].swiperSlideOffset;
+      var tx = -offset;
+      if (!swiper.params.virtualTranslate) tx -= swiper.translate;
+      var ty = 0;
+
+      if (!swiper.isHorizontal()) {
+        ty = tx;
+        tx = 0;
+      }
+
+      var slideOpacity = swiper.params.fadeEffect.crossFade ? Math.max(1 - Math.abs($slideEl[0].progress), 0) : 1 + Math.min(Math.max($slideEl[0].progress, -1), 0);
+      $slideEl.css({
+        opacity: slideOpacity
+      }).transform("translate3d(" + tx + "px, " + ty + "px, 0px)");
+    }
+  },
+  setTransition: function setTransition(duration) {
+    var swiper = this;
+    var slides = swiper.slides,
+        $wrapperEl = swiper.$wrapperEl;
+    slides.transition(duration);
+
+    if (swiper.params.virtualTranslate && duration !== 0) {
+      var eventTriggered = false;
+      slides.transitionEnd(function () {
+        if (eventTriggered) return;
+        if (!swiper || swiper.destroyed) return;
+        eventTriggered = true;
+        swiper.animating = false;
+        var triggerEvents = ['webkitTransitionEnd', 'transitionend'];
+
+        for (var i = 0; i < triggerEvents.length; i += 1) {
+          $wrapperEl.trigger(triggerEvents[i]);
+        }
+      });
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'effect-fade',
+  params: {
+    fadeEffect: {
+      crossFade: false
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["bindModuleMethods"])(swiper, {
+      fadeEffect: _extends({}, Fade)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (swiper.params.effect !== 'fade') return;
+      swiper.classNames.push(swiper.params.containerModifierClass + "fade");
+      var overwriteParams = {
+        slidesPerView: 1,
+        slidesPerColumn: 1,
+        slidesPerGroup: 1,
+        watchSlidesProgress: true,
+        spaceBetween: 0,
+        virtualTranslate: true
+      };
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper.params, overwriteParams);
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper.originalParams, overwriteParams);
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (swiper.params.effect !== 'fade') return;
+      swiper.fadeEffect.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      if (swiper.params.effect !== 'fade') return;
+      swiper.fadeEffect.setTransition(duration);
+    }
+  }
+});
 
 /***/ }),
 
@@ -3180,6 +13396,54 @@ function race(...observables) {
     };
 }
 //# sourceMappingURL=race.js.map
+
+/***/ }),
+
+/***/ "4g6d":
+/*!**********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateSize.js ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateSize; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function updateSize() {
+  var swiper = this;
+  var width;
+  var height;
+  var $el = swiper.$el;
+
+  if (typeof swiper.params.width !== 'undefined' && swiper.params.width !== null) {
+    width = swiper.params.width;
+  } else {
+    width = $el[0].clientWidth;
+  }
+
+  if (typeof swiper.params.height !== 'undefined' && swiper.params.height !== null) {
+    height = swiper.params.height;
+  } else {
+    height = $el[0].clientHeight;
+  }
+
+  if (width === 0 && swiper.isHorizontal() || height === 0 && swiper.isVertical()) {
+    return;
+  } // Subtract paddings
+
+
+  width = width - parseInt($el.css('padding-left') || 0, 10) - parseInt($el.css('padding-right') || 0, 10);
+  height = height - parseInt($el.css('padding-top') || 0, 10) - parseInt($el.css('padding-bottom') || 0, 10);
+  if (Number.isNaN(width)) width = 0;
+  if (Number.isNaN(height)) height = 0;
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper, {
+    width: width,
+    height: height,
+    size: swiper.isHorizontal() ? width : height
+  });
+}
 
 /***/ }),
 
@@ -4876,8 +15140,9 @@ const directives = [
 ];
 class VgCoreModule {
 }
+VgCoreModule.ɵfac = function VgCoreModule_Factory(t) { return new (t || VgCoreModule)(); };
 VgCoreModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: VgCoreModule });
-VgCoreModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function VgCoreModule_Factory(t) { return new (t || VgCoreModule)(); }, providers: [...services], imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]] });
+VgCoreModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ providers: [...services], imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](VgCoreModule, { declarations: function () { return [VgCuePointsDirective, VgMediaDirective, VgPlayerComponent]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]; }, exports: function () { return [VgCuePointsDirective, VgMediaDirective, VgPlayerComponent]; } }); })();
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](VgCoreModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
@@ -5427,6 +15692,141 @@ function never() {
 
 /***/ }),
 
+/***/ "6N1L":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/parallax/parallax.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Parallax = {
+  setTransform: function setTransform(el, progress) {
+    var swiper = this;
+    var rtl = swiper.rtl;
+    var $el = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(el);
+    var rtlFactor = rtl ? -1 : 1;
+    var p = $el.attr('data-swiper-parallax') || '0';
+    var x = $el.attr('data-swiper-parallax-x');
+    var y = $el.attr('data-swiper-parallax-y');
+    var scale = $el.attr('data-swiper-parallax-scale');
+    var opacity = $el.attr('data-swiper-parallax-opacity');
+
+    if (x || y) {
+      x = x || '0';
+      y = y || '0';
+    } else if (swiper.isHorizontal()) {
+      x = p;
+      y = '0';
+    } else {
+      y = p;
+      x = '0';
+    }
+
+    if (x.indexOf('%') >= 0) {
+      x = parseInt(x, 10) * progress * rtlFactor + "%";
+    } else {
+      x = x * progress * rtlFactor + "px";
+    }
+
+    if (y.indexOf('%') >= 0) {
+      y = parseInt(y, 10) * progress + "%";
+    } else {
+      y = y * progress + "px";
+    }
+
+    if (typeof opacity !== 'undefined' && opacity !== null) {
+      var currentOpacity = opacity - (opacity - 1) * (1 - Math.abs(progress));
+      $el[0].style.opacity = currentOpacity;
+    }
+
+    if (typeof scale === 'undefined' || scale === null) {
+      $el.transform("translate3d(" + x + ", " + y + ", 0px)");
+    } else {
+      var currentScale = scale - (scale - 1) * (1 - Math.abs(progress));
+      $el.transform("translate3d(" + x + ", " + y + ", 0px) scale(" + currentScale + ")");
+    }
+  },
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    var $el = swiper.$el,
+        slides = swiper.slides,
+        progress = swiper.progress,
+        snapGrid = swiper.snapGrid;
+    $el.children('[data-swiper-parallax], [data-swiper-parallax-x], [data-swiper-parallax-y], [data-swiper-parallax-opacity], [data-swiper-parallax-scale]').each(function (el) {
+      swiper.parallax.setTransform(el, progress);
+    });
+    slides.each(function (slideEl, slideIndex) {
+      var slideProgress = slideEl.progress;
+
+      if (swiper.params.slidesPerGroup > 1 && swiper.params.slidesPerView !== 'auto') {
+        slideProgress += Math.ceil(slideIndex / 2) - progress * (snapGrid.length - 1);
+      }
+
+      slideProgress = Math.min(Math.max(slideProgress, -1), 1);
+      Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(slideEl).find('[data-swiper-parallax], [data-swiper-parallax-x], [data-swiper-parallax-y], [data-swiper-parallax-opacity], [data-swiper-parallax-scale]').each(function (el) {
+        swiper.parallax.setTransform(el, slideProgress);
+      });
+    });
+  },
+  setTransition: function setTransition(duration) {
+    if (duration === void 0) {
+      duration = this.params.speed;
+    }
+
+    var swiper = this;
+    var $el = swiper.$el;
+    $el.find('[data-swiper-parallax], [data-swiper-parallax-x], [data-swiper-parallax-y], [data-swiper-parallax-opacity], [data-swiper-parallax-scale]').each(function (parallaxEl) {
+      var $parallaxEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(parallaxEl);
+      var parallaxDuration = parseInt($parallaxEl.attr('data-swiper-parallax-duration'), 10) || duration;
+      if (duration === 0) parallaxDuration = 0;
+      $parallaxEl.transition(parallaxDuration);
+    });
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'parallax',
+  params: {
+    parallax: {
+      enabled: false
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      parallax: _extends({}, Parallax)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (!swiper.params.parallax.enabled) return;
+      swiper.params.watchSlidesProgress = true;
+      swiper.originalParams.watchSlidesProgress = true;
+    },
+    init: function init(swiper) {
+      if (!swiper.params.parallax.enabled) return;
+      swiper.parallax.setTranslate();
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (!swiper.params.parallax.enabled) return;
+      swiper.parallax.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      if (!swiper.params.parallax.enabled) return;
+      swiper.parallax.setTransition(duration);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "6eBy":
 /*!*******************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/debounce.js ***!
@@ -5525,6 +15925,29 @@ function isObservable(obj) {
     return !!obj && (obj instanceof _Observable__WEBPACK_IMPORTED_MODULE_0__["Observable"] || (typeof obj.lift === 'function' && typeof obj.subscribe === 'function'));
 }
 //# sourceMappingURL=isObservable.js.map
+
+/***/ }),
+
+/***/ "78qI":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/removeAllSlides.js ***!
+  \*********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return removeAllSlides; });
+function removeAllSlides() {
+  var swiper = this;
+  var slidesIndexes = [];
+
+  for (var i = 0; i < swiper.slides.length; i += 1) {
+    slidesIndexes.push(i);
+  }
+
+  swiper.removeSlide(slidesIndexes);
+}
 
 /***/ }),
 
@@ -5881,6 +16304,81 @@ function combineAll(project) {
 
 /***/ }),
 
+/***/ "87oN":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateSlidesClasses.js ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateSlidesClasses; });
+function updateSlidesClasses() {
+  var swiper = this;
+  var slides = swiper.slides,
+      params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl,
+      activeIndex = swiper.activeIndex,
+      realIndex = swiper.realIndex;
+  var isVirtual = swiper.virtual && params.virtual.enabled;
+  slides.removeClass(params.slideActiveClass + " " + params.slideNextClass + " " + params.slidePrevClass + " " + params.slideDuplicateActiveClass + " " + params.slideDuplicateNextClass + " " + params.slideDuplicatePrevClass);
+  var activeSlide;
+
+  if (isVirtual) {
+    activeSlide = swiper.$wrapperEl.find("." + params.slideClass + "[data-swiper-slide-index=\"" + activeIndex + "\"]");
+  } else {
+    activeSlide = slides.eq(activeIndex);
+  } // Active classes
+
+
+  activeSlide.addClass(params.slideActiveClass);
+
+  if (params.loop) {
+    // Duplicate to all looped slides
+    if (activeSlide.hasClass(params.slideDuplicateClass)) {
+      $wrapperEl.children("." + params.slideClass + ":not(." + params.slideDuplicateClass + ")[data-swiper-slide-index=\"" + realIndex + "\"]").addClass(params.slideDuplicateActiveClass);
+    } else {
+      $wrapperEl.children("." + params.slideClass + "." + params.slideDuplicateClass + "[data-swiper-slide-index=\"" + realIndex + "\"]").addClass(params.slideDuplicateActiveClass);
+    }
+  } // Next Slide
+
+
+  var nextSlide = activeSlide.nextAll("." + params.slideClass).eq(0).addClass(params.slideNextClass);
+
+  if (params.loop && nextSlide.length === 0) {
+    nextSlide = slides.eq(0);
+    nextSlide.addClass(params.slideNextClass);
+  } // Prev Slide
+
+
+  var prevSlide = activeSlide.prevAll("." + params.slideClass).eq(0).addClass(params.slidePrevClass);
+
+  if (params.loop && prevSlide.length === 0) {
+    prevSlide = slides.eq(-1);
+    prevSlide.addClass(params.slidePrevClass);
+  }
+
+  if (params.loop) {
+    // Duplicate to all looped slides
+    if (nextSlide.hasClass(params.slideDuplicateClass)) {
+      $wrapperEl.children("." + params.slideClass + ":not(." + params.slideDuplicateClass + ")[data-swiper-slide-index=\"" + nextSlide.attr('data-swiper-slide-index') + "\"]").addClass(params.slideDuplicateNextClass);
+    } else {
+      $wrapperEl.children("." + params.slideClass + "." + params.slideDuplicateClass + "[data-swiper-slide-index=\"" + nextSlide.attr('data-swiper-slide-index') + "\"]").addClass(params.slideDuplicateNextClass);
+    }
+
+    if (prevSlide.hasClass(params.slideDuplicateClass)) {
+      $wrapperEl.children("." + params.slideClass + ":not(." + params.slideDuplicateClass + ")[data-swiper-slide-index=\"" + prevSlide.attr('data-swiper-slide-index') + "\"]").addClass(params.slideDuplicatePrevClass);
+    } else {
+      $wrapperEl.children("." + params.slideClass + "." + params.slideDuplicateClass + "[data-swiper-slide-index=\"" + prevSlide.attr('data-swiper-slide-index') + "\"]").addClass(params.slideDuplicatePrevClass);
+    }
+  }
+
+  swiper.emitSlidesClasses();
+}
+
+/***/ }),
+
 /***/ "8Qeq":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/canReportError.js ***!
@@ -6004,6 +16502,169 @@ class BufferSkipCountSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__
 
 /***/ }),
 
+/***/ "9QBS":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/appendSlide.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return appendSlide; });
+function appendSlide(slides) {
+  var swiper = this;
+  var $wrapperEl = swiper.$wrapperEl,
+      params = swiper.params;
+
+  if (params.loop) {
+    swiper.loopDestroy();
+  }
+
+  if (typeof slides === 'object' && 'length' in slides) {
+    for (var i = 0; i < slides.length; i += 1) {
+      if (slides[i]) $wrapperEl.append(slides[i]);
+    }
+  } else {
+    $wrapperEl.append(slides);
+  }
+
+  if (params.loop) {
+    swiper.loopCreate();
+  }
+
+  if (!(params.observer && swiper.support.observer)) {
+    swiper.update();
+  }
+}
+
+/***/ }),
+
+/***/ "9cj4":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/hash-navigation/hash-navigation.js ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+var HashNavigation = {
+  onHashCange: function onHashCange() {
+    var swiper = this;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    swiper.emit('hashChange');
+    var newHash = document.location.hash.replace('#', '');
+    var activeSlideHash = swiper.slides.eq(swiper.activeIndex).attr('data-hash');
+
+    if (newHash !== activeSlideHash) {
+      var newIndex = swiper.$wrapperEl.children("." + swiper.params.slideClass + "[data-hash=\"" + newHash + "\"]").index();
+      if (typeof newIndex === 'undefined') return;
+      swiper.slideTo(newIndex);
+    }
+  },
+  setHash: function setHash() {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    if (!swiper.hashNavigation.initialized || !swiper.params.hashNavigation.enabled) return;
+
+    if (swiper.params.hashNavigation.replaceState && window.history && window.history.replaceState) {
+      window.history.replaceState(null, null, "#" + swiper.slides.eq(swiper.activeIndex).attr('data-hash') || false);
+      swiper.emit('hashSet');
+    } else {
+      var slide = swiper.slides.eq(swiper.activeIndex);
+      var hash = slide.attr('data-hash') || slide.attr('data-history');
+      document.location.hash = hash || '';
+      swiper.emit('hashSet');
+    }
+  },
+  init: function init() {
+    var swiper = this;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    if (!swiper.params.hashNavigation.enabled || swiper.params.history && swiper.params.history.enabled) return;
+    swiper.hashNavigation.initialized = true;
+    var hash = document.location.hash.replace('#', '');
+
+    if (hash) {
+      var speed = 0;
+
+      for (var i = 0, length = swiper.slides.length; i < length; i += 1) {
+        var slide = swiper.slides.eq(i);
+        var slideHash = slide.attr('data-hash') || slide.attr('data-history');
+
+        if (slideHash === hash && !slide.hasClass(swiper.params.slideDuplicateClass)) {
+          var index = slide.index();
+          swiper.slideTo(index, speed, swiper.params.runCallbacksOnInit, true);
+        }
+      }
+    }
+
+    if (swiper.params.hashNavigation.watchState) {
+      Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(window).on('hashchange', swiper.hashNavigation.onHashCange);
+    }
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+    if (swiper.params.hashNavigation.watchState) {
+      Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(window).off('hashchange', swiper.hashNavigation.onHashCange);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'hash-navigation',
+  params: {
+    hashNavigation: {
+      enabled: false,
+      replaceState: false,
+      watchState: false
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      hashNavigation: _extends({
+        initialized: false
+      }, HashNavigation)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (swiper.params.hashNavigation.enabled) {
+        swiper.hashNavigation.init();
+      }
+    },
+    destroy: function destroy(swiper) {
+      if (swiper.params.hashNavigation.enabled) {
+        swiper.hashNavigation.destroy();
+      }
+    },
+    transitionEnd: function transitionEnd(swiper) {
+      if (swiper.hashNavigation.initialized) {
+        swiper.hashNavigation.setHash();
+      }
+    },
+    slideChange: function slideChange(swiper) {
+      if (swiper.hashNavigation.initialized && swiper.params.cssMode) {
+        swiper.hashNavigation.setHash();
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "9ihq":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/elementAt.js ***!
@@ -6086,6 +16747,406 @@ function partition(predicate, thisArg) {
 
 /***/ }),
 
+/***/ "AUG5":
+/*!*************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/check-overflow/index.js ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function checkOverflow() {
+  var swiper = this;
+  var params = swiper.params;
+  var wasLocked = swiper.isLocked;
+  var lastSlidePosition = swiper.slides.length > 0 && params.slidesOffsetBefore + params.spaceBetween * (swiper.slides.length - 1) + swiper.slides[0].offsetWidth * swiper.slides.length;
+
+  if (params.slidesOffsetBefore && params.slidesOffsetAfter && lastSlidePosition) {
+    swiper.isLocked = lastSlidePosition <= swiper.size;
+  } else {
+    swiper.isLocked = swiper.snapGrid.length === 1;
+  }
+
+  swiper.allowSlideNext = !swiper.isLocked;
+  swiper.allowSlidePrev = !swiper.isLocked; // events
+
+  if (wasLocked !== swiper.isLocked) swiper.emit(swiper.isLocked ? 'lock' : 'unlock');
+
+  if (wasLocked && wasLocked !== swiper.isLocked) {
+    swiper.isEnd = false;
+    if (swiper.navigation) swiper.navigation.update();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  checkOverflow: checkOverflow
+});
+
+/***/ }),
+
+/***/ "Ap4+":
+/*!*******************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/scrollbar/scrollbar.js ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+var Scrollbar = {
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el || !swiper.scrollbar.el) return;
+    var scrollbar = swiper.scrollbar,
+        rtl = swiper.rtlTranslate,
+        progress = swiper.progress;
+    var dragSize = scrollbar.dragSize,
+        trackSize = scrollbar.trackSize,
+        $dragEl = scrollbar.$dragEl,
+        $el = scrollbar.$el;
+    var params = swiper.params.scrollbar;
+    var newSize = dragSize;
+    var newPos = (trackSize - dragSize) * progress;
+
+    if (rtl) {
+      newPos = -newPos;
+
+      if (newPos > 0) {
+        newSize = dragSize - newPos;
+        newPos = 0;
+      } else if (-newPos + dragSize > trackSize) {
+        newSize = trackSize + newPos;
+      }
+    } else if (newPos < 0) {
+      newSize = dragSize + newPos;
+      newPos = 0;
+    } else if (newPos + dragSize > trackSize) {
+      newSize = trackSize - newPos;
+    }
+
+    if (swiper.isHorizontal()) {
+      $dragEl.transform("translate3d(" + newPos + "px, 0, 0)");
+      $dragEl[0].style.width = newSize + "px";
+    } else {
+      $dragEl.transform("translate3d(0px, " + newPos + "px, 0)");
+      $dragEl[0].style.height = newSize + "px";
+    }
+
+    if (params.hide) {
+      clearTimeout(swiper.scrollbar.timeout);
+      $el[0].style.opacity = 1;
+      swiper.scrollbar.timeout = setTimeout(function () {
+        $el[0].style.opacity = 0;
+        $el.transition(400);
+      }, 1000);
+    }
+  },
+  setTransition: function setTransition(duration) {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el || !swiper.scrollbar.el) return;
+    swiper.scrollbar.$dragEl.transition(duration);
+  },
+  updateSize: function updateSize() {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el || !swiper.scrollbar.el) return;
+    var scrollbar = swiper.scrollbar;
+    var $dragEl = scrollbar.$dragEl,
+        $el = scrollbar.$el;
+    $dragEl[0].style.width = '';
+    $dragEl[0].style.height = '';
+    var trackSize = swiper.isHorizontal() ? $el[0].offsetWidth : $el[0].offsetHeight;
+    var divider = swiper.size / swiper.virtualSize;
+    var moveDivider = divider * (trackSize / swiper.size);
+    var dragSize;
+
+    if (swiper.params.scrollbar.dragSize === 'auto') {
+      dragSize = trackSize * divider;
+    } else {
+      dragSize = parseInt(swiper.params.scrollbar.dragSize, 10);
+    }
+
+    if (swiper.isHorizontal()) {
+      $dragEl[0].style.width = dragSize + "px";
+    } else {
+      $dragEl[0].style.height = dragSize + "px";
+    }
+
+    if (divider >= 1) {
+      $el[0].style.display = 'none';
+    } else {
+      $el[0].style.display = '';
+    }
+
+    if (swiper.params.scrollbar.hide) {
+      $el[0].style.opacity = 0;
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["extend"])(scrollbar, {
+      trackSize: trackSize,
+      divider: divider,
+      moveDivider: moveDivider,
+      dragSize: dragSize
+    });
+    scrollbar.$el[swiper.params.watchOverflow && swiper.isLocked ? 'addClass' : 'removeClass'](swiper.params.scrollbar.lockClass);
+  },
+  getPointerPosition: function getPointerPosition(e) {
+    var swiper = this;
+
+    if (swiper.isHorizontal()) {
+      return e.type === 'touchstart' || e.type === 'touchmove' ? e.targetTouches[0].clientX : e.clientX;
+    }
+
+    return e.type === 'touchstart' || e.type === 'touchmove' ? e.targetTouches[0].clientY : e.clientY;
+  },
+  setDragPosition: function setDragPosition(e) {
+    var swiper = this;
+    var scrollbar = swiper.scrollbar,
+        rtl = swiper.rtlTranslate;
+    var $el = scrollbar.$el,
+        dragSize = scrollbar.dragSize,
+        trackSize = scrollbar.trackSize,
+        dragStartPos = scrollbar.dragStartPos;
+    var positionRatio;
+    positionRatio = (scrollbar.getPointerPosition(e) - $el.offset()[swiper.isHorizontal() ? 'left' : 'top'] - (dragStartPos !== null ? dragStartPos : dragSize / 2)) / (trackSize - dragSize);
+    positionRatio = Math.max(Math.min(positionRatio, 1), 0);
+
+    if (rtl) {
+      positionRatio = 1 - positionRatio;
+    }
+
+    var position = swiper.minTranslate() + (swiper.maxTranslate() - swiper.minTranslate()) * positionRatio;
+    swiper.updateProgress(position);
+    swiper.setTranslate(position);
+    swiper.updateActiveIndex();
+    swiper.updateSlidesClasses();
+  },
+  onDragStart: function onDragStart(e) {
+    var swiper = this;
+    var params = swiper.params.scrollbar;
+    var scrollbar = swiper.scrollbar,
+        $wrapperEl = swiper.$wrapperEl;
+    var $el = scrollbar.$el,
+        $dragEl = scrollbar.$dragEl;
+    swiper.scrollbar.isTouched = true;
+    swiper.scrollbar.dragStartPos = e.target === $dragEl[0] || e.target === $dragEl ? scrollbar.getPointerPosition(e) - e.target.getBoundingClientRect()[swiper.isHorizontal() ? 'left' : 'top'] : null;
+    e.preventDefault();
+    e.stopPropagation();
+    $wrapperEl.transition(100);
+    $dragEl.transition(100);
+    scrollbar.setDragPosition(e);
+    clearTimeout(swiper.scrollbar.dragTimeout);
+    $el.transition(0);
+
+    if (params.hide) {
+      $el.css('opacity', 1);
+    }
+
+    if (swiper.params.cssMode) {
+      swiper.$wrapperEl.css('scroll-snap-type', 'none');
+    }
+
+    swiper.emit('scrollbarDragStart', e);
+  },
+  onDragMove: function onDragMove(e) {
+    var swiper = this;
+    var scrollbar = swiper.scrollbar,
+        $wrapperEl = swiper.$wrapperEl;
+    var $el = scrollbar.$el,
+        $dragEl = scrollbar.$dragEl;
+    if (!swiper.scrollbar.isTouched) return;
+    if (e.preventDefault) e.preventDefault();else e.returnValue = false;
+    scrollbar.setDragPosition(e);
+    $wrapperEl.transition(0);
+    $el.transition(0);
+    $dragEl.transition(0);
+    swiper.emit('scrollbarDragMove', e);
+  },
+  onDragEnd: function onDragEnd(e) {
+    var swiper = this;
+    var params = swiper.params.scrollbar;
+    var scrollbar = swiper.scrollbar,
+        $wrapperEl = swiper.$wrapperEl;
+    var $el = scrollbar.$el;
+    if (!swiper.scrollbar.isTouched) return;
+    swiper.scrollbar.isTouched = false;
+
+    if (swiper.params.cssMode) {
+      swiper.$wrapperEl.css('scroll-snap-type', '');
+      $wrapperEl.transition('');
+    }
+
+    if (params.hide) {
+      clearTimeout(swiper.scrollbar.dragTimeout);
+      swiper.scrollbar.dragTimeout = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["nextTick"])(function () {
+        $el.css('opacity', 0);
+        $el.transition(400);
+      }, 1000);
+    }
+
+    swiper.emit('scrollbarDragEnd', e);
+
+    if (params.snapOnRelease) {
+      swiper.slideToClosest();
+    }
+  },
+  enableDraggable: function enableDraggable() {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el) return;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    var scrollbar = swiper.scrollbar,
+        touchEventsTouch = swiper.touchEventsTouch,
+        touchEventsDesktop = swiper.touchEventsDesktop,
+        params = swiper.params,
+        support = swiper.support;
+    var $el = scrollbar.$el;
+    var target = $el[0];
+    var activeListener = support.passiveListener && params.passiveListeners ? {
+      passive: false,
+      capture: false
+    } : false;
+    var passiveListener = support.passiveListener && params.passiveListeners ? {
+      passive: true,
+      capture: false
+    } : false;
+    if (!target) return;
+
+    if (!support.touch) {
+      target.addEventListener(touchEventsDesktop.start, swiper.scrollbar.onDragStart, activeListener);
+      document.addEventListener(touchEventsDesktop.move, swiper.scrollbar.onDragMove, activeListener);
+      document.addEventListener(touchEventsDesktop.end, swiper.scrollbar.onDragEnd, passiveListener);
+    } else {
+      target.addEventListener(touchEventsTouch.start, swiper.scrollbar.onDragStart, activeListener);
+      target.addEventListener(touchEventsTouch.move, swiper.scrollbar.onDragMove, activeListener);
+      target.addEventListener(touchEventsTouch.end, swiper.scrollbar.onDragEnd, passiveListener);
+    }
+  },
+  disableDraggable: function disableDraggable() {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el) return;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    var scrollbar = swiper.scrollbar,
+        touchEventsTouch = swiper.touchEventsTouch,
+        touchEventsDesktop = swiper.touchEventsDesktop,
+        params = swiper.params,
+        support = swiper.support;
+    var $el = scrollbar.$el;
+    var target = $el[0];
+    var activeListener = support.passiveListener && params.passiveListeners ? {
+      passive: false,
+      capture: false
+    } : false;
+    var passiveListener = support.passiveListener && params.passiveListeners ? {
+      passive: true,
+      capture: false
+    } : false;
+    if (!target) return;
+
+    if (!support.touch) {
+      target.removeEventListener(touchEventsDesktop.start, swiper.scrollbar.onDragStart, activeListener);
+      document.removeEventListener(touchEventsDesktop.move, swiper.scrollbar.onDragMove, activeListener);
+      document.removeEventListener(touchEventsDesktop.end, swiper.scrollbar.onDragEnd, passiveListener);
+    } else {
+      target.removeEventListener(touchEventsTouch.start, swiper.scrollbar.onDragStart, activeListener);
+      target.removeEventListener(touchEventsTouch.move, swiper.scrollbar.onDragMove, activeListener);
+      target.removeEventListener(touchEventsTouch.end, swiper.scrollbar.onDragEnd, passiveListener);
+    }
+  },
+  init: function init() {
+    var swiper = this;
+    if (!swiper.params.scrollbar.el) return;
+    var scrollbar = swiper.scrollbar,
+        $swiperEl = swiper.$el;
+    var params = swiper.params.scrollbar;
+    var $el = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(params.el);
+
+    if (swiper.params.uniqueNavElements && typeof params.el === 'string' && $el.length > 1 && $swiperEl.find(params.el).length === 1) {
+      $el = $swiperEl.find(params.el);
+    }
+
+    var $dragEl = $el.find("." + swiper.params.scrollbar.dragClass);
+
+    if ($dragEl.length === 0) {
+      $dragEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])("<div class=\"" + swiper.params.scrollbar.dragClass + "\"></div>");
+      $el.append($dragEl);
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["extend"])(scrollbar, {
+      $el: $el,
+      el: $el[0],
+      $dragEl: $dragEl,
+      dragEl: $dragEl[0]
+    });
+
+    if (params.draggable) {
+      scrollbar.enableDraggable();
+    }
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    swiper.scrollbar.disableDraggable();
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'scrollbar',
+  params: {
+    scrollbar: {
+      el: null,
+      dragSize: 'auto',
+      hide: false,
+      draggable: false,
+      snapOnRelease: true,
+      lockClass: 'swiper-scrollbar-lock',
+      dragClass: 'swiper-scrollbar-drag'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      scrollbar: _extends({
+        isTouched: false,
+        timeout: null,
+        dragTimeout: null
+      }, Scrollbar)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      swiper.scrollbar.init();
+      swiper.scrollbar.updateSize();
+      swiper.scrollbar.setTranslate();
+    },
+    update: function update(swiper) {
+      swiper.scrollbar.updateSize();
+    },
+    resize: function resize(swiper) {
+      swiper.scrollbar.updateSize();
+    },
+    observerUpdate: function observerUpdate(swiper) {
+      swiper.scrollbar.updateSize();
+    },
+    setTranslate: function setTranslate(swiper) {
+      swiper.scrollbar.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      swiper.scrollbar.setTransition(duration);
+    },
+    destroy: function destroy(swiper) {
+      swiper.scrollbar.destroy();
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "BFxc":
 /*!*******************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/takeLast.js ***!
@@ -6157,6 +17218,140 @@ class TakeLastSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subsc
     }
 }
 //# sourceMappingURL=takeLast.js.map
+
+/***/ }),
+
+/***/ "BYqR":
+/*!*************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideToClosest.js ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideToClosest; });
+/* eslint no-unused-vars: "off" */
+function slideToClosest(speed, runCallbacks, internal, threshold) {
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  if (threshold === void 0) {
+    threshold = 0.5;
+  }
+
+  var swiper = this;
+  var index = swiper.activeIndex;
+  var skip = Math.min(swiper.params.slidesPerGroupSkip, index);
+  var snapIndex = skip + Math.floor((index - skip) / swiper.params.slidesPerGroup);
+  var translate = swiper.rtlTranslate ? swiper.translate : -swiper.translate;
+
+  if (translate >= swiper.snapGrid[snapIndex]) {
+    // The current translate is on or after the current snap index, so the choice
+    // is between the current index and the one after it.
+    var currentSnap = swiper.snapGrid[snapIndex];
+    var nextSnap = swiper.snapGrid[snapIndex + 1];
+
+    if (translate - currentSnap > (nextSnap - currentSnap) * threshold) {
+      index += swiper.params.slidesPerGroup;
+    }
+  } else {
+    // The current translate is before the current snap index, so the choice
+    // is between the current index and the one before it.
+    var prevSnap = swiper.snapGrid[snapIndex - 1];
+    var _currentSnap = swiper.snapGrid[snapIndex];
+
+    if (translate - prevSnap <= (_currentSnap - prevSnap) * threshold) {
+      index -= swiper.params.slidesPerGroup;
+    }
+  }
+
+  index = Math.max(index, 0);
+  index = Math.min(index, swiper.slidesGrid.length - 1);
+  return swiper.slideTo(index, speed, runCallbacks, internal);
+}
+
+/***/ }),
+
+/***/ "C7JN":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onScroll.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onScroll; });
+function onScroll() {
+  var swiper = this;
+  var wrapperEl = swiper.wrapperEl,
+      rtlTranslate = swiper.rtlTranslate;
+  swiper.previousTranslate = swiper.translate;
+
+  if (swiper.isHorizontal()) {
+    if (rtlTranslate) {
+      swiper.translate = wrapperEl.scrollWidth - wrapperEl.offsetWidth - wrapperEl.scrollLeft;
+    } else {
+      swiper.translate = -wrapperEl.scrollLeft;
+    }
+  } else {
+    swiper.translate = -wrapperEl.scrollTop;
+  } // eslint-disable-next-line
+
+
+  if (swiper.translate === -0) swiper.translate = 0;
+  swiper.updateActiveIndex();
+  swiper.updateSlidesClasses();
+  var newProgress;
+  var translatesDiff = swiper.maxTranslate() - swiper.minTranslate();
+
+  if (translatesDiff === 0) {
+    newProgress = 0;
+  } else {
+    newProgress = (swiper.translate - swiper.minTranslate()) / translatesDiff;
+  }
+
+  if (newProgress !== swiper.progress) {
+    swiper.updateProgress(rtlTranslate ? -swiper.translate : swiper.translate);
+  }
+
+  swiper.emit('setTranslate', swiper.translate, false);
+}
+
+/***/ }),
+
+/***/ "CK30":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/index.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _appendSlide__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./appendSlide */ "9QBS");
+/* harmony import */ var _prependSlide__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./prependSlide */ "0me/");
+/* harmony import */ var _addSlide__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./addSlide */ "dtSe");
+/* harmony import */ var _removeSlide__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./removeSlide */ "/WHX");
+/* harmony import */ var _removeAllSlides__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./removeAllSlides */ "78qI");
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  appendSlide: _appendSlide__WEBPACK_IMPORTED_MODULE_0__["default"],
+  prependSlide: _prependSlide__WEBPACK_IMPORTED_MODULE_1__["default"],
+  addSlide: _addSlide__WEBPACK_IMPORTED_MODULE_2__["default"],
+  removeSlide: _removeSlide__WEBPACK_IMPORTED_MODULE_3__["default"],
+  removeAllSlides: _removeAllSlides__WEBPACK_IMPORTED_MODULE_4__["default"]
+});
 
 /***/ }),
 
@@ -6292,6 +17487,58 @@ const async = asyncScheduler;
 
 /***/ }),
 
+/***/ "D3OB":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onResize.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onResize; });
+function onResize() {
+  var swiper = this;
+  var params = swiper.params,
+      el = swiper.el;
+  if (el && el.offsetWidth === 0) return; // Breakpoints
+
+  if (params.breakpoints) {
+    swiper.setBreakpoint();
+  } // Save locks
+
+
+  var allowSlideNext = swiper.allowSlideNext,
+      allowSlidePrev = swiper.allowSlidePrev,
+      snapGrid = swiper.snapGrid; // Disable locks on resize
+
+  swiper.allowSlideNext = true;
+  swiper.allowSlidePrev = true;
+  swiper.updateSize();
+  swiper.updateSlides();
+  swiper.updateSlidesClasses();
+
+  if ((params.slidesPerView === 'auto' || params.slidesPerView > 1) && swiper.isEnd && !swiper.isBeginning && !swiper.params.centeredSlides) {
+    swiper.slideTo(swiper.slides.length - 1, 0, false, true);
+  } else {
+    swiper.slideTo(swiper.activeIndex, 0, false, true);
+  }
+
+  if (swiper.autoplay && swiper.autoplay.running && swiper.autoplay.paused) {
+    swiper.autoplay.run();
+  } // Return locks after resize
+
+
+  swiper.allowSlidePrev = allowSlidePrev;
+  swiper.allowSlideNext = allowSlideNext;
+
+  if (swiper.params.watchOverflow && snapGrid !== swiper.snapGrid) {
+    swiper.checkOverflow();
+  }
+}
+
+/***/ }),
+
 /***/ "DH7j":
 /*!*************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/isArray.js ***!
@@ -6304,6 +17551,107 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArray", function() { return isArray; });
 const isArray = (() => Array.isArray || ((x) => x && typeof x.length === 'number'))();
 //# sourceMappingURL=isArray.js.map
+
+/***/ }),
+
+/***/ "DXbN":
+/*!********************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/grab-cursor/unsetGrabCursor.js ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return unsetGrabCursor; });
+function unsetGrabCursor() {
+  var swiper = this;
+
+  if (swiper.support.touch || swiper.params.watchOverflow && swiper.isLocked || swiper.params.cssMode) {
+    return;
+  }
+
+  swiper.el.style.cursor = '';
+}
+
+/***/ }),
+
+/***/ "E51R":
+/*!**********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/grab-cursor/index.js ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _setGrabCursor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./setGrabCursor */ "zZCW");
+/* harmony import */ var _unsetGrabCursor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./unsetGrabCursor */ "DXbN");
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  setGrabCursor: _setGrabCursor__WEBPACK_IMPORTED_MODULE_0__["default"],
+  unsetGrabCursor: _unsetGrabCursor__WEBPACK_IMPORTED_MODULE_1__["default"]
+});
+
+/***/ }),
+
+/***/ "EJt4":
+/*!***************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/setTranslate.js ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return setTranslate; });
+function setTranslate(translate, byController) {
+  var swiper = this;
+  var rtl = swiper.rtlTranslate,
+      params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl,
+      wrapperEl = swiper.wrapperEl,
+      progress = swiper.progress;
+  var x = 0;
+  var y = 0;
+  var z = 0;
+
+  if (swiper.isHorizontal()) {
+    x = rtl ? -translate : translate;
+  } else {
+    y = translate;
+  }
+
+  if (params.roundLengths) {
+    x = Math.floor(x);
+    y = Math.floor(y);
+  }
+
+  if (params.cssMode) {
+    wrapperEl[swiper.isHorizontal() ? 'scrollLeft' : 'scrollTop'] = swiper.isHorizontal() ? -x : -y;
+  } else if (!params.virtualTranslate) {
+    $wrapperEl.transform("translate3d(" + x + "px, " + y + "px, " + z + "px)");
+  }
+
+  swiper.previousTranslate = swiper.translate;
+  swiper.translate = swiper.isHorizontal() ? x : y; // Check if we need to update progress
+
+  var newProgress;
+  var translatesDiff = swiper.maxTranslate() - swiper.minTranslate();
+
+  if (translatesDiff === 0) {
+    newProgress = 0;
+  } else {
+    newProgress = (translate - swiper.minTranslate()) / translatesDiff;
+  }
+
+  if (newProgress !== progress) {
+    swiper.updateProgress(translate);
+  }
+
+  swiper.emit('setTranslate', swiper.translate, byController);
+}
 
 /***/ }),
 
@@ -6740,6 +18088,89 @@ function min(comparer) {
     return Object(_reduce__WEBPACK_IMPORTED_MODULE_0__["reduce"])(min);
 }
 //# sourceMappingURL=min.js.map
+
+/***/ }),
+
+/***/ "Fsl0":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateActiveIndex.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateActiveIndex; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function updateActiveIndex(newActiveIndex) {
+  var swiper = this;
+  var translate = swiper.rtlTranslate ? swiper.translate : -swiper.translate;
+  var slidesGrid = swiper.slidesGrid,
+      snapGrid = swiper.snapGrid,
+      params = swiper.params,
+      previousIndex = swiper.activeIndex,
+      previousRealIndex = swiper.realIndex,
+      previousSnapIndex = swiper.snapIndex;
+  var activeIndex = newActiveIndex;
+  var snapIndex;
+
+  if (typeof activeIndex === 'undefined') {
+    for (var i = 0; i < slidesGrid.length; i += 1) {
+      if (typeof slidesGrid[i + 1] !== 'undefined') {
+        if (translate >= slidesGrid[i] && translate < slidesGrid[i + 1] - (slidesGrid[i + 1] - slidesGrid[i]) / 2) {
+          activeIndex = i;
+        } else if (translate >= slidesGrid[i] && translate < slidesGrid[i + 1]) {
+          activeIndex = i + 1;
+        }
+      } else if (translate >= slidesGrid[i]) {
+        activeIndex = i;
+      }
+    } // Normalize slideIndex
+
+
+    if (params.normalizeSlideIndex) {
+      if (activeIndex < 0 || typeof activeIndex === 'undefined') activeIndex = 0;
+    }
+  }
+
+  if (snapGrid.indexOf(translate) >= 0) {
+    snapIndex = snapGrid.indexOf(translate);
+  } else {
+    var skip = Math.min(params.slidesPerGroupSkip, activeIndex);
+    snapIndex = skip + Math.floor((activeIndex - skip) / params.slidesPerGroup);
+  }
+
+  if (snapIndex >= snapGrid.length) snapIndex = snapGrid.length - 1;
+
+  if (activeIndex === previousIndex) {
+    if (snapIndex !== previousSnapIndex) {
+      swiper.snapIndex = snapIndex;
+      swiper.emit('snapIndexChange');
+    }
+
+    return;
+  } // Get real index
+
+
+  var realIndex = parseInt(swiper.slides.eq(activeIndex).attr('data-swiper-slide-index') || activeIndex, 10);
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper, {
+    snapIndex: snapIndex,
+    realIndex: realIndex,
+    previousIndex: previousIndex,
+    activeIndex: activeIndex
+  });
+  swiper.emit('activeIndexChange');
+  swiper.emit('snapIndexChange');
+
+  if (previousRealIndex !== realIndex) {
+    swiper.emit('realIndexChange');
+  }
+
+  if (swiper.initialized || swiper.params.runCallbacksOnInit) {
+    swiper.emit('slideChange');
+  }
+}
 
 /***/ }),
 
@@ -7280,6 +18711,57 @@ function toArray() {
 
 /***/ }),
 
+/***/ "IBc5":
+/*!***************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/minTranslate.js ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return minTranslate; });
+function minTranslate() {
+  return -this.snapGrid[0];
+}
+
+/***/ }),
+
+/***/ "IDX/":
+/*!****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/index.js ***!
+  \****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _slideTo__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./slideTo */ "/Rr7");
+/* harmony import */ var _slideToLoop__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./slideToLoop */ "U+t4");
+/* harmony import */ var _slideNext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./slideNext */ "w1YM");
+/* harmony import */ var _slidePrev__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./slidePrev */ "YGmK");
+/* harmony import */ var _slideReset__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./slideReset */ "gtyG");
+/* harmony import */ var _slideToClosest__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./slideToClosest */ "BYqR");
+/* harmony import */ var _slideToClickedSlide__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./slideToClickedSlide */ "l9MX");
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  slideTo: _slideTo__WEBPACK_IMPORTED_MODULE_0__["default"],
+  slideToLoop: _slideToLoop__WEBPACK_IMPORTED_MODULE_1__["default"],
+  slideNext: _slideNext__WEBPACK_IMPORTED_MODULE_2__["default"],
+  slidePrev: _slidePrev__WEBPACK_IMPORTED_MODULE_3__["default"],
+  slideReset: _slideReset__WEBPACK_IMPORTED_MODULE_4__["default"],
+  slideToClosest: _slideToClosest__WEBPACK_IMPORTED_MODULE_5__["default"],
+  slideToClickedSlide: _slideToClickedSlide__WEBPACK_IMPORTED_MODULE_6__["default"]
+});
+
+/***/ }),
+
 /***/ "IjjT":
 /*!*************************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/scheduler/AsyncScheduler.js ***!
@@ -7337,6 +18819,59 @@ class AsyncScheduler extends _Scheduler__WEBPACK_IMPORTED_MODULE_0__["Scheduler"
     }
 }
 //# sourceMappingURL=AsyncScheduler.js.map
+
+/***/ }),
+
+/***/ "IoKV":
+/*!****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateAutoHeight.js ***!
+  \****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateAutoHeight; });
+function updateAutoHeight(speed) {
+  var swiper = this;
+  var activeSlides = [];
+  var newHeight = 0;
+  var i;
+
+  if (typeof speed === 'number') {
+    swiper.setTransition(speed);
+  } else if (speed === true) {
+    swiper.setTransition(swiper.params.speed);
+  } // Find slides currently in view
+
+
+  if (swiper.params.slidesPerView !== 'auto' && swiper.params.slidesPerView > 1) {
+    if (swiper.params.centeredSlides) {
+      swiper.visibleSlides.each(function (slide) {
+        activeSlides.push(slide);
+      });
+    } else {
+      for (i = 0; i < Math.ceil(swiper.params.slidesPerView); i += 1) {
+        var index = swiper.activeIndex + i;
+        if (index > swiper.slides.length) break;
+        activeSlides.push(swiper.slides.eq(index)[0]);
+      }
+    }
+  } else {
+    activeSlides.push(swiper.slides.eq(swiper.activeIndex)[0]);
+  } // Find new height from highest slide in view
+
+
+  for (i = 0; i < activeSlides.length; i += 1) {
+    if (typeof activeSlides[i] !== 'undefined') {
+      var height = activeSlides[i].offsetHeight;
+      newHeight = height > newHeight ? height : newHeight;
+    }
+  } // Update Height
+
+
+  if (newHeight) swiper.$wrapperEl.css('height', newHeight + "px");
+}
 
 /***/ }),
 
@@ -7503,6 +19038,65 @@ function zipAll(project) {
 
 /***/ }),
 
+/***/ "Jq2x":
+/*!**********************************************!*\
+  !*** ./node_modules/swiper/esm/utils/dom.js ***!
+  \**********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var dom7__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dom7 */ "3PNi");
+
+var Methods = {
+  addClass: dom7__WEBPACK_IMPORTED_MODULE_0__["addClass"],
+  removeClass: dom7__WEBPACK_IMPORTED_MODULE_0__["removeClass"],
+  hasClass: dom7__WEBPACK_IMPORTED_MODULE_0__["hasClass"],
+  toggleClass: dom7__WEBPACK_IMPORTED_MODULE_0__["toggleClass"],
+  attr: dom7__WEBPACK_IMPORTED_MODULE_0__["attr"],
+  removeAttr: dom7__WEBPACK_IMPORTED_MODULE_0__["removeAttr"],
+  transform: dom7__WEBPACK_IMPORTED_MODULE_0__["transform"],
+  transition: dom7__WEBPACK_IMPORTED_MODULE_0__["transition"],
+  on: dom7__WEBPACK_IMPORTED_MODULE_0__["on"],
+  off: dom7__WEBPACK_IMPORTED_MODULE_0__["off"],
+  trigger: dom7__WEBPACK_IMPORTED_MODULE_0__["trigger"],
+  transitionEnd: dom7__WEBPACK_IMPORTED_MODULE_0__["transitionEnd"],
+  outerWidth: dom7__WEBPACK_IMPORTED_MODULE_0__["outerWidth"],
+  outerHeight: dom7__WEBPACK_IMPORTED_MODULE_0__["outerHeight"],
+  styles: dom7__WEBPACK_IMPORTED_MODULE_0__["styles"],
+  offset: dom7__WEBPACK_IMPORTED_MODULE_0__["offset"],
+  css: dom7__WEBPACK_IMPORTED_MODULE_0__["css"],
+  each: dom7__WEBPACK_IMPORTED_MODULE_0__["each"],
+  html: dom7__WEBPACK_IMPORTED_MODULE_0__["html"],
+  text: dom7__WEBPACK_IMPORTED_MODULE_0__["text"],
+  is: dom7__WEBPACK_IMPORTED_MODULE_0__["is"],
+  index: dom7__WEBPACK_IMPORTED_MODULE_0__["index"],
+  eq: dom7__WEBPACK_IMPORTED_MODULE_0__["eq"],
+  append: dom7__WEBPACK_IMPORTED_MODULE_0__["append"],
+  prepend: dom7__WEBPACK_IMPORTED_MODULE_0__["prepend"],
+  next: dom7__WEBPACK_IMPORTED_MODULE_0__["next"],
+  nextAll: dom7__WEBPACK_IMPORTED_MODULE_0__["nextAll"],
+  prev: dom7__WEBPACK_IMPORTED_MODULE_0__["prev"],
+  prevAll: dom7__WEBPACK_IMPORTED_MODULE_0__["prevAll"],
+  parent: dom7__WEBPACK_IMPORTED_MODULE_0__["parent"],
+  parents: dom7__WEBPACK_IMPORTED_MODULE_0__["parents"],
+  closest: dom7__WEBPACK_IMPORTED_MODULE_0__["closest"],
+  find: dom7__WEBPACK_IMPORTED_MODULE_0__["find"],
+  children: dom7__WEBPACK_IMPORTED_MODULE_0__["children"],
+  filter: dom7__WEBPACK_IMPORTED_MODULE_0__["filter"],
+  remove: dom7__WEBPACK_IMPORTED_MODULE_0__["remove"]
+};
+Object.keys(Methods).forEach(function (methodName) {
+  Object.defineProperty(dom7__WEBPACK_IMPORTED_MODULE_0__["$"].fn, methodName, {
+    value: Methods[methodName],
+    writable: true
+  });
+});
+/* harmony default export */ __webpack_exports__["default"] = (dom7__WEBPACK_IMPORTED_MODULE_0__["$"]);
+
+/***/ }),
+
 /***/ "K7De":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/findIndex.js ***!
@@ -7519,6 +19113,59 @@ function findIndex(predicate, thisArg) {
     return (source) => source.lift(new _operators_find__WEBPACK_IMPORTED_MODULE_0__["FindValueOperator"](predicate, source, true, thisArg));
 }
 //# sourceMappingURL=findIndex.js.map
+
+/***/ }),
+
+/***/ "KcmN":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/loop/loopFix.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return loopFix; });
+function loopFix() {
+  var swiper = this;
+  swiper.emit('beforeLoopFix');
+  var activeIndex = swiper.activeIndex,
+      slides = swiper.slides,
+      loopedSlides = swiper.loopedSlides,
+      allowSlidePrev = swiper.allowSlidePrev,
+      allowSlideNext = swiper.allowSlideNext,
+      snapGrid = swiper.snapGrid,
+      rtl = swiper.rtlTranslate;
+  var newIndex;
+  swiper.allowSlidePrev = true;
+  swiper.allowSlideNext = true;
+  var snapTranslate = -snapGrid[activeIndex];
+  var diff = snapTranslate - swiper.getTranslate(); // Fix For Negative Oversliding
+
+  if (activeIndex < loopedSlides) {
+    newIndex = slides.length - loopedSlides * 3 + activeIndex;
+    newIndex += loopedSlides;
+    var slideChanged = swiper.slideTo(newIndex, 0, false, true);
+
+    if (slideChanged && diff !== 0) {
+      swiper.setTranslate((rtl ? -swiper.translate : swiper.translate) - diff);
+    }
+  } else if (activeIndex >= slides.length - loopedSlides) {
+    // Fix For Positive Oversliding
+    newIndex = -slides.length + activeIndex + loopedSlides;
+    newIndex += loopedSlides;
+
+    var _slideChanged = swiper.slideTo(newIndex, 0, false, true);
+
+    if (_slideChanged && diff !== 0) {
+      swiper.setTranslate((rtl ? -swiper.translate : swiper.translate) - diff);
+    }
+  }
+
+  swiper.allowSlidePrev = allowSlidePrev;
+  swiper.allowSlideNext = allowSlideNext;
+  swiper.emit('loopFix');
+}
 
 /***/ }),
 
@@ -7874,6 +19521,67 @@ class RetryWhenSubscriber extends _innerSubscribe__WEBPACK_IMPORTED_MODULE_1__["
     }
 }
 //# sourceMappingURL=retryWhen.js.map
+
+/***/ }),
+
+/***/ "N2wq":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/images/index.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _loadImage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadImage */ "z+Ea");
+/* harmony import */ var _preloadImages__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./preloadImages */ "eCvj");
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  loadImage: _loadImage__WEBPACK_IMPORTED_MODULE_0__["default"],
+  preloadImages: _preloadImages__WEBPACK_IMPORTED_MODULE_1__["default"]
+});
+
+/***/ }),
+
+/***/ "NDSe":
+/*!******************************************************!*\
+  !*** ./node_modules/swiper/esm/utils/get-browser.js ***!
+  \******************************************************/
+/*! exports provided: getBrowser */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBrowser", function() { return getBrowser; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+
+var browser;
+
+function calcBrowser() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+  function isSafari() {
+    var ua = window.navigator.userAgent.toLowerCase();
+    return ua.indexOf('safari') >= 0 && ua.indexOf('chrome') < 0 && ua.indexOf('android') < 0;
+  }
+
+  return {
+    isEdge: !!window.navigator.userAgent.match(/Edge/g),
+    isSafari: isSafari(),
+    isWebView: /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(window.navigator.userAgent)
+  };
+}
+
+function getBrowser() {
+  if (!browser) {
+    browser = calcBrowser();
+  }
+
+  return browser;
+}
+
+
 
 /***/ }),
 
@@ -8410,6 +20118,62 @@ class InnerRefCountSubscription extends _Subscription__WEBPACK_IMPORTED_MODULE_1
 
 /***/ }),
 
+/***/ "Ojvb":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/breakpoints/getBreakpoint.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return getBreakpoint; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+
+function getBreakpoint(breakpoints, base, containerEl) {
+  if (base === void 0) {
+    base = 'window';
+  }
+
+  if (!breakpoints || base === 'container' && !containerEl) return undefined;
+  var breakpoint = false;
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var currentWidth = base === 'window' ? window.innerWidth : containerEl.clientWidth;
+  var currentHeight = base === 'window' ? window.innerHeight : containerEl.clientHeight;
+  var points = Object.keys(breakpoints).map(function (point) {
+    if (typeof point === 'string' && point.indexOf('@') === 0) {
+      var minRatio = parseFloat(point.substr(1));
+      var value = currentHeight * minRatio;
+      return {
+        value: value,
+        point: point
+      };
+    }
+
+    return {
+      value: point,
+      point: point
+    };
+  });
+  points.sort(function (a, b) {
+    return parseInt(a.value, 10) - parseInt(b.value, 10);
+  });
+
+  for (var i = 0; i < points.length; i += 1) {
+    var _points$i = points[i],
+        point = _points$i.point,
+        value = _points$i.value;
+
+    if (value <= currentWidth) {
+      breakpoint = point;
+    }
+  }
+
+  return breakpoint || 'max';
+}
+
+/***/ }),
+
 /***/ "OsX3":
 /*!*********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/bufferTime.js ***!
@@ -8564,6 +20328,84 @@ function dispatchBufferClose(arg) {
     subscriber.closeContext(context);
 }
 //# sourceMappingURL=bufferTime.js.map
+
+/***/ }),
+
+/***/ "OsfX":
+/*!******************************************************!*\
+  !*** ./node_modules/swiper/esm/utils/get-support.js ***!
+  \******************************************************/
+/*! exports provided: getSupport */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSupport", function() { return getSupport; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+
+var support;
+
+function calcSupport() {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  return {
+    touch: !!('ontouchstart' in window || window.DocumentTouch && document instanceof window.DocumentTouch),
+    pointerEvents: !!window.PointerEvent && 'maxTouchPoints' in window.navigator && window.navigator.maxTouchPoints >= 0,
+    observer: function checkObserver() {
+      return 'MutationObserver' in window || 'WebkitMutationObserver' in window;
+    }(),
+    passiveListener: function checkPassiveListener() {
+      var supportsPassive = false;
+
+      try {
+        var opts = Object.defineProperty({}, 'passive', {
+          // eslint-disable-next-line
+          get: function get() {
+            supportsPassive = true;
+          }
+        });
+        window.addEventListener('testPassiveListener', null, opts);
+      } catch (e) {// No support
+      }
+
+      return supportsPassive;
+    }(),
+    gestures: function checkGestures() {
+      return 'ongesturestart' in window;
+    }()
+  };
+}
+
+function getSupport() {
+  if (!support) {
+    support = calcSupport();
+  }
+
+  return support;
+}
+
+
+
+/***/ }),
+
+/***/ "OvF9":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/loop/loopDestroy.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return loopDestroy; });
+function loopDestroy() {
+  var swiper = this;
+  var $wrapperEl = swiper.$wrapperEl,
+      params = swiper.params,
+      slides = swiper.slides;
+  $wrapperEl.children("." + params.slideClass + "." + params.slideDuplicateClass + ",." + params.slideClass + "." + params.slideBlankClass).remove();
+  slides.removeAttr('data-swiper-slide-index');
+}
 
 /***/ }),
 
@@ -8769,6 +20611,67 @@ class AsapAction extends _AsyncAction__WEBPACK_IMPORTED_MODULE_1__["AsyncAction"
     }
 }
 //# sourceMappingURL=AsapAction.js.map
+
+/***/ }),
+
+/***/ "QCkE":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/classes/addClasses.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return addClasses; });
+function prepareClasses(entries, prefix) {
+  var resultClasses = [];
+  entries.forEach(function (item) {
+    if (typeof item === 'object') {
+      Object.keys(item).forEach(function (classNames) {
+        if (item[classNames]) {
+          resultClasses.push(prefix + classNames);
+        }
+      });
+    } else if (typeof item === 'string') {
+      resultClasses.push(prefix + item);
+    }
+  });
+  return resultClasses;
+}
+
+function addClasses() {
+  var swiper = this;
+  var classNames = swiper.classNames,
+      params = swiper.params,
+      rtl = swiper.rtl,
+      $el = swiper.$el,
+      device = swiper.device,
+      support = swiper.support; // prettier-ignore
+
+  var suffixes = prepareClasses(['initialized', params.direction, {
+    'pointer-events': support.pointerEvents && !support.touch
+  }, {
+    'free-mode': params.freeMode
+  }, {
+    'autoheight': params.autoHeight
+  }, {
+    'rtl': rtl
+  }, {
+    'multirow': params.slidesPerColumn > 1
+  }, {
+    'multirow-column': params.slidesPerColumn > 1 && params.slidesPerColumnFill === 'column'
+  }, {
+    'android': device.android
+  }, {
+    'ios': device.ios
+  }, {
+    'css-mode': params.cssMode
+  }], params.containerModifierClass);
+  classNames.push.apply(classNames, suffixes);
+  $el.addClass([].concat(classNames).join(' '));
+  swiper.emitContainerClasses();
+}
 
 /***/ }),
 
@@ -8982,6 +20885,619 @@ class AsapScheduler extends _AsyncScheduler__WEBPACK_IMPORTED_MODULE_0__["AsyncS
 
 /***/ }),
 
+/***/ "S6t5":
+/*!*********************************************************!*\
+  !*** ./node_modules/swiper/esm/components/zoom/zoom.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+var Zoom = {
+  // Calc Scale From Multi-touches
+  getDistanceBetweenTouches: function getDistanceBetweenTouches(e) {
+    if (e.targetTouches.length < 2) return 1;
+    var x1 = e.targetTouches[0].pageX;
+    var y1 = e.targetTouches[0].pageY;
+    var x2 = e.targetTouches[1].pageX;
+    var y2 = e.targetTouches[1].pageY;
+    var distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    return distance;
+  },
+  // Events
+  onGestureStart: function onGestureStart(e) {
+    var swiper = this;
+    var support = swiper.support;
+    var params = swiper.params.zoom;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture;
+    zoom.fakeGestureTouched = false;
+    zoom.fakeGestureMoved = false;
+
+    if (!support.gestures) {
+      if (e.type !== 'touchstart' || e.type === 'touchstart' && e.targetTouches.length < 2) {
+        return;
+      }
+
+      zoom.fakeGestureTouched = true;
+      gesture.scaleStart = Zoom.getDistanceBetweenTouches(e);
+    }
+
+    if (!gesture.$slideEl || !gesture.$slideEl.length) {
+      gesture.$slideEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(e.target).closest("." + swiper.params.slideClass);
+      if (gesture.$slideEl.length === 0) gesture.$slideEl = swiper.slides.eq(swiper.activeIndex);
+      gesture.$imageEl = gesture.$slideEl.find('img, svg, canvas, picture, .swiper-zoom-target');
+      gesture.$imageWrapEl = gesture.$imageEl.parent("." + params.containerClass);
+      gesture.maxRatio = gesture.$imageWrapEl.attr('data-swiper-zoom') || params.maxRatio;
+
+      if (gesture.$imageWrapEl.length === 0) {
+        gesture.$imageEl = undefined;
+        return;
+      }
+    }
+
+    if (gesture.$imageEl) {
+      gesture.$imageEl.transition(0);
+    }
+
+    swiper.zoom.isScaling = true;
+  },
+  onGestureChange: function onGestureChange(e) {
+    var swiper = this;
+    var support = swiper.support;
+    var params = swiper.params.zoom;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture;
+
+    if (!support.gestures) {
+      if (e.type !== 'touchmove' || e.type === 'touchmove' && e.targetTouches.length < 2) {
+        return;
+      }
+
+      zoom.fakeGestureMoved = true;
+      gesture.scaleMove = Zoom.getDistanceBetweenTouches(e);
+    }
+
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) {
+      if (e.type === 'gesturechange') zoom.onGestureStart(e);
+      return;
+    }
+
+    if (support.gestures) {
+      zoom.scale = e.scale * zoom.currentScale;
+    } else {
+      zoom.scale = gesture.scaleMove / gesture.scaleStart * zoom.currentScale;
+    }
+
+    if (zoom.scale > gesture.maxRatio) {
+      zoom.scale = gesture.maxRatio - 1 + Math.pow(zoom.scale - gesture.maxRatio + 1, 0.5);
+    }
+
+    if (zoom.scale < params.minRatio) {
+      zoom.scale = params.minRatio + 1 - Math.pow(params.minRatio - zoom.scale + 1, 0.5);
+    }
+
+    gesture.$imageEl.transform("translate3d(0,0,0) scale(" + zoom.scale + ")");
+  },
+  onGestureEnd: function onGestureEnd(e) {
+    var swiper = this;
+    var device = swiper.device;
+    var support = swiper.support;
+    var params = swiper.params.zoom;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture;
+
+    if (!support.gestures) {
+      if (!zoom.fakeGestureTouched || !zoom.fakeGestureMoved) {
+        return;
+      }
+
+      if (e.type !== 'touchend' || e.type === 'touchend' && e.changedTouches.length < 2 && !device.android) {
+        return;
+      }
+
+      zoom.fakeGestureTouched = false;
+      zoom.fakeGestureMoved = false;
+    }
+
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+    zoom.scale = Math.max(Math.min(zoom.scale, gesture.maxRatio), params.minRatio);
+    gesture.$imageEl.transition(swiper.params.speed).transform("translate3d(0,0,0) scale(" + zoom.scale + ")");
+    zoom.currentScale = zoom.scale;
+    zoom.isScaling = false;
+    if (zoom.scale === 1) gesture.$slideEl = undefined;
+  },
+  onTouchStart: function onTouchStart(e) {
+    var swiper = this;
+    var device = swiper.device;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture,
+        image = zoom.image;
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+    if (image.isTouched) return;
+    if (device.android && e.cancelable) e.preventDefault();
+    image.isTouched = true;
+    image.touchesStart.x = e.type === 'touchstart' ? e.targetTouches[0].pageX : e.pageX;
+    image.touchesStart.y = e.type === 'touchstart' ? e.targetTouches[0].pageY : e.pageY;
+  },
+  onTouchMove: function onTouchMove(e) {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture,
+        image = zoom.image,
+        velocity = zoom.velocity;
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+    swiper.allowClick = false;
+    if (!image.isTouched || !gesture.$slideEl) return;
+
+    if (!image.isMoved) {
+      image.width = gesture.$imageEl[0].offsetWidth;
+      image.height = gesture.$imageEl[0].offsetHeight;
+      image.startX = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["getTranslate"])(gesture.$imageWrapEl[0], 'x') || 0;
+      image.startY = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["getTranslate"])(gesture.$imageWrapEl[0], 'y') || 0;
+      gesture.slideWidth = gesture.$slideEl[0].offsetWidth;
+      gesture.slideHeight = gesture.$slideEl[0].offsetHeight;
+      gesture.$imageWrapEl.transition(0);
+
+      if (swiper.rtl) {
+        image.startX = -image.startX;
+        image.startY = -image.startY;
+      }
+    } // Define if we need image drag
+
+
+    var scaledWidth = image.width * zoom.scale;
+    var scaledHeight = image.height * zoom.scale;
+    if (scaledWidth < gesture.slideWidth && scaledHeight < gesture.slideHeight) return;
+    image.minX = Math.min(gesture.slideWidth / 2 - scaledWidth / 2, 0);
+    image.maxX = -image.minX;
+    image.minY = Math.min(gesture.slideHeight / 2 - scaledHeight / 2, 0);
+    image.maxY = -image.minY;
+    image.touchesCurrent.x = e.type === 'touchmove' ? e.targetTouches[0].pageX : e.pageX;
+    image.touchesCurrent.y = e.type === 'touchmove' ? e.targetTouches[0].pageY : e.pageY;
+
+    if (!image.isMoved && !zoom.isScaling) {
+      if (swiper.isHorizontal() && (Math.floor(image.minX) === Math.floor(image.startX) && image.touchesCurrent.x < image.touchesStart.x || Math.floor(image.maxX) === Math.floor(image.startX) && image.touchesCurrent.x > image.touchesStart.x)) {
+        image.isTouched = false;
+        return;
+      }
+
+      if (!swiper.isHorizontal() && (Math.floor(image.minY) === Math.floor(image.startY) && image.touchesCurrent.y < image.touchesStart.y || Math.floor(image.maxY) === Math.floor(image.startY) && image.touchesCurrent.y > image.touchesStart.y)) {
+        image.isTouched = false;
+        return;
+      }
+    }
+
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    e.stopPropagation();
+    image.isMoved = true;
+    image.currentX = image.touchesCurrent.x - image.touchesStart.x + image.startX;
+    image.currentY = image.touchesCurrent.y - image.touchesStart.y + image.startY;
+
+    if (image.currentX < image.minX) {
+      image.currentX = image.minX + 1 - Math.pow(image.minX - image.currentX + 1, 0.8);
+    }
+
+    if (image.currentX > image.maxX) {
+      image.currentX = image.maxX - 1 + Math.pow(image.currentX - image.maxX + 1, 0.8);
+    }
+
+    if (image.currentY < image.minY) {
+      image.currentY = image.minY + 1 - Math.pow(image.minY - image.currentY + 1, 0.8);
+    }
+
+    if (image.currentY > image.maxY) {
+      image.currentY = image.maxY - 1 + Math.pow(image.currentY - image.maxY + 1, 0.8);
+    } // Velocity
+
+
+    if (!velocity.prevPositionX) velocity.prevPositionX = image.touchesCurrent.x;
+    if (!velocity.prevPositionY) velocity.prevPositionY = image.touchesCurrent.y;
+    if (!velocity.prevTime) velocity.prevTime = Date.now();
+    velocity.x = (image.touchesCurrent.x - velocity.prevPositionX) / (Date.now() - velocity.prevTime) / 2;
+    velocity.y = (image.touchesCurrent.y - velocity.prevPositionY) / (Date.now() - velocity.prevTime) / 2;
+    if (Math.abs(image.touchesCurrent.x - velocity.prevPositionX) < 2) velocity.x = 0;
+    if (Math.abs(image.touchesCurrent.y - velocity.prevPositionY) < 2) velocity.y = 0;
+    velocity.prevPositionX = image.touchesCurrent.x;
+    velocity.prevPositionY = image.touchesCurrent.y;
+    velocity.prevTime = Date.now();
+    gesture.$imageWrapEl.transform("translate3d(" + image.currentX + "px, " + image.currentY + "px,0)");
+  },
+  onTouchEnd: function onTouchEnd() {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture,
+        image = zoom.image,
+        velocity = zoom.velocity;
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+
+    if (!image.isTouched || !image.isMoved) {
+      image.isTouched = false;
+      image.isMoved = false;
+      return;
+    }
+
+    image.isTouched = false;
+    image.isMoved = false;
+    var momentumDurationX = 300;
+    var momentumDurationY = 300;
+    var momentumDistanceX = velocity.x * momentumDurationX;
+    var newPositionX = image.currentX + momentumDistanceX;
+    var momentumDistanceY = velocity.y * momentumDurationY;
+    var newPositionY = image.currentY + momentumDistanceY; // Fix duration
+
+    if (velocity.x !== 0) momentumDurationX = Math.abs((newPositionX - image.currentX) / velocity.x);
+    if (velocity.y !== 0) momentumDurationY = Math.abs((newPositionY - image.currentY) / velocity.y);
+    var momentumDuration = Math.max(momentumDurationX, momentumDurationY);
+    image.currentX = newPositionX;
+    image.currentY = newPositionY; // Define if we need image drag
+
+    var scaledWidth = image.width * zoom.scale;
+    var scaledHeight = image.height * zoom.scale;
+    image.minX = Math.min(gesture.slideWidth / 2 - scaledWidth / 2, 0);
+    image.maxX = -image.minX;
+    image.minY = Math.min(gesture.slideHeight / 2 - scaledHeight / 2, 0);
+    image.maxY = -image.minY;
+    image.currentX = Math.max(Math.min(image.currentX, image.maxX), image.minX);
+    image.currentY = Math.max(Math.min(image.currentY, image.maxY), image.minY);
+    gesture.$imageWrapEl.transition(momentumDuration).transform("translate3d(" + image.currentX + "px, " + image.currentY + "px,0)");
+  },
+  onTransitionEnd: function onTransitionEnd() {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    var gesture = zoom.gesture;
+
+    if (gesture.$slideEl && swiper.previousIndex !== swiper.activeIndex) {
+      if (gesture.$imageEl) {
+        gesture.$imageEl.transform('translate3d(0,0,0) scale(1)');
+      }
+
+      if (gesture.$imageWrapEl) {
+        gesture.$imageWrapEl.transform('translate3d(0,0,0)');
+      }
+
+      zoom.scale = 1;
+      zoom.currentScale = 1;
+      gesture.$slideEl = undefined;
+      gesture.$imageEl = undefined;
+      gesture.$imageWrapEl = undefined;
+    }
+  },
+  // Toggle Zoom
+  toggle: function toggle(e) {
+    var swiper = this;
+    var zoom = swiper.zoom;
+
+    if (zoom.scale && zoom.scale !== 1) {
+      // Zoom Out
+      zoom.out();
+    } else {
+      // Zoom In
+      zoom.in(e);
+    }
+  },
+  in: function _in(e) {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var zoom = swiper.zoom;
+    var params = swiper.params.zoom;
+    var gesture = zoom.gesture,
+        image = zoom.image;
+
+    if (!gesture.$slideEl) {
+      if (swiper.params.virtual && swiper.params.virtual.enabled && swiper.virtual) {
+        gesture.$slideEl = swiper.$wrapperEl.children("." + swiper.params.slideActiveClass);
+      } else {
+        gesture.$slideEl = swiper.slides.eq(swiper.activeIndex);
+      }
+
+      gesture.$imageEl = gesture.$slideEl.find('img, svg, canvas, picture, .swiper-zoom-target');
+      gesture.$imageWrapEl = gesture.$imageEl.parent("." + params.containerClass);
+    }
+
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+    gesture.$slideEl.addClass("" + params.zoomedSlideClass);
+    var touchX;
+    var touchY;
+    var offsetX;
+    var offsetY;
+    var diffX;
+    var diffY;
+    var translateX;
+    var translateY;
+    var imageWidth;
+    var imageHeight;
+    var scaledWidth;
+    var scaledHeight;
+    var translateMinX;
+    var translateMinY;
+    var translateMaxX;
+    var translateMaxY;
+    var slideWidth;
+    var slideHeight;
+
+    if (typeof image.touchesStart.x === 'undefined' && e) {
+      touchX = e.type === 'touchend' ? e.changedTouches[0].pageX : e.pageX;
+      touchY = e.type === 'touchend' ? e.changedTouches[0].pageY : e.pageY;
+    } else {
+      touchX = image.touchesStart.x;
+      touchY = image.touchesStart.y;
+    }
+
+    zoom.scale = gesture.$imageWrapEl.attr('data-swiper-zoom') || params.maxRatio;
+    zoom.currentScale = gesture.$imageWrapEl.attr('data-swiper-zoom') || params.maxRatio;
+
+    if (e) {
+      slideWidth = gesture.$slideEl[0].offsetWidth;
+      slideHeight = gesture.$slideEl[0].offsetHeight;
+      offsetX = gesture.$slideEl.offset().left + window.scrollX;
+      offsetY = gesture.$slideEl.offset().top + window.scrollY;
+      diffX = offsetX + slideWidth / 2 - touchX;
+      diffY = offsetY + slideHeight / 2 - touchY;
+      imageWidth = gesture.$imageEl[0].offsetWidth;
+      imageHeight = gesture.$imageEl[0].offsetHeight;
+      scaledWidth = imageWidth * zoom.scale;
+      scaledHeight = imageHeight * zoom.scale;
+      translateMinX = Math.min(slideWidth / 2 - scaledWidth / 2, 0);
+      translateMinY = Math.min(slideHeight / 2 - scaledHeight / 2, 0);
+      translateMaxX = -translateMinX;
+      translateMaxY = -translateMinY;
+      translateX = diffX * zoom.scale;
+      translateY = diffY * zoom.scale;
+
+      if (translateX < translateMinX) {
+        translateX = translateMinX;
+      }
+
+      if (translateX > translateMaxX) {
+        translateX = translateMaxX;
+      }
+
+      if (translateY < translateMinY) {
+        translateY = translateMinY;
+      }
+
+      if (translateY > translateMaxY) {
+        translateY = translateMaxY;
+      }
+    } else {
+      translateX = 0;
+      translateY = 0;
+    }
+
+    gesture.$imageWrapEl.transition(300).transform("translate3d(" + translateX + "px, " + translateY + "px,0)");
+    gesture.$imageEl.transition(300).transform("translate3d(0,0,0) scale(" + zoom.scale + ")");
+  },
+  out: function out() {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    var params = swiper.params.zoom;
+    var gesture = zoom.gesture;
+
+    if (!gesture.$slideEl) {
+      if (swiper.params.virtual && swiper.params.virtual.enabled && swiper.virtual) {
+        gesture.$slideEl = swiper.$wrapperEl.children("." + swiper.params.slideActiveClass);
+      } else {
+        gesture.$slideEl = swiper.slides.eq(swiper.activeIndex);
+      }
+
+      gesture.$imageEl = gesture.$slideEl.find('img, svg, canvas, picture, .swiper-zoom-target');
+      gesture.$imageWrapEl = gesture.$imageEl.parent("." + params.containerClass);
+    }
+
+    if (!gesture.$imageEl || gesture.$imageEl.length === 0) return;
+    zoom.scale = 1;
+    zoom.currentScale = 1;
+    gesture.$imageWrapEl.transition(300).transform('translate3d(0,0,0)');
+    gesture.$imageEl.transition(300).transform('translate3d(0,0,0) scale(1)');
+    gesture.$slideEl.removeClass("" + params.zoomedSlideClass);
+    gesture.$slideEl = undefined;
+  },
+  toggleGestures: function toggleGestures(method) {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    var selector = zoom.slideSelector,
+        passive = zoom.passiveListener;
+    swiper.$wrapperEl[method]('gesturestart', selector, zoom.onGestureStart, passive);
+    swiper.$wrapperEl[method]('gesturechange', selector, zoom.onGestureChange, passive);
+    swiper.$wrapperEl[method]('gestureend', selector, zoom.onGestureEnd, passive);
+  },
+  enableGestures: function enableGestures() {
+    if (this.zoom.gesturesEnabled) return;
+    this.zoom.gesturesEnabled = true;
+    this.zoom.toggleGestures('on');
+  },
+  disableGestures: function disableGestures() {
+    if (!this.zoom.gesturesEnabled) return;
+    this.zoom.gesturesEnabled = false;
+    this.zoom.toggleGestures('off');
+  },
+  // Attach/Detach Events
+  enable: function enable() {
+    var swiper = this;
+    var support = swiper.support;
+    var zoom = swiper.zoom;
+    if (zoom.enabled) return;
+    zoom.enabled = true;
+    var passiveListener = swiper.touchEvents.start === 'touchstart' && support.passiveListener && swiper.params.passiveListeners ? {
+      passive: true,
+      capture: false
+    } : false;
+    var activeListenerWithCapture = support.passiveListener ? {
+      passive: false,
+      capture: true
+    } : true;
+    var slideSelector = "." + swiper.params.slideClass;
+    swiper.zoom.passiveListener = passiveListener;
+    swiper.zoom.slideSelector = slideSelector; // Scale image
+
+    if (support.gestures) {
+      swiper.$wrapperEl.on(swiper.touchEvents.start, swiper.zoom.enableGestures, passiveListener);
+      swiper.$wrapperEl.on(swiper.touchEvents.end, swiper.zoom.disableGestures, passiveListener);
+    } else if (swiper.touchEvents.start === 'touchstart') {
+      swiper.$wrapperEl.on(swiper.touchEvents.start, slideSelector, zoom.onGestureStart, passiveListener);
+      swiper.$wrapperEl.on(swiper.touchEvents.move, slideSelector, zoom.onGestureChange, activeListenerWithCapture);
+      swiper.$wrapperEl.on(swiper.touchEvents.end, slideSelector, zoom.onGestureEnd, passiveListener);
+
+      if (swiper.touchEvents.cancel) {
+        swiper.$wrapperEl.on(swiper.touchEvents.cancel, slideSelector, zoom.onGestureEnd, passiveListener);
+      }
+    } // Move image
+
+
+    swiper.$wrapperEl.on(swiper.touchEvents.move, "." + swiper.params.zoom.containerClass, zoom.onTouchMove, activeListenerWithCapture);
+  },
+  disable: function disable() {
+    var swiper = this;
+    var zoom = swiper.zoom;
+    if (!zoom.enabled) return;
+    var support = swiper.support;
+    swiper.zoom.enabled = false;
+    var passiveListener = swiper.touchEvents.start === 'touchstart' && support.passiveListener && swiper.params.passiveListeners ? {
+      passive: true,
+      capture: false
+    } : false;
+    var activeListenerWithCapture = support.passiveListener ? {
+      passive: false,
+      capture: true
+    } : true;
+    var slideSelector = "." + swiper.params.slideClass; // Scale image
+
+    if (support.gestures) {
+      swiper.$wrapperEl.off(swiper.touchEvents.start, swiper.zoom.enableGestures, passiveListener);
+      swiper.$wrapperEl.off(swiper.touchEvents.end, swiper.zoom.disableGestures, passiveListener);
+    } else if (swiper.touchEvents.start === 'touchstart') {
+      swiper.$wrapperEl.off(swiper.touchEvents.start, slideSelector, zoom.onGestureStart, passiveListener);
+      swiper.$wrapperEl.off(swiper.touchEvents.move, slideSelector, zoom.onGestureChange, activeListenerWithCapture);
+      swiper.$wrapperEl.off(swiper.touchEvents.end, slideSelector, zoom.onGestureEnd, passiveListener);
+
+      if (swiper.touchEvents.cancel) {
+        swiper.$wrapperEl.off(swiper.touchEvents.cancel, slideSelector, zoom.onGestureEnd, passiveListener);
+      }
+    } // Move image
+
+
+    swiper.$wrapperEl.off(swiper.touchEvents.move, "." + swiper.params.zoom.containerClass, zoom.onTouchMove, activeListenerWithCapture);
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'zoom',
+  params: {
+    zoom: {
+      enabled: false,
+      maxRatio: 3,
+      minRatio: 1,
+      toggle: true,
+      containerClass: 'swiper-zoom-container',
+      zoomedSlideClass: 'swiper-slide-zoomed'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      zoom: _extends({
+        enabled: false,
+        scale: 1,
+        currentScale: 1,
+        isScaling: false,
+        gesture: {
+          $slideEl: undefined,
+          slideWidth: undefined,
+          slideHeight: undefined,
+          $imageEl: undefined,
+          $imageWrapEl: undefined,
+          maxRatio: 3
+        },
+        image: {
+          isTouched: undefined,
+          isMoved: undefined,
+          currentX: undefined,
+          currentY: undefined,
+          minX: undefined,
+          minY: undefined,
+          maxX: undefined,
+          maxY: undefined,
+          width: undefined,
+          height: undefined,
+          startX: undefined,
+          startY: undefined,
+          touchesStart: {},
+          touchesCurrent: {}
+        },
+        velocity: {
+          x: undefined,
+          y: undefined,
+          prevPositionX: undefined,
+          prevPositionY: undefined,
+          prevTime: undefined
+        }
+      }, Zoom)
+    });
+    var scale = 1;
+    Object.defineProperty(swiper.zoom, 'scale', {
+      get: function get() {
+        return scale;
+      },
+      set: function set(value) {
+        if (scale !== value) {
+          var imageEl = swiper.zoom.gesture.$imageEl ? swiper.zoom.gesture.$imageEl[0] : undefined;
+          var slideEl = swiper.zoom.gesture.$slideEl ? swiper.zoom.gesture.$slideEl[0] : undefined;
+          swiper.emit('zoomChange', value, imageEl, slideEl);
+        }
+
+        scale = value;
+      }
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (swiper.params.zoom.enabled) {
+        swiper.zoom.enable();
+      }
+    },
+    destroy: function destroy(swiper) {
+      swiper.zoom.disable();
+    },
+    touchStart: function touchStart(swiper, e) {
+      if (!swiper.zoom.enabled) return;
+      swiper.zoom.onTouchStart(e);
+    },
+    touchEnd: function touchEnd(swiper, e) {
+      if (!swiper.zoom.enabled) return;
+      swiper.zoom.onTouchEnd(e);
+    },
+    doubleTap: function doubleTap(swiper, e) {
+      if (!swiper.animating && swiper.params.zoom.enabled && swiper.zoom.enabled && swiper.params.zoom.toggle) {
+        swiper.zoom.toggle(e);
+      }
+    },
+    transitionEnd: function transitionEnd(swiper) {
+      if (swiper.zoom.enabled && swiper.params.zoom.enabled) {
+        swiper.zoom.onTransitionEnd();
+      }
+    },
+    slideChange: function slideChange(swiper) {
+      if (swiper.zoom.enabled && swiper.params.zoom.enabled && swiper.params.cssMode) {
+        swiper.zoom.onTransitionEnd();
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "SeVD":
 /*!*****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/subscribeTo.js ***!
@@ -9078,6 +21594,147 @@ function first(predicate, defaultValue) {
     return (source) => source.pipe(predicate ? Object(_filter__WEBPACK_IMPORTED_MODULE_1__["filter"])((v, i) => predicate(v, i, source)) : _util_identity__WEBPACK_IMPORTED_MODULE_5__["identity"], Object(_take__WEBPACK_IMPORTED_MODULE_2__["take"])(1), hasDefaultValue ? Object(_defaultIfEmpty__WEBPACK_IMPORTED_MODULE_3__["defaultIfEmpty"])(defaultValue) : Object(_throwIfEmpty__WEBPACK_IMPORTED_MODULE_4__["throwIfEmpty"])(() => new _util_EmptyError__WEBPACK_IMPORTED_MODULE_0__["EmptyError"]()));
 }
 //# sourceMappingURL=first.js.map
+
+/***/ }),
+
+/***/ "TaHA":
+/*!*******************************************!*\
+  !*** ./node_modules/swiper/swiper.esm.js ***!
+  \*******************************************/
+/*! exports provided: Swiper, default, Virtual, Keyboard, Mousewheel, Navigation, Pagination, Scrollbar, Parallax, Zoom, Lazy, Controller, A11y, History, HashNavigation, Autoplay, EffectFade, EffectCube, EffectFlip, EffectCoverflow, Thumbs */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _esm_components_core_core_class__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./esm/components/core/core-class */ "bTu8");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Swiper", function() { return _esm_components_core_core_class__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "default", function() { return _esm_components_core_core_class__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _esm_components_virtual_virtual__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./esm/components/virtual/virtual */ "drdV");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Virtual", function() { return _esm_components_virtual_virtual__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+/* harmony import */ var _esm_components_keyboard_keyboard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./esm/components/keyboard/keyboard */ "h2/A");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Keyboard", function() { return _esm_components_keyboard_keyboard__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+/* harmony import */ var _esm_components_mousewheel_mousewheel__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./esm/components/mousewheel/mousewheel */ "tC+P");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Mousewheel", function() { return _esm_components_mousewheel_mousewheel__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+
+/* harmony import */ var _esm_components_navigation_navigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./esm/components/navigation/navigation */ "g0Ox");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Navigation", function() { return _esm_components_navigation_navigation__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+
+/* harmony import */ var _esm_components_pagination_pagination__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./esm/components/pagination/pagination */ "Xchd");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Pagination", function() { return _esm_components_pagination_pagination__WEBPACK_IMPORTED_MODULE_5__["default"]; });
+
+/* harmony import */ var _esm_components_scrollbar_scrollbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./esm/components/scrollbar/scrollbar */ "Ap4+");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Scrollbar", function() { return _esm_components_scrollbar_scrollbar__WEBPACK_IMPORTED_MODULE_6__["default"]; });
+
+/* harmony import */ var _esm_components_parallax_parallax__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./esm/components/parallax/parallax */ "6N1L");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Parallax", function() { return _esm_components_parallax_parallax__WEBPACK_IMPORTED_MODULE_7__["default"]; });
+
+/* harmony import */ var _esm_components_zoom_zoom__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./esm/components/zoom/zoom */ "S6t5");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Zoom", function() { return _esm_components_zoom_zoom__WEBPACK_IMPORTED_MODULE_8__["default"]; });
+
+/* harmony import */ var _esm_components_lazy_lazy__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./esm/components/lazy/lazy */ "fMrl");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Lazy", function() { return _esm_components_lazy_lazy__WEBPACK_IMPORTED_MODULE_9__["default"]; });
+
+/* harmony import */ var _esm_components_controller_controller__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./esm/components/controller/controller */ "c0r8");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Controller", function() { return _esm_components_controller_controller__WEBPACK_IMPORTED_MODULE_10__["default"]; });
+
+/* harmony import */ var _esm_components_a11y_a11y__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./esm/components/a11y/a11y */ "ZXcA");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "A11y", function() { return _esm_components_a11y_a11y__WEBPACK_IMPORTED_MODULE_11__["default"]; });
+
+/* harmony import */ var _esm_components_history_history__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./esm/components/history/history */ "tQmk");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "History", function() { return _esm_components_history_history__WEBPACK_IMPORTED_MODULE_12__["default"]; });
+
+/* harmony import */ var _esm_components_hash_navigation_hash_navigation__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./esm/components/hash-navigation/hash-navigation */ "9cj4");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "HashNavigation", function() { return _esm_components_hash_navigation_hash_navigation__WEBPACK_IMPORTED_MODULE_13__["default"]; });
+
+/* harmony import */ var _esm_components_autoplay_autoplay__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./esm/components/autoplay/autoplay */ "0Xqd");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Autoplay", function() { return _esm_components_autoplay_autoplay__WEBPACK_IMPORTED_MODULE_14__["default"]; });
+
+/* harmony import */ var _esm_components_effect_fade_effect_fade__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./esm/components/effect-fade/effect-fade */ "42op");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EffectFade", function() { return _esm_components_effect_fade_effect_fade__WEBPACK_IMPORTED_MODULE_15__["default"]; });
+
+/* harmony import */ var _esm_components_effect_cube_effect_cube__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./esm/components/effect-cube/effect-cube */ "1VCM");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EffectCube", function() { return _esm_components_effect_cube_effect_cube__WEBPACK_IMPORTED_MODULE_16__["default"]; });
+
+/* harmony import */ var _esm_components_effect_flip_effect_flip__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./esm/components/effect-flip/effect-flip */ "mK+M");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EffectFlip", function() { return _esm_components_effect_flip_effect_flip__WEBPACK_IMPORTED_MODULE_17__["default"]; });
+
+/* harmony import */ var _esm_components_effect_coverflow_effect_coverflow__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./esm/components/effect-coverflow/effect-coverflow */ "daxC");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EffectCoverflow", function() { return _esm_components_effect_coverflow_effect_coverflow__WEBPACK_IMPORTED_MODULE_18__["default"]; });
+
+/* harmony import */ var _esm_components_thumbs_thumbs__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./esm/components/thumbs/thumbs */ "zITX");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Thumbs", function() { return _esm_components_thumbs_thumbs__WEBPACK_IMPORTED_MODULE_19__["default"]; });
+
+/**
+ * Swiper 6.5.6
+ * Most modern mobile touch slider and framework with hardware accelerated transitions
+ * https://swiperjs.com
+ *
+ * Copyright 2014-2021 Vladimir Kharlampidi
+ *
+ * Released under the MIT License
+ *
+ * Released on: April 9, 2021
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "U+t4":
+/*!**********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideToLoop.js ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideToLoop; });
+function slideToLoop(index, speed, runCallbacks, internal) {
+  if (index === void 0) {
+    index = 0;
+  }
+
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  var newIndex = index;
+
+  if (swiper.params.loop) {
+    newIndex += swiper.loopedSlides;
+  }
+
+  return swiper.slideTo(newIndex, speed, runCallbacks, internal);
+}
 
 /***/ }),
 
@@ -9259,6 +21916,1731 @@ function dispatchWindowClose(state) {
     subscriber.closeWindow(window);
 }
 //# sourceMappingURL=windowTime.js.map
+
+/***/ }),
+
+/***/ "UMfn":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/__ivy_ngcc__/angular/fesm2015/swiper_angular.js ***!
+  \*****************************************************************************/
+/*! exports provided: SwiperComponent, SwiperModule, SwiperSlideDirective */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SwiperComponent", function() { return SwiperComponent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SwiperModule", function() { return SwiperModule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SwiperSlideDirective", function() { return SwiperSlideDirective; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ "ofXK");
+/* harmony import */ var swiper_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! swiper/core */ "TaHA");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ "qCKp");
+
+
+
+
+
+
+
+
+const _c0 = ["prevElRef"];
+const _c1 = ["nextElRef"];
+const _c2 = ["scrollbarElRef"];
+const _c3 = ["paginationElRef"];
+function SwiperComponent_ng_container_1_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerStart"](0);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](1, "div", 6, 7);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](3, "div", 8, 9);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerEnd"]();
+} }
+function SwiperComponent_div_2_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](0, "div", 10, 11);
+} }
+function SwiperComponent_div_3_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](0, "div", 12, 13);
+} }
+function SwiperComponent_6_ng_template_0_Template(rf, ctx) { }
+function SwiperComponent_6_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](0, SwiperComponent_6_ng_template_0_Template, 0, 0, "ng-template");
+} }
+function SwiperComponent_7_ng_template_0_Template(rf, ctx) { }
+function SwiperComponent_7_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](0, SwiperComponent_7_ng_template_0_Template, 0, 0, "ng-template");
+} }
+function SwiperComponent_8_ng_template_0_Template(rf, ctx) { }
+function SwiperComponent_8_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](0, SwiperComponent_8_ng_template_0_Template, 0, 0, "ng-template");
+} }
+function SwiperComponent_ng_template_11_div_0_div_1_ng_template_1_Template(rf, ctx) { }
+const _c4 = function (a0) { return { $implicit: a0 }; };
+function SwiperComponent_ng_template_11_div_0_div_1_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 3);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, SwiperComponent_ng_template_11_div_0_div_1_ng_template_1_Template, 0, 0, "ng-template", 18);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+} if (rf & 2) {
+    const slide_r18 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"]().$implicit;
+    const ctx_r19 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngClass", ctx_r19.zoomContainerClass);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngTemplateOutlet", slide_r18.template)("ngTemplateOutletContext", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpureFunction1"](3, _c4, slide_r18.slideData));
+} }
+function SwiperComponent_ng_template_11_div_0_ng_container_2_ng_template_1_Template(rf, ctx) { }
+function SwiperComponent_ng_template_11_div_0_ng_container_2_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerStart"](0);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, SwiperComponent_ng_template_11_div_0_ng_container_2_ng_template_1_Template, 0, 0, "ng-template", 18);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementContainerEnd"]();
+} if (rf & 2) {
+    const slide_r18 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"]().$implicit;
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngTemplateOutlet", slide_r18.template)("ngTemplateOutletContext", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpureFunction1"](2, _c4, slide_r18.slideData));
+} }
+function SwiperComponent_ng_template_11_div_0_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 15);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, SwiperComponent_ng_template_11_div_0_div_1_Template, 2, 5, "div", 16);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](2, SwiperComponent_ng_template_11_div_0_ng_container_2_Template, 2, 4, "ng-container", 17);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+} if (rf & 2) {
+    const slide_r18 = ctx.$implicit;
+    const slideKey_r16 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"]().key;
+    const ctx_r17 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵnextContext"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵstyleMap"](ctx_r17.style);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngClass", (slide_r18.class ? slide_r18.class + " " : "") + ctx_r17.slideClass + (slideKey_r16 !== "" ? " " + ctx_r17.slideDuplicateClass : ""))("ngSwitch", slide_r18.zoom);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵattribute"]("data-swiper-slide-index", slide_r18.virtualIndex ? slide_r18.virtualIndex : slide_r18.slideIndex);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngSwitchCase", true);
+} }
+function SwiperComponent_ng_template_11_Template(rf, ctx) { if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](0, SwiperComponent_ng_template_11_div_0_Template, 3, 6, "div", 14);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpipe"](1, "async");
+} if (rf & 2) {
+    const loopSlides_r15 = ctx.loopSlides;
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngForOf", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpipeBind1"](1, 1, loopSlides_r15));
+} }
+const _c5 = [[["", "slot", "container-start"]], [["", "slot", "wrapper-start"]], [["", "slot", "wrapper-end"]], [["", "slot", "container-end"]]];
+const _c6 = function (a0) { return { loopSlides: a0, key: "prepend" }; };
+const _c7 = function (a0) { return { loopSlides: a0, key: "" }; };
+const _c8 = function (a0) { return { loopSlides: a0, key: "append" }; };
+const _c9 = ["[slot=container-start]", "[slot=wrapper-start]", "[slot=wrapper-end]", "[slot=container-end]"];
+function isObject(o) {
+    return (typeof o === 'object' &&
+        o !== null &&
+        o.constructor &&
+        Object.prototype.toString.call(o).slice(8, -1) === 'Object');
+}
+function extend(target, src) {
+    const noExtend = ['__proto__', 'constructor', 'prototype'];
+    Object.keys(src)
+        .filter((key) => noExtend.indexOf(key) < 0)
+        .forEach((key) => {
+        if (typeof target[key] === 'undefined') {
+            target[key] = src[key];
+            return;
+        }
+        if (target[key] && !src[key]) {
+            return;
+        }
+        if (isObject(src[key]) && isObject(target[key]) && Object.keys(src[key]).length > 0) {
+            if (src[key].__swiper__)
+                target[key] = src[key];
+            else
+                extend(target[key], src[key]);
+        }
+        else {
+            target[key] = src[key];
+        }
+    });
+}
+function coerceBooleanProperty(value) {
+    return value != null && `${value}` !== 'false';
+}
+const ignoreNgOnChanges = ['pagination', 'navigation', 'scrollbar', 'virtual'];
+function setProperty(val, obj = {}) {
+    if (isObject(val)) {
+        return val;
+    }
+    if (coerceBooleanProperty(val) === true) {
+        return obj;
+    }
+    return false;
+}
+
+/* underscore in name -> watch for changes */
+const paramsList = [
+    'init',
+    '_direction',
+    'touchEventsTarget',
+    'initialSlide',
+    '_speed',
+    'cssMode',
+    'updateOnWindowResize',
+    'resizeObserver',
+    'nested',
+    '_width',
+    '_height',
+    'preventInteractionOnTransition',
+    'userAgent',
+    'url',
+    '_edgeSwipeDetection',
+    '_edgeSwipeThreshold',
+    '_freeMode',
+    '_freeModeMomentum',
+    '_freeModeMomentumRatio',
+    '_freeModeMomentumBounce',
+    '_freeModeMomentumBounceRatio',
+    '_freeModeMomentumVelocityRatio',
+    '_freeModeSticky',
+    '_freeModeMinimumVelocity',
+    '_autoHeight',
+    'setWrapperSize',
+    'virtualTranslate',
+    '_effect',
+    'breakpoints',
+    '_spaceBetween',
+    '_slidesPerView',
+    '_slidesPerColumn',
+    '_slidesPerColumnFill',
+    '_slidesPerGroup',
+    '_slidesPerGroupSkip',
+    '_centeredSlides',
+    '_centeredSlidesBounds',
+    '_slidesOffsetBefore',
+    '_slidesOffsetAfter',
+    'normalizeSlideIndex',
+    '_centerInsufficientSlides',
+    '_watchOverflow',
+    'roundLengths',
+    'touchRatio',
+    'touchAngle',
+    'simulateTouch',
+    '_shortSwipes',
+    '_longSwipes',
+    'longSwipesRatio',
+    'longSwipesMs',
+    '_followFinger',
+    'allowTouchMove',
+    '_threshold',
+    'touchMoveStopPropagation',
+    'touchStartPreventDefault',
+    'touchStartForcePreventDefault',
+    'touchReleaseOnEdges',
+    'uniqueNavElements',
+    '_resistance',
+    '_resistanceRatio',
+    '_watchSlidesProgress',
+    '_watchSlidesVisibility',
+    '_grabCursor',
+    'preventClicks',
+    'preventClicksPropagation',
+    '_slideToClickedSlide',
+    '_preloadImages',
+    'updateOnImagesReady',
+    '_loop',
+    '_loopAdditionalSlides',
+    '_loopedSlides',
+    '_loopFillGroupWithBlank',
+    'loopPreventsSlide',
+    '_allowSlidePrev',
+    '_allowSlideNext',
+    '_swipeHandler',
+    '_noSwiping',
+    'noSwipingClass',
+    'noSwipingSelector',
+    'passiveListeners',
+    'containerModifierClass',
+    'slideClass',
+    'slideBlankClass',
+    'slideActiveClass',
+    'slideDuplicateActiveClass',
+    'slideVisibleClass',
+    'slideDuplicateClass',
+    'slideNextClass',
+    'slideDuplicateNextClass',
+    'slidePrevClass',
+    'slideDuplicatePrevClass',
+    'wrapperClass',
+    'runCallbacksOnInit',
+    'observer',
+    'observeParents',
+    'observeSlideChildren',
+    // modules
+    'a11y',
+    'autoplay',
+    '_controller',
+    'coverflowEffect',
+    'cubeEffect',
+    'fadeEffect',
+    'flipEffect',
+    'hashNavigation',
+    'history',
+    'keyboard',
+    'lazy',
+    'mousewheel',
+    '_navigation',
+    '_pagination',
+    'parallax',
+    '_scrollbar',
+    '_thumbs',
+    'virtual',
+    'zoom',
+];
+
+// eslint-disable-next-line
+const ɵ0 = (key) => key.replace(/_/, '');
+const allowedParams = paramsList.map(ɵ0);
+function getParams(obj = {}) {
+    const params = {
+        on: {},
+    };
+    const passedParams = {};
+    extend(params, swiper_core__WEBPACK_IMPORTED_MODULE_2__["default"].defaults);
+    extend(params, swiper_core__WEBPACK_IMPORTED_MODULE_2__["default"].extendedDefaults);
+    params._emitClasses = true;
+    const rest = {};
+    Object.keys(obj).forEach((key) => {
+        const _key = key.replace(/^_/, '');
+        if (typeof obj[_key] === 'undefined')
+            return;
+        if (allowedParams.indexOf(_key) >= 0) {
+            if (isObject(obj[_key])) {
+                params[_key] = {};
+                passedParams[_key] = {};
+                extend(params[_key], obj[_key]);
+                extend(passedParams[_key], obj[_key]);
+            }
+            else {
+                params[_key] = obj[_key];
+                passedParams[_key] = obj[_key];
+            }
+        }
+        else {
+            rest[_key] = obj[_key];
+        }
+    });
+    return { params, passedParams, rest };
+}
+
+class SwiperSlideDirective {
+    constructor(template) {
+        this.template = template;
+        this.class = '';
+        this.slideData = {
+            isActive: false,
+            isPrev: false,
+            isNext: false,
+            isVisible: false,
+            isDuplicate: false,
+        };
+    }
+    set zoom(val) {
+        this._zoom = coerceBooleanProperty(val);
+    }
+    get zoom() {
+        return this._zoom;
+    }
+    get classNames() {
+        return this._classNames;
+    }
+    set classNames(val) {
+        if (this._classNames === val) {
+            return;
+        }
+        this._classNames = val;
+        this.slideData = {
+            isActive: this._hasClass(['swiper-slide-active', 'swiper-slide-duplicate-active']),
+            isVisible: this._hasClass(['swiper-slide-visible']),
+            isDuplicate: this._hasClass(['swiper-slide-duplicate']),
+            isPrev: this._hasClass(['swiper-slide-prev', 'swiper-slide-duplicate-prev']),
+            isNext: this._hasClass(['swiper-slide-next', 'swiper-slide-duplicate-next']),
+        };
+    }
+    _hasClass(classNames) {
+        return classNames.some((className) => this._classNames.indexOf(className) >= 0);
+    }
+}
+SwiperSlideDirective.ɵfac = function SwiperSlideDirective_Factory(t) { return new (t || SwiperSlideDirective)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"])); };
+SwiperSlideDirective.ɵdir = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineDirective"]({ type: SwiperSlideDirective, selectors: [["ng-template", "swiperSlide", ""]], inputs: { class: "class", zoom: "zoom", virtualIndex: "virtualIndex" } });
+SwiperSlideDirective.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"] }
+];
+SwiperSlideDirective.propDecorators = {
+    virtualIndex: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    class: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    zoom: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SwiperSlideDirective, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Directive"],
+        args: [{
+                selector: 'ng-template[swiperSlide]'
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["TemplateRef"] }]; }, { class: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], zoom: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], virtualIndex: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }] }); })();
+
+class SwiperComponent {
+    constructor(_ngZone, elementRef, _changeDetectorRef, _platformId) {
+        this._ngZone = _ngZone;
+        this.elementRef = elementRef;
+        this._changeDetectorRef = _changeDetectorRef;
+        this._platformId = _platformId;
+        this.slideClass = 'swiper-slide';
+        this.wrapperClass = 'swiper-wrapper';
+        this.showNavigation = true;
+        this.showPagination = true;
+        this.showScrollbar = true;
+        // prettier-ignore
+        this.s__beforeBreakpoint = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s__containerClasses = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s__slideClass = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s__swiper = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_activeIndexChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_afterInit = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_autoplay = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_autoplayStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_autoplayStop = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeDestroy = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeInit = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeLoopFix = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeResize = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeSlideChangeStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_beforeTransitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_breakpoint = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_changeDirection = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_click = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_doubleTap = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_doubleClick = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_destroy = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_fromEdge = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_hashChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_hashSet = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_imagesReady = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_init = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_keyPress = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_lazyImageLoad = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_lazyImageReady = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_loopFix = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_momentumBounce = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_navigationHide = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_navigationShow = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_observerUpdate = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_orientationchange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_paginationHide = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_paginationRender = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_paginationShow = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_paginationUpdate = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_progress = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_reachBeginning = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_reachEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_realIndexChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_resize = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_scroll = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_scrollbarDragEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_scrollbarDragMove = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_scrollbarDragStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_setTransition = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_setTranslate = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideChangeTransitionEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideChangeTransitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideNextTransitionEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideNextTransitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slidePrevTransitionEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slidePrevTransitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideResetTransitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slideResetTransitionEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_sliderMove = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_sliderFirstMove = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slidesLengthChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_slidesGridLengthChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_snapGridLengthChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_snapIndexChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_tap = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_toEdge = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_touchEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_touchMove = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_touchMoveOpposite = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_touchStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_transitionEnd = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_transitionStart = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_update = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_zoomChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        // prettier-ignore
+        this.s_swiper = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this.indexChange = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["EventEmitter"]();
+        this._activeSlides = new rxjs__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
+        this.containerClasses = 'swiper-container';
+        this.slidesChanges = (val) => {
+            this.slides = val.map((slide, index) => {
+                slide.slideIndex = index;
+                slide.classNames = this.slideClass;
+                return slide;
+            });
+            if (this.loop && !this.loopedSlides) {
+                this.calcLoopedSlides();
+            }
+            if (!this.virtual) {
+                this.prependSlides = Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["of"])(this.slides.slice(this.slides.length - this.loopedSlides));
+                this.appendSlides = Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["of"])(this.slides.slice(0, this.loopedSlides));
+            }
+            else if (this.swiperRef && this.swiperRef.virtual) {
+                this._ngZone.runOutsideAngular(() => {
+                    this.swiperRef.virtual.slides = this.slides;
+                    this.swiperRef.virtual.update(true);
+                });
+            }
+            this._changeDetectorRef.detectChanges();
+        };
+        this.style = null;
+        this.updateVirtualSlides = (virtualData) => {
+            // TODO: type virtualData
+            if (!this.swiperRef ||
+                (this.currentVirtualData &&
+                    this.currentVirtualData.from === virtualData.from &&
+                    this.currentVirtualData.to === virtualData.to &&
+                    this.currentVirtualData.offset === virtualData.offset)) {
+                return;
+            }
+            this.style = this.swiperRef.isHorizontal()
+                ? {
+                    [this.swiperRef.rtlTranslate ? 'right' : 'left']: `${virtualData.offset}px`,
+                }
+                : {
+                    top: `${virtualData.offset}px`,
+                };
+            this.currentVirtualData = virtualData;
+            this._activeSlides.next(virtualData.slides);
+            this._changeDetectorRef.detectChanges();
+            this._ngZone.runOutsideAngular(() => {
+                this.swiperRef.updateSlides();
+                this.swiperRef.updateProgress();
+                this.swiperRef.updateSlidesClasses();
+                if (this.swiperRef.lazy && this.swiperRef.params.lazy['enabled']) {
+                    this.swiperRef.lazy.load();
+                }
+                this.swiperRef.virtual.update(true);
+            });
+            return;
+        };
+    }
+    set navigation(val) {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        const currentNext = typeof this._navigation !== 'boolean' ? (_a = this._navigation) === null || _a === void 0 ? void 0 : _a.nextEl : null;
+        const currentPrev = typeof this._navigation !== 'boolean' ? (_b = this._navigation) === null || _b === void 0 ? void 0 : _b.prevEl : null;
+        this._navigation = setProperty(val, {
+            nextEl: currentNext || null,
+            prevEl: currentPrev || null,
+        });
+        if (coerceBooleanProperty(val) !== true &&
+            typeof this._navigation !== 'boolean' &&
+            ((_c = this._navigation) === null || _c === void 0 ? void 0 : _c.prevEl) !== ((_d = this._prevElRef) === null || _d === void 0 ? void 0 : _d.nativeElement) &&
+            (typeof ((_e = this._navigation) === null || _e === void 0 ? void 0 : _e.nextEl) === 'string' ||
+                typeof ((_f = this._navigation) === null || _f === void 0 ? void 0 : _f.prevEl) === 'string' ||
+                typeof ((_g = this._navigation) === null || _g === void 0 ? void 0 : _g.nextEl) === 'object' ||
+                typeof ((_h = this._navigation) === null || _h === void 0 ? void 0 : _h.prevEl) === 'object')) {
+            this.showNavigation = false;
+        }
+    }
+    get navigation() {
+        return this._navigation;
+    }
+    set pagination(val) {
+        var _a, _b, _c, _d, _e;
+        const current = typeof this._pagination !== 'boolean' ? (_a = this._pagination) === null || _a === void 0 ? void 0 : _a.el : null;
+        this._pagination = setProperty(val, {
+            el: current || null,
+        });
+        if (coerceBooleanProperty(val) !== true &&
+            typeof this._pagination !== 'boolean' &&
+            ((_b = this._pagination) === null || _b === void 0 ? void 0 : _b.el) !== ((_c = this._paginationElRef) === null || _c === void 0 ? void 0 : _c.nativeElement) &&
+            (typeof ((_d = this._pagination) === null || _d === void 0 ? void 0 : _d.el) === 'string' || typeof ((_e = this._pagination) === null || _e === void 0 ? void 0 : _e.el) === 'object')) {
+            this.showPagination = false;
+        }
+    }
+    get pagination() {
+        return this._pagination;
+    }
+    set scrollbar(val) {
+        var _a, _b, _c, _d, _e;
+        const current = typeof this._scrollbar !== 'boolean' ? (_a = this._scrollbar) === null || _a === void 0 ? void 0 : _a.el : null;
+        this._scrollbar = setProperty(val, {
+            el: current || null,
+        });
+        if (coerceBooleanProperty(val) !== true &&
+            typeof this._scrollbar !== 'boolean' &&
+            ((_b = this._scrollbar) === null || _b === void 0 ? void 0 : _b.el) !== ((_c = this._scrollbarElRef) === null || _c === void 0 ? void 0 : _c.nativeElement) &&
+            (typeof ((_d = this._scrollbar) === null || _d === void 0 ? void 0 : _d.el) === 'string' || typeof ((_e = this._scrollbar) === null || _e === void 0 ? void 0 : _e.el) === 'object')) {
+            this.showScrollbar = false;
+        }
+    }
+    get scrollbar() {
+        return this._scrollbar;
+    }
+    set virtual(val) {
+        this._virtual = setProperty(val);
+    }
+    get virtual() {
+        return this._virtual;
+    }
+    set index(index) {
+        this.setIndex(index);
+    }
+    set config(val) {
+        this.updateSwiper(val);
+        const { params } = getParams(val);
+        Object.assign(this, params);
+    }
+    set prevElRef(el) {
+        this._prevElRef = el;
+        this._setElement(el, this.navigation, 'navigation', 'prevEl');
+    }
+    set nextElRef(el) {
+        this._nextElRef = el;
+        this._setElement(el, this.navigation, 'navigation', 'nextEl');
+    }
+    set scrollbarElRef(el) {
+        this._scrollbarElRef = el;
+        this._setElement(el, this.scrollbar, 'scrollbar');
+    }
+    set paginationElRef(el) {
+        this._paginationElRef = el;
+        this._setElement(el, this.pagination, 'pagination');
+    }
+    get activeSlides() {
+        if (this.virtual) {
+            return this._activeSlides;
+        }
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["of"])(this.slides);
+    }
+    get zoomContainerClass() {
+        return typeof this.zoom !== 'boolean' ? this.zoom.containerClass : 'swiper-zoom-container';
+    }
+    _setElement(el, ref, update, key = 'el') {
+        if (!el || !ref) {
+            return;
+        }
+        if (ref && el.nativeElement) {
+            if (ref[key] === el.nativeElement) {
+                return;
+            }
+            ref[key] = el.nativeElement;
+        }
+        const updateObj = {};
+        updateObj[update] = true;
+        this.updateInitSwiper(updateObj);
+    }
+    ngOnInit() {
+        const { params } = getParams(this);
+        Object.assign(this, params);
+    }
+    ngAfterViewInit() {
+        this.childrenSlidesInit();
+        this.initSwiper();
+        this._changeDetectorRef.detectChanges();
+        setTimeout(() => {
+            this.s_swiper.emit(this.swiperRef);
+        });
+    }
+    childrenSlidesInit() {
+        this.slidesChanges(this.slidesEl);
+        this.slidesEl.changes.subscribe(this.slidesChanges);
+    }
+    get isSwiperActive() {
+        return this.swiperRef && !this.swiperRef.destroyed;
+    }
+    initSwiper() {
+        const { params: swiperParams, passedParams } = getParams(this);
+        Object.assign(this, swiperParams);
+        this._ngZone.runOutsideAngular(() => {
+            swiperParams.init = false;
+            if (!swiperParams.virtual) {
+                swiperParams.observer = true;
+            }
+            swiperParams.onAny = (event, ...args) => {
+                const emitter = this[`s_${event}`];
+                if (emitter) {
+                    emitter.emit(...args);
+                }
+            };
+            Object.assign(swiperParams.on, {
+                _containerClasses(swiper, classes) {
+                    this.containerClasses = classes;
+                },
+                _slideClasses: (_, updated) => {
+                    updated.forEach(({ slideEl, classNames }, index) => {
+                        const slideIndex = parseInt(slideEl.getAttribute('data-swiper-slide-index')) || index;
+                        if (this.virtual) {
+                            const virtualSlide = this.slides.find((item) => {
+                                return item.virtualIndex && item.virtualIndex === slideIndex;
+                            });
+                            if (virtualSlide) {
+                                virtualSlide.classNames = classNames;
+                                return;
+                            }
+                        }
+                        if (this.slides[slideIndex]) {
+                            this.slides[slideIndex].classNames = classNames;
+                        }
+                    });
+                    this._changeDetectorRef.detectChanges();
+                },
+            });
+            const swiperRef = new swiper_core__WEBPACK_IMPORTED_MODULE_2__["default"](swiperParams);
+            swiperRef.loopCreate = () => { };
+            swiperRef.loopDestroy = () => { };
+            if (swiperParams.loop) {
+                swiperRef.loopedSlides = this.loopedSlides;
+            }
+            if (swiperRef.virtual && swiperRef.params.virtual.enabled) {
+                swiperRef.virtual.slides = this.slides;
+                const extendWith = {
+                    cache: false,
+                    renderExternal: this.updateVirtualSlides,
+                    renderExternalUpdate: false,
+                };
+                extend(swiperRef.params.virtual, extendWith);
+                extend(swiperRef.originalParams.virtual, extendWith);
+            }
+            if (Object(_angular_common__WEBPACK_IMPORTED_MODULE_1__["isPlatformBrowser"])(this._platformId)) {
+                this.swiperRef = swiperRef.init(this.elementRef.nativeElement);
+                if (this.swiperRef.virtual && this.swiperRef.params.virtual.enabled) {
+                    this.swiperRef.virtual.update(true);
+                }
+                this._changeDetectorRef.detectChanges();
+                swiperRef.on('slideChange', () => {
+                    this.indexChange.emit(this.swiperRef.realIndex);
+                });
+            }
+        });
+    }
+    ngOnChanges(changedParams) {
+        this.updateSwiper(changedParams);
+        this._changeDetectorRef.detectChanges();
+    }
+    updateInitSwiper(changedParams) {
+        if (!(changedParams && this.swiperRef && !this.swiperRef.destroyed)) {
+            return;
+        }
+        this._ngZone.runOutsideAngular(() => {
+            const { params: currentParams, pagination, navigation, scrollbar, virtual, thumbs, } = this.swiperRef;
+            if (changedParams.pagination) {
+                if (this.pagination &&
+                    typeof this.pagination !== 'boolean' &&
+                    this.pagination.el &&
+                    pagination &&
+                    !pagination.el) {
+                    this.updateParameter('pagination', this.pagination);
+                    pagination.init();
+                    pagination.render();
+                    pagination.update();
+                }
+                else {
+                    pagination.destroy();
+                    pagination.el = null;
+                }
+            }
+            if (changedParams.scrollbar) {
+                if (this.scrollbar &&
+                    typeof this.scrollbar !== 'boolean' &&
+                    this.scrollbar.el &&
+                    scrollbar &&
+                    !scrollbar.el) {
+                    this.updateParameter('scrollbar', this.scrollbar);
+                    scrollbar.init();
+                    scrollbar.updateSize();
+                    scrollbar.setTranslate();
+                }
+                else {
+                    scrollbar.destroy();
+                    scrollbar.el = null;
+                }
+            }
+            if (changedParams.navigation) {
+                if (this.navigation &&
+                    typeof this.navigation !== 'boolean' &&
+                    this.navigation.prevEl &&
+                    this.navigation.nextEl &&
+                    navigation &&
+                    !navigation.prevEl &&
+                    !navigation.nextEl) {
+                    this.updateParameter('navigation', this.navigation);
+                    navigation.init();
+                    navigation.update();
+                }
+                else if (navigation.prevEl && navigation.nextEl) {
+                    navigation.destroy();
+                    navigation.nextEl = null;
+                    navigation.prevEl = null;
+                }
+            }
+            if (changedParams.thumbs && this.thumbs && this.thumbs.swiper) {
+                this.updateParameter('thumbs', this.thumbs);
+                const initialized = thumbs.init();
+                if (initialized)
+                    thumbs.update(true);
+            }
+            if (changedParams.controller && this.controller && this.controller.control) {
+                this.swiperRef.controller.control = this.controller.control;
+            }
+            this.swiperRef.update();
+        });
+    }
+    updateSwiper(changedParams) {
+        this._ngZone.runOutsideAngular(() => {
+            var _a, _b;
+            if (changedParams.config) {
+                return;
+            }
+            if (!(changedParams && this.swiperRef && !this.swiperRef.destroyed)) {
+                return;
+            }
+            for (const key in changedParams) {
+                if (ignoreNgOnChanges.indexOf(key) >= 0) {
+                    continue;
+                }
+                const newValue = (_b = (_a = changedParams[key]) === null || _a === void 0 ? void 0 : _a.currentValue) !== null && _b !== void 0 ? _b : changedParams[key];
+                this.updateParameter(key, newValue);
+            }
+            if (changedParams.allowSlideNext) {
+                this.swiperRef.allowSlideNext = this.allowSlideNext;
+            }
+            if (changedParams.allowSlidePrev) {
+                this.swiperRef.allowSlidePrev = this.allowSlidePrev;
+            }
+            if (changedParams.direction) {
+                this.swiperRef.changeDirection(this.direction, false);
+            }
+            if (changedParams.breakpoints) {
+                if (this.loop && !this.loopedSlides) {
+                    this.calcLoopedSlides();
+                }
+                this.swiperRef.currentBreakpoint = null;
+                this.swiperRef.setBreakpoint();
+            }
+            if (changedParams.thumbs || changedParams.controller) {
+                this.updateInitSwiper(changedParams);
+            }
+            this.swiperRef.update();
+        });
+    }
+    calcLoopedSlides() {
+        if (!this.loop) {
+            return;
+        }
+        let slidesPerViewParams = this.slidesPerView;
+        if (this.breakpoints) {
+            const breakpoint = swiper_core__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.getBreakpoint(this.breakpoints);
+            const breakpointOnlyParams = breakpoint in this.breakpoints ? this.breakpoints[breakpoint] : undefined;
+            if (breakpointOnlyParams && breakpointOnlyParams.slidesPerView) {
+                slidesPerViewParams = breakpointOnlyParams.slidesPerView;
+            }
+        }
+        if (slidesPerViewParams === 'auto') {
+            this.loopedSlides = this.slides.length;
+            return this.slides.length;
+        }
+        let loopedSlides = this.loopedSlides || slidesPerViewParams;
+        loopedSlides += this.loopAdditionalSlides;
+        if (loopedSlides > this.slides.length) {
+            loopedSlides = this.slides.length;
+        }
+        this.loopedSlides = loopedSlides;
+        return loopedSlides;
+    }
+    updateParameter(key, value) {
+        if (!(this.swiperRef && !this.swiperRef.destroyed)) {
+            return;
+        }
+        const _key = key.replace(/^_/, '');
+        if (Object.keys(this.swiperRef.modules).indexOf(_key) >= 0) {
+            extend(value, this.swiperRef.modules[_key].params[_key]);
+        }
+        if (isObject(this.swiperRef.params[_key]) && isObject(value)) {
+            extend(this.swiperRef.params[_key], value);
+        }
+        else {
+            this.swiperRef.params[_key] = value;
+        }
+    }
+    setIndex(index, speed, silent) {
+        if (!this.isSwiperActive) {
+            this.initialSlide = index;
+            return;
+        }
+        if (index === this.swiperRef.activeIndex) {
+            return;
+        }
+        this._ngZone.runOutsideAngular(() => {
+            if (this.loop) {
+                this.swiperRef.slideToLoop(index, speed, !silent);
+            }
+            else {
+                this.swiperRef.slideTo(index, speed, !silent);
+            }
+        });
+    }
+    ngOnDestroy() {
+        this._ngZone.runOutsideAngular(() => {
+            var _a;
+            (_a = this.swiperRef) === null || _a === void 0 ? void 0 : _a.destroy();
+        });
+    }
+}
+SwiperComponent.ɵfac = function SwiperComponent_Factory(t) { return new (t || SwiperComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"])); };
+SwiperComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: SwiperComponent, selectors: [["swiper"], ["", "swiper", ""]], contentQueries: function SwiperComponent_ContentQueries(rf, ctx, dirIndex) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵcontentQuery"](dirIndex, SwiperSlideDirective, 5);
+    } if (rf & 2) {
+        let _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.slidesEl = _t);
+    } }, viewQuery: function SwiperComponent_Query(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵviewQuery"](_c0, 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵviewQuery"](_c1, 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵviewQuery"](_c2, 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵviewQuery"](_c3, 1);
+    } if (rf & 2) {
+        let _t;
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.prevElRef = _t.first);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.nextElRef = _t.first);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.scrollbarElRef = _t.first);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵqueryRefresh"](_t = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵloadQuery"]()) && (ctx.paginationElRef = _t.first);
+    } }, hostVars: 2, hostBindings: function SwiperComponent_HostBindings(rf, ctx) { if (rf & 2) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassMap"](ctx.containerClasses);
+    } }, inputs: { slideClass: "slideClass", wrapperClass: "wrapperClass", navigation: "navigation", pagination: "pagination", scrollbar: "scrollbar", virtual: "virtual", index: "index", config: "config", loopedSlides: "loopedSlides", initialSlide: "initialSlide", direction: "direction", touchEventsTarget: "touchEventsTarget", speed: "speed", cssMode: "cssMode", updateOnWindowResize: "updateOnWindowResize", resizeObserver: "resizeObserver", nested: "nested", width: "width", height: "height", preventInteractionOnTransition: "preventInteractionOnTransition", userAgent: "userAgent", url: "url", edgeSwipeDetection: "edgeSwipeDetection", edgeSwipeThreshold: "edgeSwipeThreshold", freeMode: "freeMode", freeModeMomentum: "freeModeMomentum", freeModeMomentumRatio: "freeModeMomentumRatio", freeModeMomentumBounce: "freeModeMomentumBounce", freeModeMomentumBounceRatio: "freeModeMomentumBounceRatio", freeModeMomentumVelocityRatio: "freeModeMomentumVelocityRatio", freeModeSticky: "freeModeSticky", freeModeMinimumVelocity: "freeModeMinimumVelocity", autoHeight: "autoHeight", setWrapperSize: "setWrapperSize", virtualTranslate: "virtualTranslate", effect: "effect", breakpoints: "breakpoints", spaceBetween: "spaceBetween", slidesPerView: "slidesPerView", slidesPerColumn: "slidesPerColumn", slidesPerColumnFill: "slidesPerColumnFill", slidesPerGroup: "slidesPerGroup", slidesPerGroupSkip: "slidesPerGroupSkip", centeredSlides: "centeredSlides", centeredSlidesBounds: "centeredSlidesBounds", slidesOffsetBefore: "slidesOffsetBefore", slidesOffsetAfter: "slidesOffsetAfter", normalizeSlideIndex: "normalizeSlideIndex", centerInsufficientSlides: "centerInsufficientSlides", watchOverflow: "watchOverflow", roundLengths: "roundLengths", touchRatio: "touchRatio", touchAngle: "touchAngle", simulateTouch: "simulateTouch", shortSwipes: "shortSwipes", longSwipes: "longSwipes", longSwipesRatio: "longSwipesRatio", longSwipesMs: "longSwipesMs", followFinger: "followFinger", allowTouchMove: "allowTouchMove", threshold: "threshold", touchMoveStopPropagation: "touchMoveStopPropagation", touchStartPreventDefault: "touchStartPreventDefault", touchStartForcePreventDefault: "touchStartForcePreventDefault", touchReleaseOnEdges: "touchReleaseOnEdges", uniqueNavElements: "uniqueNavElements", resistance: "resistance", resistanceRatio: "resistanceRatio", watchSlidesProgress: "watchSlidesProgress", watchSlidesVisibility: "watchSlidesVisibility", grabCursor: "grabCursor", preventClicks: "preventClicks", preventClicksPropagation: "preventClicksPropagation", slideToClickedSlide: "slideToClickedSlide", preloadImages: "preloadImages", updateOnImagesReady: "updateOnImagesReady", loop: "loop", loopAdditionalSlides: "loopAdditionalSlides", loopFillGroupWithBlank: "loopFillGroupWithBlank", loopPreventsSlide: "loopPreventsSlide", allowSlidePrev: "allowSlidePrev", allowSlideNext: "allowSlideNext", swipeHandler: "swipeHandler", noSwiping: "noSwiping", noSwipingClass: "noSwipingClass", noSwipingSelector: "noSwipingSelector", passiveListeners: "passiveListeners", containerModifierClass: "containerModifierClass", slideBlankClass: "slideBlankClass", slideActiveClass: "slideActiveClass", slideDuplicateActiveClass: "slideDuplicateActiveClass", slideVisibleClass: "slideVisibleClass", slideDuplicateClass: "slideDuplicateClass", slideNextClass: "slideNextClass", slideDuplicateNextClass: "slideDuplicateNextClass", slidePrevClass: "slidePrevClass", slideDuplicatePrevClass: "slideDuplicatePrevClass", runCallbacksOnInit: "runCallbacksOnInit", observeParents: "observeParents", observeSlideChildren: "observeSlideChildren", a11y: "a11y", autoplay: "autoplay", controller: "controller", coverflowEffect: "coverflowEffect", cubeEffect: "cubeEffect", fadeEffect: "fadeEffect", flipEffect: "flipEffect", hashNavigation: "hashNavigation", history: "history", keyboard: "keyboard", lazy: "lazy", mousewheel: "mousewheel", parallax: "parallax", thumbs: "thumbs", zoom: "zoom" }, outputs: { s__beforeBreakpoint: "_beforeBreakpoint", s__containerClasses: "_containerClasses", s__slideClass: "_slideClass", s__swiper: "_swiper", s_activeIndexChange: "activeIndexChange", s_afterInit: "afterInit", s_autoplay: "autoplay", s_autoplayStart: "autoplayStart", s_autoplayStop: "autoplayStop", s_beforeDestroy: "beforeDestroy", s_beforeInit: "beforeInit", s_beforeLoopFix: "beforeLoopFix", s_beforeResize: "beforeResize", s_beforeSlideChangeStart: "beforeSlideChangeStart", s_beforeTransitionStart: "beforeTransitionStart", s_breakpoint: "breakpoint", s_changeDirection: "changeDirection", s_click: "click", s_doubleTap: "doubleTap", s_doubleClick: "doubleClick", s_destroy: "destroy", s_fromEdge: "fromEdge", s_hashChange: "hashChange", s_hashSet: "hashSet", s_imagesReady: "imagesReady", s_init: "init", s_keyPress: "keyPress", s_lazyImageLoad: "lazyImageLoad", s_lazyImageReady: "lazyImageReady", s_loopFix: "loopFix", s_momentumBounce: "momentumBounce", s_navigationHide: "navigationHide", s_navigationShow: "navigationShow", s_observerUpdate: "observerUpdate", s_orientationchange: "orientationchange", s_paginationHide: "paginationHide", s_paginationRender: "paginationRender", s_paginationShow: "paginationShow", s_paginationUpdate: "paginationUpdate", s_progress: "progress", s_reachBeginning: "reachBeginning", s_reachEnd: "reachEnd", s_realIndexChange: "realIndexChange", s_resize: "resize", s_scroll: "scroll", s_scrollbarDragEnd: "scrollbarDragEnd", s_scrollbarDragMove: "scrollbarDragMove", s_scrollbarDragStart: "scrollbarDragStart", s_setTransition: "setTransition", s_setTranslate: "setTranslate", s_slideChange: "slideChange", s_slideChangeTransitionEnd: "slideChangeTransitionEnd", s_slideChangeTransitionStart: "slideChangeTransitionStart", s_slideNextTransitionEnd: "slideNextTransitionEnd", s_slideNextTransitionStart: "slideNextTransitionStart", s_slidePrevTransitionEnd: "slidePrevTransitionEnd", s_slidePrevTransitionStart: "slidePrevTransitionStart", s_slideResetTransitionStart: "slideResetTransitionStart", s_slideResetTransitionEnd: "slideResetTransitionEnd", s_sliderMove: "sliderMove", s_sliderFirstMove: "sliderFirstMove", s_slidesLengthChange: "slidesLengthChange", s_slidesGridLengthChange: "slidesGridLengthChange", s_snapGridLengthChange: "snapGridLengthChange", s_snapIndexChange: "snapIndexChange", s_tap: "tap", s_toEdge: "toEdge", s_touchEnd: "touchEnd", s_touchMove: "touchMove", s_touchMoveOpposite: "touchMoveOpposite", s_touchStart: "touchStart", s_transitionEnd: "transitionEnd", s_transitionStart: "transitionStart", s_update: "update", s_zoomChange: "zoomChange", s_swiper: "swiper", indexChange: "indexChange" }, features: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵNgOnChangesFeature"]], ngContentSelectors: _c9, decls: 13, vars: 16, consts: [[4, "ngIf"], ["class", "swiper-scrollbar", 4, "ngIf"], ["class", "swiper-pagination", 4, "ngIf"], [3, "ngClass"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["slidesTemplate", ""], [1, "swiper-button-prev"], ["prevElRef", ""], [1, "swiper-button-next"], ["nextElRef", ""], [1, "swiper-scrollbar"], ["scrollbarElRef", ""], [1, "swiper-pagination"], ["paginationElRef", ""], [3, "ngClass", "style", "ngSwitch", 4, "ngFor", "ngForOf"], [3, "ngClass", "ngSwitch"], [3, "ngClass", 4, "ngSwitchCase"], [4, "ngSwitchDefault"], [3, "ngTemplateOutlet", "ngTemplateOutletContext"]], template: function SwiperComponent_Template(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojectionDef"](_c5);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojection"](0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, SwiperComponent_ng_container_1_Template, 5, 0, "ng-container", 0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](2, SwiperComponent_div_2_Template, 2, 0, "div", 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](3, SwiperComponent_div_3_Template, 2, 0, "div", 2);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](4, "div", 3);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojection"](5, 1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](6, SwiperComponent_6_Template, 1, 0, undefined, 4);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](7, SwiperComponent_7_Template, 1, 0, undefined, 4);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](8, SwiperComponent_8_Template, 1, 0, undefined, 4);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojection"](9, 2);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵprojection"](10, 3);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](11, SwiperComponent_ng_template_11_Template, 2, 3, "ng-template", null, 5, _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplateRefExtractor"]);
+    } if (rf & 2) {
+        const _r6 = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵreference"](12);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx.navigation && ctx.showNavigation);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx.scrollbar && ctx.showScrollbar);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx.pagination && ctx.showPagination);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngClass", ctx.wrapperClass);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](2);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngTemplateOutlet", _r6)("ngTemplateOutletContext", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpureFunction1"](10, _c6, ctx.prependSlides));
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngTemplateOutlet", _r6)("ngTemplateOutletContext", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpureFunction1"](12, _c7, ctx.activeSlides));
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngTemplateOutlet", _r6)("ngTemplateOutletContext", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpureFunction1"](14, _c8, ctx.appendSlides));
+    } }, directives: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["NgIf"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgClass"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgTemplateOutlet"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgForOf"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgSwitch"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgSwitchCase"], _angular_common__WEBPACK_IMPORTED_MODULE_1__["NgSwitchDefault"]], pipes: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["AsyncPipe"]], styles: ["\n      swiper {\n        display: block;\n      }\n    "], encapsulation: 2, changeDetection: 0 });
+SwiperComponent.ctorParameters = () => [
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] },
+    { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"] },
+    { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"],] }] }
+];
+SwiperComponent.propDecorators = {
+    direction: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchEventsTarget: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    initialSlide: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    speed: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    cssMode: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    updateOnWindowResize: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    resizeObserver: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    nested: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    width: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    height: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    preventInteractionOnTransition: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    userAgent: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    url: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    edgeSwipeDetection: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    edgeSwipeThreshold: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeMode: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMomentum: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMomentumRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMomentumBounce: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMomentumBounceRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMomentumVelocityRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeSticky: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    freeModeMinimumVelocity: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    autoHeight: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    setWrapperSize: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    virtualTranslate: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    effect: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    breakpoints: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    spaceBetween: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesPerView: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesPerColumn: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesPerColumnFill: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesPerGroup: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesPerGroupSkip: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    centeredSlides: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    centeredSlidesBounds: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesOffsetBefore: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidesOffsetAfter: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    normalizeSlideIndex: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    centerInsufficientSlides: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    watchOverflow: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    roundLengths: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchAngle: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    simulateTouch: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    shortSwipes: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    longSwipes: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    longSwipesRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    longSwipesMs: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    followFinger: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    allowTouchMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    threshold: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchMoveStopPropagation: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchStartPreventDefault: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchStartForcePreventDefault: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    touchReleaseOnEdges: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    uniqueNavElements: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    resistance: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    resistanceRatio: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    watchSlidesProgress: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    watchSlidesVisibility: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    grabCursor: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    preventClicks: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    preventClicksPropagation: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideToClickedSlide: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    preloadImages: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    updateOnImagesReady: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    loop: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    loopAdditionalSlides: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    loopedSlides: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    loopFillGroupWithBlank: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    loopPreventsSlide: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    allowSlidePrev: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    allowSlideNext: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    swipeHandler: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    noSwiping: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    noSwipingClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    noSwipingSelector: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    passiveListeners: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    containerModifierClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideBlankClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideActiveClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideDuplicateActiveClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideVisibleClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideDuplicateClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideNextClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideDuplicateNextClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slidePrevClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    slideDuplicatePrevClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    wrapperClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    runCallbacksOnInit: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    observeParents: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    observeSlideChildren: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    a11y: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    autoplay: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    controller: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    coverflowEffect: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    cubeEffect: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    fadeEffect: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    flipEffect: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    hashNavigation: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    history: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    keyboard: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    lazy: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    mousewheel: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    parallax: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    thumbs: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    zoom: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    navigation: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    pagination: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    scrollbar: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    virtual: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    index: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    config: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"] }],
+    s__beforeBreakpoint: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['_beforeBreakpoint',] }],
+    s__containerClasses: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['_containerClasses',] }],
+    s__slideClass: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['_slideClass',] }],
+    s__swiper: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['_swiper',] }],
+    s_activeIndexChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['activeIndexChange',] }],
+    s_afterInit: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['afterInit',] }],
+    s_autoplay: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['autoplay',] }],
+    s_autoplayStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['autoplayStart',] }],
+    s_autoplayStop: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['autoplayStop',] }],
+    s_beforeDestroy: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeDestroy',] }],
+    s_beforeInit: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeInit',] }],
+    s_beforeLoopFix: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeLoopFix',] }],
+    s_beforeResize: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeResize',] }],
+    s_beforeSlideChangeStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeSlideChangeStart',] }],
+    s_beforeTransitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['beforeTransitionStart',] }],
+    s_breakpoint: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['breakpoint',] }],
+    s_changeDirection: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['changeDirection',] }],
+    s_click: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['click',] }],
+    s_doubleTap: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['doubleTap',] }],
+    s_doubleClick: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['doubleClick',] }],
+    s_destroy: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['destroy',] }],
+    s_fromEdge: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['fromEdge',] }],
+    s_hashChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['hashChange',] }],
+    s_hashSet: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['hashSet',] }],
+    s_imagesReady: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['imagesReady',] }],
+    s_init: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['init',] }],
+    s_keyPress: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['keyPress',] }],
+    s_lazyImageLoad: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['lazyImageLoad',] }],
+    s_lazyImageReady: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['lazyImageReady',] }],
+    s_loopFix: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['loopFix',] }],
+    s_momentumBounce: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['momentumBounce',] }],
+    s_navigationHide: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['navigationHide',] }],
+    s_navigationShow: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['navigationShow',] }],
+    s_observerUpdate: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['observerUpdate',] }],
+    s_orientationchange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['orientationchange',] }],
+    s_paginationHide: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['paginationHide',] }],
+    s_paginationRender: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['paginationRender',] }],
+    s_paginationShow: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['paginationShow',] }],
+    s_paginationUpdate: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['paginationUpdate',] }],
+    s_progress: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['progress',] }],
+    s_reachBeginning: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['reachBeginning',] }],
+    s_reachEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['reachEnd',] }],
+    s_realIndexChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['realIndexChange',] }],
+    s_resize: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['resize',] }],
+    s_scroll: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['scroll',] }],
+    s_scrollbarDragEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['scrollbarDragEnd',] }],
+    s_scrollbarDragMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['scrollbarDragMove',] }],
+    s_scrollbarDragStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['scrollbarDragStart',] }],
+    s_setTransition: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['setTransition',] }],
+    s_setTranslate: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['setTranslate',] }],
+    s_slideChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideChange',] }],
+    s_slideChangeTransitionEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideChangeTransitionEnd',] }],
+    s_slideChangeTransitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideChangeTransitionStart',] }],
+    s_slideNextTransitionEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideNextTransitionEnd',] }],
+    s_slideNextTransitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideNextTransitionStart',] }],
+    s_slidePrevTransitionEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slidePrevTransitionEnd',] }],
+    s_slidePrevTransitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slidePrevTransitionStart',] }],
+    s_slideResetTransitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideResetTransitionStart',] }],
+    s_slideResetTransitionEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slideResetTransitionEnd',] }],
+    s_sliderMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['sliderMove',] }],
+    s_sliderFirstMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['sliderFirstMove',] }],
+    s_slidesLengthChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slidesLengthChange',] }],
+    s_slidesGridLengthChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['slidesGridLengthChange',] }],
+    s_snapGridLengthChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['snapGridLengthChange',] }],
+    s_snapIndexChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['snapIndexChange',] }],
+    s_tap: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['tap',] }],
+    s_toEdge: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['toEdge',] }],
+    s_touchEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['touchEnd',] }],
+    s_touchMove: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['touchMove',] }],
+    s_touchMoveOpposite: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['touchMoveOpposite',] }],
+    s_touchStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['touchStart',] }],
+    s_transitionEnd: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['transitionEnd',] }],
+    s_transitionStart: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['transitionStart',] }],
+    s_update: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['update',] }],
+    s_zoomChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['zoomChange',] }],
+    s_swiper: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"], args: ['swiper',] }],
+    indexChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"] }],
+    prevElRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: ['prevElRef', { static: false },] }],
+    nextElRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: ['nextElRef', { static: false },] }],
+    scrollbarElRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: ['scrollbarElRef', { static: false },] }],
+    paginationElRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"], args: ['paginationElRef', { static: false },] }],
+    slidesEl: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ContentChildren"], args: [SwiperSlideDirective, { descendants: true, emitDistinctChangesOnly: true },] }],
+    containerClasses: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["HostBinding"], args: ['class',] }]
+};
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SwiperComponent, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
+        args: [{
+                selector: 'swiper, [swiper]',
+                template: "<ng-content select=\"[slot=container-start]\"></ng-content>\n<ng-container *ngIf=\"navigation && showNavigation\">\n  <div class=\"swiper-button-prev\" #prevElRef></div>\n  <div class=\"swiper-button-next\" #nextElRef></div>\n</ng-container>\n<div *ngIf=\"scrollbar && showScrollbar\" class=\"swiper-scrollbar\" #scrollbarElRef></div>\n<div *ngIf=\"pagination && showPagination\" class=\"swiper-pagination\" #paginationElRef></div>\n<div [ngClass]=\"wrapperClass\">\n  <ng-content select=\"[slot=wrapper-start]\"></ng-content>\n  <ng-template\n    *ngTemplateOutlet=\"\n      slidesTemplate;\n      context: {\n        loopSlides: prependSlides,\n        key: 'prepend'\n      }\n    \"\n  ></ng-template>\n  <ng-template\n    *ngTemplateOutlet=\"\n      slidesTemplate;\n      context: {\n        loopSlides: activeSlides,\n        key: ''\n      }\n    \"\n  ></ng-template>\n  <ng-template\n    *ngTemplateOutlet=\"\n      slidesTemplate;\n      context: {\n        loopSlides: appendSlides,\n        key: 'append'\n      }\n    \"\n  ></ng-template>\n  <ng-content select=\"[slot=wrapper-end]\"></ng-content>\n</div>\n<ng-content select=\"[slot=container-end]\"></ng-content>\n\n<ng-template #slidesTemplate let-loopSlides=\"loopSlides\" let-slideKey=\"key\">\n  <div\n    *ngFor=\"let slide of loopSlides | async\"\n    [ngClass]=\"\n      (slide.class ? slide.class + ' ' : '') +\n      slideClass +\n      (slideKey !== '' ? ' ' + slideDuplicateClass : '')\n    \"\n    [attr.data-swiper-slide-index]=\"slide.virtualIndex ? slide.virtualIndex : slide.slideIndex\"\n    [style]=\"style\"\n    [ngSwitch]=\"slide.zoom\"\n  >\n    <div *ngSwitchCase=\"true\" [ngClass]=\"zoomContainerClass\">\n      <ng-template\n        [ngTemplateOutlet]=\"slide.template\"\n        [ngTemplateOutletContext]=\"{\n          $implicit: slide.slideData\n        }\"\n      ></ng-template>\n    </div>\n    <ng-container *ngSwitchDefault>\n      <ng-template\n        [ngTemplateOutlet]=\"slide.template\"\n        [ngTemplateOutletContext]=\"{\n          $implicit: slide.slideData\n        }\"\n      ></ng-template>\n    </ng-container>\n  </div>\n</ng-template>\n",
+                changeDetection: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectionStrategy"].OnPush,
+                encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewEncapsulation"].None,
+                styles: [`
+      swiper {
+        display: block;
+      }
+    `]
+            }]
+    }], function () { return [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ElementRef"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ChangeDetectorRef"] }, { type: undefined, decorators: [{
+                type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"],
+                args: [_angular_core__WEBPACK_IMPORTED_MODULE_0__["PLATFORM_ID"]]
+            }] }]; }, { slideClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], wrapperClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], s__beforeBreakpoint: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['_beforeBreakpoint']
+        }], s__containerClasses: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['_containerClasses']
+        }], s__slideClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['_slideClass']
+        }], s__swiper: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['_swiper']
+        }], s_activeIndexChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['activeIndexChange']
+        }], s_afterInit: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['afterInit']
+        }], s_autoplay: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['autoplay']
+        }], s_autoplayStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['autoplayStart']
+        }], s_autoplayStop: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['autoplayStop']
+        }], s_beforeDestroy: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeDestroy']
+        }], s_beforeInit: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeInit']
+        }], s_beforeLoopFix: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeLoopFix']
+        }], s_beforeResize: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeResize']
+        }], s_beforeSlideChangeStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeSlideChangeStart']
+        }], s_beforeTransitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['beforeTransitionStart']
+        }], s_breakpoint: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['breakpoint']
+        }], s_changeDirection: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['changeDirection']
+        }], s_click: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['click']
+        }], s_doubleTap: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['doubleTap']
+        }], s_doubleClick: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['doubleClick']
+        }], s_destroy: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['destroy']
+        }], s_fromEdge: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['fromEdge']
+        }], s_hashChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['hashChange']
+        }], s_hashSet: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['hashSet']
+        }], s_imagesReady: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['imagesReady']
+        }], s_init: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['init']
+        }], s_keyPress: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['keyPress']
+        }], s_lazyImageLoad: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['lazyImageLoad']
+        }], s_lazyImageReady: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['lazyImageReady']
+        }], s_loopFix: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['loopFix']
+        }], s_momentumBounce: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['momentumBounce']
+        }], s_navigationHide: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['navigationHide']
+        }], s_navigationShow: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['navigationShow']
+        }], s_observerUpdate: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['observerUpdate']
+        }], s_orientationchange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['orientationchange']
+        }], s_paginationHide: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['paginationHide']
+        }], s_paginationRender: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['paginationRender']
+        }], s_paginationShow: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['paginationShow']
+        }], s_paginationUpdate: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['paginationUpdate']
+        }], s_progress: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['progress']
+        }], s_reachBeginning: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['reachBeginning']
+        }], s_reachEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['reachEnd']
+        }], s_realIndexChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['realIndexChange']
+        }], s_resize: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['resize']
+        }], s_scroll: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['scroll']
+        }], s_scrollbarDragEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['scrollbarDragEnd']
+        }], s_scrollbarDragMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['scrollbarDragMove']
+        }], s_scrollbarDragStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['scrollbarDragStart']
+        }], s_setTransition: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['setTransition']
+        }], s_setTranslate: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['setTranslate']
+        }], s_slideChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideChange']
+        }], s_slideChangeTransitionEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideChangeTransitionEnd']
+        }], s_slideChangeTransitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideChangeTransitionStart']
+        }], s_slideNextTransitionEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideNextTransitionEnd']
+        }], s_slideNextTransitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideNextTransitionStart']
+        }], s_slidePrevTransitionEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slidePrevTransitionEnd']
+        }], s_slidePrevTransitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slidePrevTransitionStart']
+        }], s_slideResetTransitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideResetTransitionStart']
+        }], s_slideResetTransitionEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slideResetTransitionEnd']
+        }], s_sliderMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['sliderMove']
+        }], s_sliderFirstMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['sliderFirstMove']
+        }], s_slidesLengthChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slidesLengthChange']
+        }], s_slidesGridLengthChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['slidesGridLengthChange']
+        }], s_snapGridLengthChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['snapGridLengthChange']
+        }], s_snapIndexChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['snapIndexChange']
+        }], s_tap: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['tap']
+        }], s_toEdge: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['toEdge']
+        }], s_touchEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['touchEnd']
+        }], s_touchMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['touchMove']
+        }], s_touchMoveOpposite: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['touchMoveOpposite']
+        }], s_touchStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['touchStart']
+        }], s_transitionEnd: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['transitionEnd']
+        }], s_transitionStart: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['transitionStart']
+        }], s_update: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['update']
+        }], s_zoomChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['zoomChange']
+        }], s_swiper: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"],
+            args: ['swiper']
+        }], indexChange: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Output"]
+        }], containerClasses: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["HostBinding"],
+            args: ['class']
+        }], navigation: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], pagination: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], scrollbar: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], virtual: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], index: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], config: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], prevElRef: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: ['prevElRef', { static: false }]
+        }], nextElRef: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: ['nextElRef', { static: false }]
+        }], scrollbarElRef: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: ['scrollbarElRef', { static: false }]
+        }], paginationElRef: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ViewChild"],
+            args: ['paginationElRef', { static: false }]
+        }], loopedSlides: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], initialSlide: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], direction: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchEventsTarget: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], speed: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], cssMode: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], updateOnWindowResize: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], resizeObserver: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], nested: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], width: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], height: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], preventInteractionOnTransition: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], userAgent: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], url: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], edgeSwipeDetection: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], edgeSwipeThreshold: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeMode: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMomentum: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMomentumRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMomentumBounce: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMomentumBounceRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMomentumVelocityRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeSticky: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], freeModeMinimumVelocity: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], autoHeight: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], setWrapperSize: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], virtualTranslate: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], effect: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], breakpoints: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], spaceBetween: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesPerView: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesPerColumn: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesPerColumnFill: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesPerGroup: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesPerGroupSkip: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], centeredSlides: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], centeredSlidesBounds: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesOffsetBefore: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesOffsetAfter: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], normalizeSlideIndex: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], centerInsufficientSlides: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], watchOverflow: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], roundLengths: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchAngle: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], simulateTouch: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], shortSwipes: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], longSwipes: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], longSwipesRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], longSwipesMs: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], followFinger: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], allowTouchMove: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], threshold: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchMoveStopPropagation: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchStartPreventDefault: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchStartForcePreventDefault: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], touchReleaseOnEdges: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], uniqueNavElements: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], resistance: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], resistanceRatio: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], watchSlidesProgress: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], watchSlidesVisibility: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], grabCursor: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], preventClicks: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], preventClicksPropagation: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideToClickedSlide: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], preloadImages: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], updateOnImagesReady: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], loop: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], loopAdditionalSlides: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], loopFillGroupWithBlank: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], loopPreventsSlide: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], allowSlidePrev: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], allowSlideNext: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], swipeHandler: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], noSwiping: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], noSwipingClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], noSwipingSelector: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], passiveListeners: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], containerModifierClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideBlankClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideActiveClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideDuplicateActiveClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideVisibleClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideDuplicateClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideNextClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideDuplicateNextClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidePrevClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slideDuplicatePrevClass: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], runCallbacksOnInit: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], observeParents: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], observeSlideChildren: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], a11y: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], autoplay: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], controller: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], coverflowEffect: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], cubeEffect: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], fadeEffect: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], flipEffect: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], hashNavigation: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], history: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], keyboard: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], lazy: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], mousewheel: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], parallax: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], thumbs: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], zoom: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"]
+        }], slidesEl: [{
+            type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["ContentChildren"],
+            args: [SwiperSlideDirective, { descendants: true, emitDistinctChangesOnly: true }]
+        }] }); })();
+
+class SwiperModule {
+}
+SwiperModule.ɵfac = function SwiperModule_Factory(t) { return new (t || SwiperModule)(); };
+SwiperModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: SwiperModule });
+SwiperModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](SwiperModule, { declarations: function () { return [SwiperComponent, SwiperSlideDirective]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]; }, exports: function () { return [SwiperComponent, SwiperSlideDirective]; } }); })();
+(function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](SwiperModule, [{
+        type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
+        args: [{
+                declarations: [SwiperComponent, SwiperSlideDirective],
+                exports: [SwiperComponent, SwiperSlideDirective],
+                imports: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"]]
+            }]
+    }], null, null); })();
+
+/*
+ * Public API Surface of angular
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+
+
+//# sourceMappingURL=swiper_angular.js.map
 
 /***/ }),
 
@@ -9570,8 +23952,9 @@ if (false) {}
  */
 class VgBufferingModule {
 }
+VgBufferingModule.ɵfac = function VgBufferingModule_Factory(t) { return new (t || VgBufferingModule)(); };
 VgBufferingModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: VgBufferingModule });
-VgBufferingModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function VgBufferingModule_Factory(t) { return new (t || VgBufferingModule)(); }, imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]] });
+VgBufferingModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](VgBufferingModule, { declarations: function () { return [VgBufferingComponent]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]; }, exports: function () { return [VgBufferingComponent]; } }); })();
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](VgBufferingModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
@@ -9640,6 +24023,362 @@ function merge(...observables) {
 
 /***/ }),
 
+/***/ "VjSb":
+/*!**********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onTouchEnd.js ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onTouchEnd; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function onTouchEnd(event) {
+  var swiper = this;
+  var data = swiper.touchEventsData;
+  var params = swiper.params,
+      touches = swiper.touches,
+      rtl = swiper.rtlTranslate,
+      $wrapperEl = swiper.$wrapperEl,
+      slidesGrid = swiper.slidesGrid,
+      snapGrid = swiper.snapGrid;
+  var e = event;
+  if (e.originalEvent) e = e.originalEvent;
+
+  if (data.allowTouchCallbacks) {
+    swiper.emit('touchEnd', e);
+  }
+
+  data.allowTouchCallbacks = false;
+
+  if (!data.isTouched) {
+    if (data.isMoved && params.grabCursor) {
+      swiper.setGrabCursor(false);
+    }
+
+    data.isMoved = false;
+    data.startMoving = false;
+    return;
+  } // Return Grab Cursor
+
+
+  if (params.grabCursor && data.isMoved && data.isTouched && (swiper.allowSlideNext === true || swiper.allowSlidePrev === true)) {
+    swiper.setGrabCursor(false);
+  } // Time diff
+
+
+  var touchEndTime = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["now"])();
+  var timeDiff = touchEndTime - data.touchStartTime; // Tap, doubleTap, Click
+
+  if (swiper.allowClick) {
+    swiper.updateClickedSlide(e);
+    swiper.emit('tap click', e);
+
+    if (timeDiff < 300 && touchEndTime - data.lastClickTime < 300) {
+      swiper.emit('doubleTap doubleClick', e);
+    }
+  }
+
+  data.lastClickTime = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["now"])();
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["nextTick"])(function () {
+    if (!swiper.destroyed) swiper.allowClick = true;
+  });
+
+  if (!data.isTouched || !data.isMoved || !swiper.swipeDirection || touches.diff === 0 || data.currentTranslate === data.startTranslate) {
+    data.isTouched = false;
+    data.isMoved = false;
+    data.startMoving = false;
+    return;
+  }
+
+  data.isTouched = false;
+  data.isMoved = false;
+  data.startMoving = false;
+  var currentPos;
+
+  if (params.followFinger) {
+    currentPos = rtl ? swiper.translate : -swiper.translate;
+  } else {
+    currentPos = -data.currentTranslate;
+  }
+
+  if (params.cssMode) {
+    return;
+  }
+
+  if (params.freeMode) {
+    if (currentPos < -swiper.minTranslate()) {
+      swiper.slideTo(swiper.activeIndex);
+      return;
+    }
+
+    if (currentPos > -swiper.maxTranslate()) {
+      if (swiper.slides.length < snapGrid.length) {
+        swiper.slideTo(snapGrid.length - 1);
+      } else {
+        swiper.slideTo(swiper.slides.length - 1);
+      }
+
+      return;
+    }
+
+    if (params.freeModeMomentum) {
+      if (data.velocities.length > 1) {
+        var lastMoveEvent = data.velocities.pop();
+        var velocityEvent = data.velocities.pop();
+        var distance = lastMoveEvent.position - velocityEvent.position;
+        var time = lastMoveEvent.time - velocityEvent.time;
+        swiper.velocity = distance / time;
+        swiper.velocity /= 2;
+
+        if (Math.abs(swiper.velocity) < params.freeModeMinimumVelocity) {
+          swiper.velocity = 0;
+        } // this implies that the user stopped moving a finger then released.
+        // There would be no events with distance zero, so the last event is stale.
+
+
+        if (time > 150 || Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["now"])() - lastMoveEvent.time > 300) {
+          swiper.velocity = 0;
+        }
+      } else {
+        swiper.velocity = 0;
+      }
+
+      swiper.velocity *= params.freeModeMomentumVelocityRatio;
+      data.velocities.length = 0;
+      var momentumDuration = 1000 * params.freeModeMomentumRatio;
+      var momentumDistance = swiper.velocity * momentumDuration;
+      var newPosition = swiper.translate + momentumDistance;
+      if (rtl) newPosition = -newPosition;
+      var doBounce = false;
+      var afterBouncePosition;
+      var bounceAmount = Math.abs(swiper.velocity) * 20 * params.freeModeMomentumBounceRatio;
+      var needsLoopFix;
+
+      if (newPosition < swiper.maxTranslate()) {
+        if (params.freeModeMomentumBounce) {
+          if (newPosition + swiper.maxTranslate() < -bounceAmount) {
+            newPosition = swiper.maxTranslate() - bounceAmount;
+          }
+
+          afterBouncePosition = swiper.maxTranslate();
+          doBounce = true;
+          data.allowMomentumBounce = true;
+        } else {
+          newPosition = swiper.maxTranslate();
+        }
+
+        if (params.loop && params.centeredSlides) needsLoopFix = true;
+      } else if (newPosition > swiper.minTranslate()) {
+        if (params.freeModeMomentumBounce) {
+          if (newPosition - swiper.minTranslate() > bounceAmount) {
+            newPosition = swiper.minTranslate() + bounceAmount;
+          }
+
+          afterBouncePosition = swiper.minTranslate();
+          doBounce = true;
+          data.allowMomentumBounce = true;
+        } else {
+          newPosition = swiper.minTranslate();
+        }
+
+        if (params.loop && params.centeredSlides) needsLoopFix = true;
+      } else if (params.freeModeSticky) {
+        var nextSlide;
+
+        for (var j = 0; j < snapGrid.length; j += 1) {
+          if (snapGrid[j] > -newPosition) {
+            nextSlide = j;
+            break;
+          }
+        }
+
+        if (Math.abs(snapGrid[nextSlide] - newPosition) < Math.abs(snapGrid[nextSlide - 1] - newPosition) || swiper.swipeDirection === 'next') {
+          newPosition = snapGrid[nextSlide];
+        } else {
+          newPosition = snapGrid[nextSlide - 1];
+        }
+
+        newPosition = -newPosition;
+      }
+
+      if (needsLoopFix) {
+        swiper.once('transitionEnd', function () {
+          swiper.loopFix();
+        });
+      } // Fix duration
+
+
+      if (swiper.velocity !== 0) {
+        if (rtl) {
+          momentumDuration = Math.abs((-newPosition - swiper.translate) / swiper.velocity);
+        } else {
+          momentumDuration = Math.abs((newPosition - swiper.translate) / swiper.velocity);
+        }
+
+        if (params.freeModeSticky) {
+          // If freeModeSticky is active and the user ends a swipe with a slow-velocity
+          // event, then durations can be 20+ seconds to slide one (or zero!) slides.
+          // It's easy to see this when simulating touch with mouse events. To fix this,
+          // limit single-slide swipes to the default slide duration. This also has the
+          // nice side effect of matching slide speed if the user stopped moving before
+          // lifting finger or mouse vs. moving slowly before lifting the finger/mouse.
+          // For faster swipes, also apply limits (albeit higher ones).
+          var moveDistance = Math.abs((rtl ? -newPosition : newPosition) - swiper.translate);
+          var currentSlideSize = swiper.slidesSizesGrid[swiper.activeIndex];
+
+          if (moveDistance < currentSlideSize) {
+            momentumDuration = params.speed;
+          } else if (moveDistance < 2 * currentSlideSize) {
+            momentumDuration = params.speed * 1.5;
+          } else {
+            momentumDuration = params.speed * 2.5;
+          }
+        }
+      } else if (params.freeModeSticky) {
+        swiper.slideToClosest();
+        return;
+      }
+
+      if (params.freeModeMomentumBounce && doBounce) {
+        swiper.updateProgress(afterBouncePosition);
+        swiper.setTransition(momentumDuration);
+        swiper.setTranslate(newPosition);
+        swiper.transitionStart(true, swiper.swipeDirection);
+        swiper.animating = true;
+        $wrapperEl.transitionEnd(function () {
+          if (!swiper || swiper.destroyed || !data.allowMomentumBounce) return;
+          swiper.emit('momentumBounce');
+          swiper.setTransition(params.speed);
+          setTimeout(function () {
+            swiper.setTranslate(afterBouncePosition);
+            $wrapperEl.transitionEnd(function () {
+              if (!swiper || swiper.destroyed) return;
+              swiper.transitionEnd();
+            });
+          }, 0);
+        });
+      } else if (swiper.velocity) {
+        swiper.updateProgress(newPosition);
+        swiper.setTransition(momentumDuration);
+        swiper.setTranslate(newPosition);
+        swiper.transitionStart(true, swiper.swipeDirection);
+
+        if (!swiper.animating) {
+          swiper.animating = true;
+          $wrapperEl.transitionEnd(function () {
+            if (!swiper || swiper.destroyed) return;
+            swiper.transitionEnd();
+          });
+        }
+      } else {
+        swiper.emit('_freeModeNoMomentumRelease');
+        swiper.updateProgress(newPosition);
+      }
+
+      swiper.updateActiveIndex();
+      swiper.updateSlidesClasses();
+    } else if (params.freeModeSticky) {
+      swiper.slideToClosest();
+      return;
+    } else if (params.freeMode) {
+      swiper.emit('_freeModeNoMomentumRelease');
+    }
+
+    if (!params.freeModeMomentum || timeDiff >= params.longSwipesMs) {
+      swiper.updateProgress();
+      swiper.updateActiveIndex();
+      swiper.updateSlidesClasses();
+    }
+
+    return;
+  } // Find current slide
+
+
+  var stopIndex = 0;
+  var groupSize = swiper.slidesSizesGrid[0];
+
+  for (var i = 0; i < slidesGrid.length; i += i < params.slidesPerGroupSkip ? 1 : params.slidesPerGroup) {
+    var _increment = i < params.slidesPerGroupSkip - 1 ? 1 : params.slidesPerGroup;
+
+    if (typeof slidesGrid[i + _increment] !== 'undefined') {
+      if (currentPos >= slidesGrid[i] && currentPos < slidesGrid[i + _increment]) {
+        stopIndex = i;
+        groupSize = slidesGrid[i + _increment] - slidesGrid[i];
+      }
+    } else if (currentPos >= slidesGrid[i]) {
+      stopIndex = i;
+      groupSize = slidesGrid[slidesGrid.length - 1] - slidesGrid[slidesGrid.length - 2];
+    }
+  } // Find current slide size
+
+
+  var ratio = (currentPos - slidesGrid[stopIndex]) / groupSize;
+  var increment = stopIndex < params.slidesPerGroupSkip - 1 ? 1 : params.slidesPerGroup;
+
+  if (timeDiff > params.longSwipesMs) {
+    // Long touches
+    if (!params.longSwipes) {
+      swiper.slideTo(swiper.activeIndex);
+      return;
+    }
+
+    if (swiper.swipeDirection === 'next') {
+      if (ratio >= params.longSwipesRatio) swiper.slideTo(stopIndex + increment);else swiper.slideTo(stopIndex);
+    }
+
+    if (swiper.swipeDirection === 'prev') {
+      if (ratio > 1 - params.longSwipesRatio) swiper.slideTo(stopIndex + increment);else swiper.slideTo(stopIndex);
+    }
+  } else {
+    // Short swipes
+    if (!params.shortSwipes) {
+      swiper.slideTo(swiper.activeIndex);
+      return;
+    }
+
+    var isNavButtonTarget = swiper.navigation && (e.target === swiper.navigation.nextEl || e.target === swiper.navigation.prevEl);
+
+    if (!isNavButtonTarget) {
+      if (swiper.swipeDirection === 'next') {
+        swiper.slideTo(stopIndex + increment);
+      }
+
+      if (swiper.swipeDirection === 'prev') {
+        swiper.slideTo(stopIndex);
+      }
+    } else if (e.target === swiper.navigation.nextEl) {
+      swiper.slideTo(stopIndex + increment);
+    } else {
+      swiper.slideTo(stopIndex);
+    }
+  }
+}
+
+/***/ }),
+
+/***/ "VlRc":
+/*!******************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/classes/index.js ***!
+  \******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _addClasses__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./addClasses */ "QCkE");
+/* harmony import */ var _removeClasses__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./removeClasses */ "00qV");
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  addClasses: _addClasses__WEBPACK_IMPORTED_MODULE_0__["default"],
+  removeClasses: _removeClasses__WEBPACK_IMPORTED_MODULE_1__["default"]
+});
+
+/***/ }),
+
 /***/ "Vpsf":
 /*!*******************************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/scheduler/AnimationFrameAction.js ***!
@@ -9677,6 +24416,54 @@ class AnimationFrameAction extends _AsyncAction__WEBPACK_IMPORTED_MODULE_0__["As
     }
 }
 //# sourceMappingURL=AnimationFrameAction.js.map
+
+/***/ }),
+
+/***/ "VyJC":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/transition/transitionEnd.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return transitionEnd; });
+function transitionEnd(runCallbacks, direction) {
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  var activeIndex = swiper.activeIndex,
+      previousIndex = swiper.previousIndex,
+      params = swiper.params;
+  swiper.animating = false;
+  if (params.cssMode) return;
+  swiper.setTransition(0);
+  var dir = direction;
+
+  if (!dir) {
+    if (activeIndex > previousIndex) dir = 'next';else if (activeIndex < previousIndex) dir = 'prev';else dir = 'reset';
+  }
+
+  swiper.emit('transitionEnd');
+
+  if (runCallbacks && activeIndex !== previousIndex) {
+    if (dir === 'reset') {
+      swiper.emit('slideResetTransitionEnd');
+      return;
+    }
+
+    swiper.emit('slideChangeTransitionEnd');
+
+    if (dir === 'next') {
+      swiper.emit('slideNextTransitionEnd');
+    } else {
+      swiper.emit('slidePrevTransitionEnd');
+    }
+  }
+}
 
 /***/ }),
 
@@ -10004,6 +24791,113 @@ function defaultErrorFactory() {
 
 /***/ }),
 
+/***/ "XGUr":
+/*!************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onTouchStart.js ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onTouchStart; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+
+
+function onTouchStart(event) {
+  var swiper = this;
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var data = swiper.touchEventsData;
+  var params = swiper.params,
+      touches = swiper.touches;
+
+  if (swiper.animating && params.preventInteractionOnTransition) {
+    return;
+  }
+
+  var e = event;
+  if (e.originalEvent) e = e.originalEvent;
+  var $targetEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(e.target);
+
+  if (params.touchEventsTarget === 'wrapper') {
+    if (!$targetEl.closest(swiper.wrapperEl).length) return;
+  }
+
+  data.isTouchEvent = e.type === 'touchstart';
+  if (!data.isTouchEvent && 'which' in e && e.which === 3) return;
+  if (!data.isTouchEvent && 'button' in e && e.button > 0) return;
+  if (data.isTouched && data.isMoved) return; // change target el for shadow root componenet
+
+  var swipingClassHasValue = !!params.noSwipingClass && params.noSwipingClass !== '';
+
+  if (swipingClassHasValue && e.target && e.target.shadowRoot && event.path && event.path[0]) {
+    $targetEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(event.path[0]);
+  }
+
+  if (params.noSwiping && $targetEl.closest(params.noSwipingSelector ? params.noSwipingSelector : "." + params.noSwipingClass)[0]) {
+    swiper.allowClick = true;
+    return;
+  }
+
+  if (params.swipeHandler) {
+    if (!$targetEl.closest(params.swipeHandler)[0]) return;
+  }
+
+  touches.currentX = e.type === 'touchstart' ? e.targetTouches[0].pageX : e.pageX;
+  touches.currentY = e.type === 'touchstart' ? e.targetTouches[0].pageY : e.pageY;
+  var startX = touches.currentX;
+  var startY = touches.currentY; // Do NOT start if iOS edge swipe is detected. Otherwise iOS app cannot swipe-to-go-back anymore
+
+  var edgeSwipeDetection = params.edgeSwipeDetection || params.iOSEdgeSwipeDetection;
+  var edgeSwipeThreshold = params.edgeSwipeThreshold || params.iOSEdgeSwipeThreshold;
+
+  if (edgeSwipeDetection && (startX <= edgeSwipeThreshold || startX >= window.innerWidth - edgeSwipeThreshold)) {
+    if (edgeSwipeDetection === 'prevent') {
+      event.preventDefault();
+    } else {
+      return;
+    }
+  }
+
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["extend"])(data, {
+    isTouched: true,
+    isMoved: false,
+    allowTouchCallbacks: true,
+    isScrolling: undefined,
+    startMoving: undefined
+  });
+  touches.startX = startX;
+  touches.startY = startY;
+  data.touchStartTime = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])();
+  swiper.allowClick = true;
+  swiper.updateSize();
+  swiper.swipeDirection = undefined;
+  if (params.threshold > 0) data.allowThresholdMove = false;
+
+  if (e.type !== 'touchstart') {
+    var preventDefault = true;
+    if ($targetEl.is(data.formElements)) preventDefault = false;
+
+    if (document.activeElement && Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(document.activeElement).is(data.formElements) && document.activeElement !== $targetEl[0]) {
+      document.activeElement.blur();
+    }
+
+    var shouldPreventDefault = preventDefault && swiper.allowTouchMove && params.touchStartPreventDefault;
+
+    if ((params.touchStartForcePreventDefault || shouldPreventDefault) && !$targetEl[0].isContentEditable) {
+      e.preventDefault();
+    }
+  }
+
+  swiper.emit('touchStart', e);
+}
+
+/***/ }),
+
 /***/ "XNiG":
 /*!********************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/Subject.js ***!
@@ -10166,6 +25060,384 @@ class AnonymousSubject extends Subject {
     }
 }
 //# sourceMappingURL=Subject.js.map
+
+/***/ }),
+
+/***/ "Xchd":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/pagination/pagination.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Pagination = {
+  update: function update() {
+    // Render || Update Pagination bullets/items
+    var swiper = this;
+    var rtl = swiper.rtl;
+    var params = swiper.params.pagination;
+    if (!params.el || !swiper.pagination.el || !swiper.pagination.$el || swiper.pagination.$el.length === 0) return;
+    var slidesLength = swiper.virtual && swiper.params.virtual.enabled ? swiper.virtual.slides.length : swiper.slides.length;
+    var $el = swiper.pagination.$el; // Current/Total
+
+    var current;
+    var total = swiper.params.loop ? Math.ceil((slidesLength - swiper.loopedSlides * 2) / swiper.params.slidesPerGroup) : swiper.snapGrid.length;
+
+    if (swiper.params.loop) {
+      current = Math.ceil((swiper.activeIndex - swiper.loopedSlides) / swiper.params.slidesPerGroup);
+
+      if (current > slidesLength - 1 - swiper.loopedSlides * 2) {
+        current -= slidesLength - swiper.loopedSlides * 2;
+      }
+
+      if (current > total - 1) current -= total;
+      if (current < 0 && swiper.params.paginationType !== 'bullets') current = total + current;
+    } else if (typeof swiper.snapIndex !== 'undefined') {
+      current = swiper.snapIndex;
+    } else {
+      current = swiper.activeIndex || 0;
+    } // Types
+
+
+    if (params.type === 'bullets' && swiper.pagination.bullets && swiper.pagination.bullets.length > 0) {
+      var bullets = swiper.pagination.bullets;
+      var firstIndex;
+      var lastIndex;
+      var midIndex;
+
+      if (params.dynamicBullets) {
+        swiper.pagination.bulletSize = bullets.eq(0)[swiper.isHorizontal() ? 'outerWidth' : 'outerHeight'](true);
+        $el.css(swiper.isHorizontal() ? 'width' : 'height', swiper.pagination.bulletSize * (params.dynamicMainBullets + 4) + "px");
+
+        if (params.dynamicMainBullets > 1 && swiper.previousIndex !== undefined) {
+          swiper.pagination.dynamicBulletIndex += current - swiper.previousIndex;
+
+          if (swiper.pagination.dynamicBulletIndex > params.dynamicMainBullets - 1) {
+            swiper.pagination.dynamicBulletIndex = params.dynamicMainBullets - 1;
+          } else if (swiper.pagination.dynamicBulletIndex < 0) {
+            swiper.pagination.dynamicBulletIndex = 0;
+          }
+        }
+
+        firstIndex = current - swiper.pagination.dynamicBulletIndex;
+        lastIndex = firstIndex + (Math.min(bullets.length, params.dynamicMainBullets) - 1);
+        midIndex = (lastIndex + firstIndex) / 2;
+      }
+
+      bullets.removeClass(params.bulletActiveClass + " " + params.bulletActiveClass + "-next " + params.bulletActiveClass + "-next-next " + params.bulletActiveClass + "-prev " + params.bulletActiveClass + "-prev-prev " + params.bulletActiveClass + "-main");
+
+      if ($el.length > 1) {
+        bullets.each(function (bullet) {
+          var $bullet = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(bullet);
+          var bulletIndex = $bullet.index();
+
+          if (bulletIndex === current) {
+            $bullet.addClass(params.bulletActiveClass);
+          }
+
+          if (params.dynamicBullets) {
+            if (bulletIndex >= firstIndex && bulletIndex <= lastIndex) {
+              $bullet.addClass(params.bulletActiveClass + "-main");
+            }
+
+            if (bulletIndex === firstIndex) {
+              $bullet.prev().addClass(params.bulletActiveClass + "-prev").prev().addClass(params.bulletActiveClass + "-prev-prev");
+            }
+
+            if (bulletIndex === lastIndex) {
+              $bullet.next().addClass(params.bulletActiveClass + "-next").next().addClass(params.bulletActiveClass + "-next-next");
+            }
+          }
+        });
+      } else {
+        var $bullet = bullets.eq(current);
+        var bulletIndex = $bullet.index();
+        $bullet.addClass(params.bulletActiveClass);
+
+        if (params.dynamicBullets) {
+          var $firstDisplayedBullet = bullets.eq(firstIndex);
+          var $lastDisplayedBullet = bullets.eq(lastIndex);
+
+          for (var i = firstIndex; i <= lastIndex; i += 1) {
+            bullets.eq(i).addClass(params.bulletActiveClass + "-main");
+          }
+
+          if (swiper.params.loop) {
+            if (bulletIndex >= bullets.length - params.dynamicMainBullets) {
+              for (var _i = params.dynamicMainBullets; _i >= 0; _i -= 1) {
+                bullets.eq(bullets.length - _i).addClass(params.bulletActiveClass + "-main");
+              }
+
+              bullets.eq(bullets.length - params.dynamicMainBullets - 1).addClass(params.bulletActiveClass + "-prev");
+            } else {
+              $firstDisplayedBullet.prev().addClass(params.bulletActiveClass + "-prev").prev().addClass(params.bulletActiveClass + "-prev-prev");
+              $lastDisplayedBullet.next().addClass(params.bulletActiveClass + "-next").next().addClass(params.bulletActiveClass + "-next-next");
+            }
+          } else {
+            $firstDisplayedBullet.prev().addClass(params.bulletActiveClass + "-prev").prev().addClass(params.bulletActiveClass + "-prev-prev");
+            $lastDisplayedBullet.next().addClass(params.bulletActiveClass + "-next").next().addClass(params.bulletActiveClass + "-next-next");
+          }
+        }
+      }
+
+      if (params.dynamicBullets) {
+        var dynamicBulletsLength = Math.min(bullets.length, params.dynamicMainBullets + 4);
+        var bulletsOffset = (swiper.pagination.bulletSize * dynamicBulletsLength - swiper.pagination.bulletSize) / 2 - midIndex * swiper.pagination.bulletSize;
+        var offsetProp = rtl ? 'right' : 'left';
+        bullets.css(swiper.isHorizontal() ? offsetProp : 'top', bulletsOffset + "px");
+      }
+    }
+
+    if (params.type === 'fraction') {
+      $el.find(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.currentClass)).text(params.formatFractionCurrent(current + 1));
+      $el.find(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.totalClass)).text(params.formatFractionTotal(total));
+    }
+
+    if (params.type === 'progressbar') {
+      var progressbarDirection;
+
+      if (params.progressbarOpposite) {
+        progressbarDirection = swiper.isHorizontal() ? 'vertical' : 'horizontal';
+      } else {
+        progressbarDirection = swiper.isHorizontal() ? 'horizontal' : 'vertical';
+      }
+
+      var scale = (current + 1) / total;
+      var scaleX = 1;
+      var scaleY = 1;
+
+      if (progressbarDirection === 'horizontal') {
+        scaleX = scale;
+      } else {
+        scaleY = scale;
+      }
+
+      $el.find(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.progressbarFillClass)).transform("translate3d(0,0,0) scaleX(" + scaleX + ") scaleY(" + scaleY + ")").transition(swiper.params.speed);
+    }
+
+    if (params.type === 'custom' && params.renderCustom) {
+      $el.html(params.renderCustom(swiper, current + 1, total));
+      swiper.emit('paginationRender', $el[0]);
+    } else {
+      swiper.emit('paginationUpdate', $el[0]);
+    }
+
+    $el[swiper.params.watchOverflow && swiper.isLocked ? 'addClass' : 'removeClass'](params.lockClass);
+  },
+  render: function render() {
+    // Render Container
+    var swiper = this;
+    var params = swiper.params.pagination;
+    if (!params.el || !swiper.pagination.el || !swiper.pagination.$el || swiper.pagination.$el.length === 0) return;
+    var slidesLength = swiper.virtual && swiper.params.virtual.enabled ? swiper.virtual.slides.length : swiper.slides.length;
+    var $el = swiper.pagination.$el;
+    var paginationHTML = '';
+
+    if (params.type === 'bullets') {
+      var numberOfBullets = swiper.params.loop ? Math.ceil((slidesLength - swiper.loopedSlides * 2) / swiper.params.slidesPerGroup) : swiper.snapGrid.length;
+
+      if (swiper.params.freeMode && !swiper.params.loop && numberOfBullets > slidesLength) {
+        numberOfBullets = slidesLength;
+      }
+
+      for (var i = 0; i < numberOfBullets; i += 1) {
+        if (params.renderBullet) {
+          paginationHTML += params.renderBullet.call(swiper, i, params.bulletClass);
+        } else {
+          paginationHTML += "<" + params.bulletElement + " class=\"" + params.bulletClass + "\"></" + params.bulletElement + ">";
+        }
+      }
+
+      $el.html(paginationHTML);
+      swiper.pagination.bullets = $el.find(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.bulletClass));
+    }
+
+    if (params.type === 'fraction') {
+      if (params.renderFraction) {
+        paginationHTML = params.renderFraction.call(swiper, params.currentClass, params.totalClass);
+      } else {
+        paginationHTML = "<span class=\"" + params.currentClass + "\"></span>" + ' / ' + ("<span class=\"" + params.totalClass + "\"></span>");
+      }
+
+      $el.html(paginationHTML);
+    }
+
+    if (params.type === 'progressbar') {
+      if (params.renderProgressbar) {
+        paginationHTML = params.renderProgressbar.call(swiper, params.progressbarFillClass);
+      } else {
+        paginationHTML = "<span class=\"" + params.progressbarFillClass + "\"></span>";
+      }
+
+      $el.html(paginationHTML);
+    }
+
+    if (params.type !== 'custom') {
+      swiper.emit('paginationRender', swiper.pagination.$el[0]);
+    }
+  },
+  init: function init() {
+    var swiper = this;
+    var params = swiper.params.pagination;
+    if (!params.el) return;
+    var $el = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.el);
+    if ($el.length === 0) return;
+
+    if (swiper.params.uniqueNavElements && typeof params.el === 'string' && $el.length > 1) {
+      $el = swiper.$el.find(params.el);
+    }
+
+    if (params.type === 'bullets' && params.clickable) {
+      $el.addClass(params.clickableClass);
+    }
+
+    $el.addClass(params.modifierClass + params.type);
+
+    if (params.type === 'bullets' && params.dynamicBullets) {
+      $el.addClass("" + params.modifierClass + params.type + "-dynamic");
+      swiper.pagination.dynamicBulletIndex = 0;
+
+      if (params.dynamicMainBullets < 1) {
+        params.dynamicMainBullets = 1;
+      }
+    }
+
+    if (params.type === 'progressbar' && params.progressbarOpposite) {
+      $el.addClass(params.progressbarOppositeClass);
+    }
+
+    if (params.clickable) {
+      $el.on('click', Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.bulletClass), function onClick(e) {
+        e.preventDefault();
+        var index = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(this).index() * swiper.params.slidesPerGroup;
+        if (swiper.params.loop) index += swiper.loopedSlides;
+        swiper.slideTo(index);
+      });
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.pagination, {
+      $el: $el,
+      el: $el[0]
+    });
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    var params = swiper.params.pagination;
+    if (!params.el || !swiper.pagination.el || !swiper.pagination.$el || swiper.pagination.$el.length === 0) return;
+    var $el = swiper.pagination.$el;
+    $el.removeClass(params.hiddenClass);
+    $el.removeClass(params.modifierClass + params.type);
+    if (swiper.pagination.bullets) swiper.pagination.bullets.removeClass(params.bulletActiveClass);
+
+    if (params.clickable) {
+      $el.off('click', Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(params.bulletClass));
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'pagination',
+  params: {
+    pagination: {
+      el: null,
+      bulletElement: 'span',
+      clickable: false,
+      hideOnClick: false,
+      renderBullet: null,
+      renderProgressbar: null,
+      renderFraction: null,
+      renderCustom: null,
+      progressbarOpposite: false,
+      type: 'bullets',
+      // 'bullets' or 'progressbar' or 'fraction' or 'custom'
+      dynamicBullets: false,
+      dynamicMainBullets: 1,
+      formatFractionCurrent: function formatFractionCurrent(number) {
+        return number;
+      },
+      formatFractionTotal: function formatFractionTotal(number) {
+        return number;
+      },
+      bulletClass: 'swiper-pagination-bullet',
+      bulletActiveClass: 'swiper-pagination-bullet-active',
+      modifierClass: 'swiper-pagination-',
+      // NEW
+      currentClass: 'swiper-pagination-current',
+      totalClass: 'swiper-pagination-total',
+      hiddenClass: 'swiper-pagination-hidden',
+      progressbarFillClass: 'swiper-pagination-progressbar-fill',
+      progressbarOppositeClass: 'swiper-pagination-progressbar-opposite',
+      clickableClass: 'swiper-pagination-clickable',
+      // NEW
+      lockClass: 'swiper-pagination-lock'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      pagination: _extends({
+        dynamicBulletIndex: 0
+      }, Pagination)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      swiper.pagination.init();
+      swiper.pagination.render();
+      swiper.pagination.update();
+    },
+    activeIndexChange: function activeIndexChange(swiper) {
+      if (swiper.params.loop) {
+        swiper.pagination.update();
+      } else if (typeof swiper.snapIndex === 'undefined') {
+        swiper.pagination.update();
+      }
+    },
+    snapIndexChange: function snapIndexChange(swiper) {
+      if (!swiper.params.loop) {
+        swiper.pagination.update();
+      }
+    },
+    slidesLengthChange: function slidesLengthChange(swiper) {
+      if (swiper.params.loop) {
+        swiper.pagination.render();
+        swiper.pagination.update();
+      }
+    },
+    snapGridLengthChange: function snapGridLengthChange(swiper) {
+      if (!swiper.params.loop) {
+        swiper.pagination.render();
+        swiper.pagination.update();
+      }
+    },
+    destroy: function destroy(swiper) {
+      swiper.pagination.destroy();
+    },
+    click: function click(swiper, e) {
+      var targetEl = e.target;
+
+      if (swiper.params.pagination.el && swiper.params.pagination.hideOnClick && swiper.pagination.$el.length > 0 && !Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(targetEl).hasClass(swiper.params.pagination.bulletClass)) {
+        if (swiper.navigation && (swiper.navigation.nextEl && targetEl === swiper.navigation.nextEl || swiper.navigation.prevEl && targetEl === swiper.navigation.prevEl)) return;
+        var isHidden = swiper.pagination.$el.hasClass(swiper.params.pagination.hiddenClass);
+
+        if (isHidden === true) {
+          swiper.emit('paginationShow');
+        } else {
+          swiper.emit('paginationHide');
+        }
+
+        swiper.pagination.$el.toggleClass(swiper.params.pagination.hiddenClass);
+      }
+    }
+  }
+});
 
 /***/ }),
 
@@ -10364,6 +25636,92 @@ function isNumeric(val) {
 
 /***/ }),
 
+/***/ "YGmK":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slidePrev.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slidePrev; });
+/* eslint no-unused-vars: "off" */
+function slidePrev(speed, runCallbacks, internal) {
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  var params = swiper.params,
+      animating = swiper.animating,
+      snapGrid = swiper.snapGrid,
+      slidesGrid = swiper.slidesGrid,
+      rtlTranslate = swiper.rtlTranslate;
+
+  if (params.loop) {
+    if (animating && params.loopPreventsSlide) return false;
+    swiper.loopFix(); // eslint-disable-next-line
+
+    swiper._clientLeft = swiper.$wrapperEl[0].clientLeft;
+  }
+
+  var translate = rtlTranslate ? swiper.translate : -swiper.translate;
+
+  function normalize(val) {
+    if (val < 0) return -Math.floor(Math.abs(val));
+    return Math.floor(val);
+  }
+
+  var normalizedTranslate = normalize(translate);
+  var normalizedSnapGrid = snapGrid.map(function (val) {
+    return normalize(val);
+  });
+  var currentSnap = snapGrid[normalizedSnapGrid.indexOf(normalizedTranslate)];
+  var prevSnap = snapGrid[normalizedSnapGrid.indexOf(normalizedTranslate) - 1];
+
+  if (typeof prevSnap === 'undefined' && params.cssMode) {
+    snapGrid.forEach(function (snap) {
+      if (!prevSnap && normalizedTranslate >= snap) prevSnap = snap;
+    });
+  }
+
+  var prevIndex;
+
+  if (typeof prevSnap !== 'undefined') {
+    prevIndex = slidesGrid.indexOf(prevSnap);
+    if (prevIndex < 0) prevIndex = swiper.activeIndex - 1;
+  }
+
+  return swiper.slideTo(prevIndex, speed, runCallbacks, internal);
+}
+
+/***/ }),
+
+/***/ "Yi0i":
+/*!**********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/breakpoints/index.js ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _setBreakpoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./setBreakpoint */ "wCrk");
+/* harmony import */ var _getBreakpoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./getBreakpoint */ "Ojvb");
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  setBreakpoint: _setBreakpoint__WEBPACK_IMPORTED_MODULE_0__["default"],
+  getBreakpoint: _getBreakpoint__WEBPACK_IMPORTED_MODULE_1__["default"]
+});
+
+/***/ }),
+
 /***/ "Ylt2":
 /*!********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/SubjectSubscription.js ***!
@@ -10447,6 +25805,56 @@ class QueueAction extends _AsyncAction__WEBPACK_IMPORTED_MODULE_0__["AsyncAction
 
 /***/ }),
 
+/***/ "Z67w":
+/*!************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/modular.js ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  useParams: function useParams(instanceParams) {
+    var instance = this;
+    if (!instance.modules) return;
+    Object.keys(instance.modules).forEach(function (moduleName) {
+      var module = instance.modules[moduleName]; // Extend params
+
+      if (module.params) {
+        Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(instanceParams, module.params);
+      }
+    });
+  },
+  useModules: function useModules(modulesParams) {
+    if (modulesParams === void 0) {
+      modulesParams = {};
+    }
+
+    var instance = this;
+    if (!instance.modules) return;
+    Object.keys(instance.modules).forEach(function (moduleName) {
+      var module = instance.modules[moduleName];
+      var moduleParams = modulesParams[moduleName] || {}; // Add event listeners
+
+      if (module.on && instance.on) {
+        Object.keys(module.on).forEach(function (moduleEventName) {
+          instance.on(moduleEventName, module.on[moduleEventName]);
+        });
+      } // Module create callback
+
+
+      if (module.create) {
+        module.create.bind(instance)(moduleParams);
+      }
+    });
+  }
+});
+
+/***/ }),
+
 /***/ "ZUHj":
 /*!***********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/subscribeToResult.js ***!
@@ -10473,6 +25881,317 @@ function subscribeToResult(outerSubscriber, result, outerValue, outerIndex, inne
     return Object(_subscribeTo__WEBPACK_IMPORTED_MODULE_1__["subscribeTo"])(result)(innerSubscriber);
 }
 //# sourceMappingURL=subscribeToResult.js.map
+
+/***/ }),
+
+/***/ "ZXcA":
+/*!*********************************************************!*\
+  !*** ./node_modules/swiper/esm/components/a11y/a11y.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var A11y = {
+  getRandomNumber: function getRandomNumber(size) {
+    if (size === void 0) {
+      size = 16;
+    }
+
+    var randomChar = function randomChar() {
+      return Math.round(16 * Math.random()).toString(16);
+    };
+
+    return 'x'.repeat(size).replace(/x/g, randomChar);
+  },
+  makeElFocusable: function makeElFocusable($el) {
+    $el.attr('tabIndex', '0');
+    return $el;
+  },
+  makeElNotFocusable: function makeElNotFocusable($el) {
+    $el.attr('tabIndex', '-1');
+    return $el;
+  },
+  addElRole: function addElRole($el, role) {
+    $el.attr('role', role);
+    return $el;
+  },
+  addElRoleDescription: function addElRoleDescription($el, description) {
+    $el.attr('aria-roledescription', description);
+    return $el;
+  },
+  addElControls: function addElControls($el, controls) {
+    $el.attr('aria-controls', controls);
+    return $el;
+  },
+  addElLabel: function addElLabel($el, label) {
+    $el.attr('aria-label', label);
+    return $el;
+  },
+  addElId: function addElId($el, id) {
+    $el.attr('id', id);
+    return $el;
+  },
+  addElLive: function addElLive($el, live) {
+    $el.attr('aria-live', live);
+    return $el;
+  },
+  disableEl: function disableEl($el) {
+    $el.attr('aria-disabled', true);
+    return $el;
+  },
+  enableEl: function enableEl($el) {
+    $el.attr('aria-disabled', false);
+    return $el;
+  },
+  onEnterOrSpaceKey: function onEnterOrSpaceKey(e) {
+    if (e.keyCode !== 13 && e.keyCode !== 32) return;
+    var swiper = this;
+    var params = swiper.params.a11y;
+    var $targetEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(e.target);
+
+    if (swiper.navigation && swiper.navigation.$nextEl && $targetEl.is(swiper.navigation.$nextEl)) {
+      if (!(swiper.isEnd && !swiper.params.loop)) {
+        swiper.slideNext();
+      }
+
+      if (swiper.isEnd) {
+        swiper.a11y.notify(params.lastSlideMessage);
+      } else {
+        swiper.a11y.notify(params.nextSlideMessage);
+      }
+    }
+
+    if (swiper.navigation && swiper.navigation.$prevEl && $targetEl.is(swiper.navigation.$prevEl)) {
+      if (!(swiper.isBeginning && !swiper.params.loop)) {
+        swiper.slidePrev();
+      }
+
+      if (swiper.isBeginning) {
+        swiper.a11y.notify(params.firstSlideMessage);
+      } else {
+        swiper.a11y.notify(params.prevSlideMessage);
+      }
+    }
+
+    if (swiper.pagination && $targetEl.is(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(swiper.params.pagination.bulletClass))) {
+      $targetEl[0].click();
+    }
+  },
+  notify: function notify(message) {
+    var swiper = this;
+    var notification = swiper.a11y.liveRegion;
+    if (notification.length === 0) return;
+    notification.html('');
+    notification.html(message);
+  },
+  updateNavigation: function updateNavigation() {
+    var swiper = this;
+    if (swiper.params.loop || !swiper.navigation) return;
+    var _swiper$navigation = swiper.navigation,
+        $nextEl = _swiper$navigation.$nextEl,
+        $prevEl = _swiper$navigation.$prevEl;
+
+    if ($prevEl && $prevEl.length > 0) {
+      if (swiper.isBeginning) {
+        swiper.a11y.disableEl($prevEl);
+        swiper.a11y.makeElNotFocusable($prevEl);
+      } else {
+        swiper.a11y.enableEl($prevEl);
+        swiper.a11y.makeElFocusable($prevEl);
+      }
+    }
+
+    if ($nextEl && $nextEl.length > 0) {
+      if (swiper.isEnd) {
+        swiper.a11y.disableEl($nextEl);
+        swiper.a11y.makeElNotFocusable($nextEl);
+      } else {
+        swiper.a11y.enableEl($nextEl);
+        swiper.a11y.makeElFocusable($nextEl);
+      }
+    }
+  },
+  updatePagination: function updatePagination() {
+    var swiper = this;
+    var params = swiper.params.a11y;
+
+    if (swiper.pagination && swiper.params.pagination.clickable && swiper.pagination.bullets && swiper.pagination.bullets.length) {
+      swiper.pagination.bullets.each(function (bulletEl) {
+        var $bulletEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(bulletEl);
+        swiper.a11y.makeElFocusable($bulletEl);
+
+        if (!swiper.params.pagination.renderBullet) {
+          swiper.a11y.addElRole($bulletEl, 'button');
+          swiper.a11y.addElLabel($bulletEl, params.paginationBulletMessage.replace(/\{\{index\}\}/, $bulletEl.index() + 1));
+        }
+      });
+    }
+  },
+  init: function init() {
+    var swiper = this;
+    var params = swiper.params.a11y;
+    swiper.$el.append(swiper.a11y.liveRegion); // Container
+
+    var $containerEl = swiper.$el;
+
+    if (params.containerRoleDescriptionMessage) {
+      swiper.a11y.addElRoleDescription($containerEl, params.containerRoleDescriptionMessage);
+    }
+
+    if (params.containerMessage) {
+      swiper.a11y.addElLabel($containerEl, params.containerMessage);
+    } // Wrapper
+
+
+    var $wrapperEl = swiper.$wrapperEl;
+    var wrapperId = $wrapperEl.attr('id') || "swiper-wrapper-" + swiper.a11y.getRandomNumber(16);
+    var live;
+    swiper.a11y.addElId($wrapperEl, wrapperId);
+
+    if (swiper.params.autoplay && swiper.params.autoplay.enabled) {
+      live = 'off';
+    } else {
+      live = 'polite';
+    }
+
+    swiper.a11y.addElLive($wrapperEl, live); // Slide
+
+    if (params.itemRoleDescriptionMessage) {
+      swiper.a11y.addElRoleDescription(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(swiper.slides), params.itemRoleDescriptionMessage);
+    }
+
+    swiper.a11y.addElRole(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(swiper.slides), 'group');
+    swiper.slides.each(function (slideEl) {
+      var $slideEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(slideEl);
+      var ariaLabelMessage = params.slideLabelMessage.replace(/\{\{index\}\}/, $slideEl.index() + 1).replace(/\{\{slidesLength\}\}/, swiper.slides.length);
+      swiper.a11y.addElLabel($slideEl, ariaLabelMessage);
+    }); // Navigation
+
+    var $nextEl;
+    var $prevEl;
+
+    if (swiper.navigation && swiper.navigation.$nextEl) {
+      $nextEl = swiper.navigation.$nextEl;
+    }
+
+    if (swiper.navigation && swiper.navigation.$prevEl) {
+      $prevEl = swiper.navigation.$prevEl;
+    }
+
+    if ($nextEl && $nextEl.length) {
+      swiper.a11y.makeElFocusable($nextEl);
+
+      if ($nextEl[0].tagName !== 'BUTTON') {
+        swiper.a11y.addElRole($nextEl, 'button');
+        $nextEl.on('keydown', swiper.a11y.onEnterOrSpaceKey);
+      }
+
+      swiper.a11y.addElLabel($nextEl, params.nextSlideMessage);
+      swiper.a11y.addElControls($nextEl, wrapperId);
+    }
+
+    if ($prevEl && $prevEl.length) {
+      swiper.a11y.makeElFocusable($prevEl);
+
+      if ($prevEl[0].tagName !== 'BUTTON') {
+        swiper.a11y.addElRole($prevEl, 'button');
+        $prevEl.on('keydown', swiper.a11y.onEnterOrSpaceKey);
+      }
+
+      swiper.a11y.addElLabel($prevEl, params.prevSlideMessage);
+      swiper.a11y.addElControls($prevEl, wrapperId);
+    } // Pagination
+
+
+    if (swiper.pagination && swiper.params.pagination.clickable && swiper.pagination.bullets && swiper.pagination.bullets.length) {
+      swiper.pagination.$el.on('keydown', Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(swiper.params.pagination.bulletClass), swiper.a11y.onEnterOrSpaceKey);
+    }
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    if (swiper.a11y.liveRegion && swiper.a11y.liveRegion.length > 0) swiper.a11y.liveRegion.remove();
+    var $nextEl;
+    var $prevEl;
+
+    if (swiper.navigation && swiper.navigation.$nextEl) {
+      $nextEl = swiper.navigation.$nextEl;
+    }
+
+    if (swiper.navigation && swiper.navigation.$prevEl) {
+      $prevEl = swiper.navigation.$prevEl;
+    }
+
+    if ($nextEl) {
+      $nextEl.off('keydown', swiper.a11y.onEnterOrSpaceKey);
+    }
+
+    if ($prevEl) {
+      $prevEl.off('keydown', swiper.a11y.onEnterOrSpaceKey);
+    } // Pagination
+
+
+    if (swiper.pagination && swiper.params.pagination.clickable && swiper.pagination.bullets && swiper.pagination.bullets.length) {
+      swiper.pagination.$el.off('keydown', Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["classesToSelector"])(swiper.params.pagination.bulletClass), swiper.a11y.onEnterOrSpaceKey);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'a11y',
+  params: {
+    a11y: {
+      enabled: true,
+      notificationClass: 'swiper-notification',
+      prevSlideMessage: 'Previous slide',
+      nextSlideMessage: 'Next slide',
+      firstSlideMessage: 'This is the first slide',
+      lastSlideMessage: 'This is the last slide',
+      paginationBulletMessage: 'Go to slide {{index}}',
+      slideLabelMessage: '{{index}} / {{slidesLength}}',
+      containerMessage: null,
+      containerRoleDescriptionMessage: null,
+      itemRoleDescriptionMessage: null
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      a11y: _extends({}, A11y, {
+        liveRegion: Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<span class=\"" + swiper.params.a11y.notificationClass + "\" aria-live=\"assertive\" aria-atomic=\"true\"></span>")
+      })
+    });
+  },
+  on: {
+    afterInit: function afterInit(swiper) {
+      if (!swiper.params.a11y.enabled) return;
+      swiper.a11y.init();
+      swiper.a11y.updateNavigation();
+    },
+    toEdge: function toEdge(swiper) {
+      if (!swiper.params.a11y.enabled) return;
+      swiper.a11y.updateNavigation();
+    },
+    fromEdge: function fromEdge(swiper) {
+      if (!swiper.params.a11y.enabled) return;
+      swiper.a11y.updateNavigation();
+    },
+    paginationUpdate: function paginationUpdate(swiper) {
+      if (!swiper.params.a11y.enabled) return;
+      swiper.a11y.updatePagination();
+    },
+    destroy: function destroy(swiper) {
+      if (!swiper.params.a11y.enabled) return;
+      swiper.a11y.destroy();
+    }
+  }
+});
 
 /***/ }),
 
@@ -10679,6 +26398,69 @@ function switchMapTo(innerObservable, resultSelector) {
 
 /***/ }),
 
+/***/ "akMW":
+/*!**************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateProgress.js ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateProgress; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function updateProgress(translate) {
+  var swiper = this;
+
+  if (typeof translate === 'undefined') {
+    var multiplier = swiper.rtlTranslate ? -1 : 1; // eslint-disable-next-line
+
+    translate = swiper && swiper.translate && swiper.translate * multiplier || 0;
+  }
+
+  var params = swiper.params;
+  var translatesDiff = swiper.maxTranslate() - swiper.minTranslate();
+  var progress = swiper.progress,
+      isBeginning = swiper.isBeginning,
+      isEnd = swiper.isEnd;
+  var wasBeginning = isBeginning;
+  var wasEnd = isEnd;
+
+  if (translatesDiff === 0) {
+    progress = 0;
+    isBeginning = true;
+    isEnd = true;
+  } else {
+    progress = (translate - swiper.minTranslate()) / translatesDiff;
+    isBeginning = progress <= 0;
+    isEnd = progress >= 1;
+  }
+
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper, {
+    progress: progress,
+    isBeginning: isBeginning,
+    isEnd: isEnd
+  });
+  if (params.watchSlidesProgress || params.watchSlidesVisibility || params.centeredSlides && params.autoHeight) swiper.updateSlidesProgress(translate);
+
+  if (isBeginning && !wasBeginning) {
+    swiper.emit('reachBeginning toEdge');
+  }
+
+  if (isEnd && !wasEnd) {
+    swiper.emit('reachEnd toEdge');
+  }
+
+  if (wasBeginning && !isBeginning || wasEnd && !isEnd) {
+    swiper.emit('fromEdge');
+  }
+
+  swiper.emit('progress', progress);
+}
+
+/***/ }),
+
 /***/ "bHdf":
 /*!*******************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/mergeAll.js ***!
@@ -10716,6 +26498,831 @@ function concatMap(project, resultSelector) {
     return Object(_mergeMap__WEBPACK_IMPORTED_MODULE_0__["mergeMap"])(project, resultSelector, 1);
 }
 //# sourceMappingURL=concatMap.js.map
+
+/***/ }),
+
+/***/ "bTu8":
+/*!***************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/core-class.js ***!
+  \***************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+/* harmony import */ var _utils_get_support__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/get-support */ "OsfX");
+/* harmony import */ var _utils_get_device__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/get-device */ "ngAh");
+/* harmony import */ var _utils_get_browser__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/get-browser */ "NDSe");
+/* harmony import */ var _modules_resize_resize__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../modules/resize/resize */ "0t0F");
+/* harmony import */ var _modules_observer_observer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../modules/observer/observer */ "f9ef");
+/* harmony import */ var _modular__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modular */ "Z67w");
+/* harmony import */ var _events_emitter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./events-emitter */ "xW1W");
+/* harmony import */ var _update_index__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./update/index */ "rTk1");
+/* harmony import */ var _translate_index__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./translate/index */ "0roy");
+/* harmony import */ var _transition_index__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./transition/index */ "wvNA");
+/* harmony import */ var _slide_index__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./slide/index */ "IDX/");
+/* harmony import */ var _loop_index__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./loop/index */ "ju4L");
+/* harmony import */ var _grab_cursor_index__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./grab-cursor/index */ "E51R");
+/* harmony import */ var _manipulation_index__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./manipulation/index */ "CK30");
+/* harmony import */ var _events_index__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./events/index */ "nyww");
+/* harmony import */ var _breakpoints_index__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./breakpoints/index */ "Yi0i");
+/* harmony import */ var _classes_index__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./classes/index */ "VlRc");
+/* harmony import */ var _images_index__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./images/index */ "N2wq");
+/* harmony import */ var _check_overflow_index__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./check-overflow/index */ "AUG5");
+/* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./defaults */ "nyfm");
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/* eslint no-param-reassign: "off" */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var prototypes = {
+  modular: _modular__WEBPACK_IMPORTED_MODULE_7__["default"],
+  eventsEmitter: _events_emitter__WEBPACK_IMPORTED_MODULE_8__["default"],
+  update: _update_index__WEBPACK_IMPORTED_MODULE_9__["default"],
+  translate: _translate_index__WEBPACK_IMPORTED_MODULE_10__["default"],
+  transition: _transition_index__WEBPACK_IMPORTED_MODULE_11__["default"],
+  slide: _slide_index__WEBPACK_IMPORTED_MODULE_12__["default"],
+  loop: _loop_index__WEBPACK_IMPORTED_MODULE_13__["default"],
+  grabCursor: _grab_cursor_index__WEBPACK_IMPORTED_MODULE_14__["default"],
+  manipulation: _manipulation_index__WEBPACK_IMPORTED_MODULE_15__["default"],
+  events: _events_index__WEBPACK_IMPORTED_MODULE_16__["default"],
+  breakpoints: _breakpoints_index__WEBPACK_IMPORTED_MODULE_17__["default"],
+  checkOverflow: _check_overflow_index__WEBPACK_IMPORTED_MODULE_20__["default"],
+  classes: _classes_index__WEBPACK_IMPORTED_MODULE_18__["default"],
+  images: _images_index__WEBPACK_IMPORTED_MODULE_19__["default"]
+};
+var extendedDefaults = {};
+
+var Swiper = /*#__PURE__*/function () {
+  function Swiper() {
+    var el;
+    var params;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (args.length === 1 && args[0].constructor && Object.prototype.toString.call(args[0]).slice(8, -1) === 'Object') {
+      params = args[0];
+    } else {
+      el = args[0];
+      params = args[1];
+    }
+
+    if (!params) params = {};
+    params = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, params);
+    if (el && !params.el) params.el = el;
+
+    if (params.el && Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.el).length > 1) {
+      var swipers = [];
+      Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.el).each(function (containerEl) {
+        var newParams = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, params, {
+          el: containerEl
+        });
+        swipers.push(new Swiper(newParams));
+      });
+      return swipers;
+    } // Swiper Instance
+
+
+    var swiper = this;
+    swiper.__swiper__ = true;
+    swiper.support = Object(_utils_get_support__WEBPACK_IMPORTED_MODULE_2__["getSupport"])();
+    swiper.device = Object(_utils_get_device__WEBPACK_IMPORTED_MODULE_3__["getDevice"])({
+      userAgent: params.userAgent
+    });
+    swiper.browser = Object(_utils_get_browser__WEBPACK_IMPORTED_MODULE_4__["getBrowser"])();
+    swiper.eventsListeners = {};
+    swiper.eventsAnyListeners = [];
+
+    if (typeof swiper.modules === 'undefined') {
+      swiper.modules = {};
+    }
+
+    Object.keys(swiper.modules).forEach(function (moduleName) {
+      var module = swiper.modules[moduleName];
+
+      if (module.params) {
+        var moduleParamName = Object.keys(module.params)[0];
+        var moduleParams = module.params[moduleParamName];
+        if (typeof moduleParams !== 'object' || moduleParams === null) return;
+        if (!(moduleParamName in params && 'enabled' in moduleParams)) return;
+
+        if (params[moduleParamName] === true) {
+          params[moduleParamName] = {
+            enabled: true
+          };
+        }
+
+        if (typeof params[moduleParamName] === 'object' && !('enabled' in params[moduleParamName])) {
+          params[moduleParamName].enabled = true;
+        }
+
+        if (!params[moduleParamName]) params[moduleParamName] = {
+          enabled: false
+        };
+      }
+    }); // Extend defaults with modules params
+
+    var swiperParams = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, _defaults__WEBPACK_IMPORTED_MODULE_21__["default"]);
+    swiper.useParams(swiperParams); // Extend defaults with passed params
+
+    swiper.params = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, swiperParams, extendedDefaults, params);
+    swiper.originalParams = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, swiper.params);
+    swiper.passedParams = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])({}, params); // add event listeners
+
+    if (swiper.params && swiper.params.on) {
+      Object.keys(swiper.params.on).forEach(function (eventName) {
+        swiper.on(eventName, swiper.params.on[eventName]);
+      });
+    }
+
+    if (swiper.params && swiper.params.onAny) {
+      swiper.onAny(swiper.params.onAny);
+    } // Save Dom lib
+
+
+    swiper.$ = _utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"]; // Extend Swiper
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper, {
+      el: el,
+      // Classes
+      classNames: [],
+      // Slides
+      slides: Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(),
+      slidesGrid: [],
+      snapGrid: [],
+      slidesSizesGrid: [],
+      // isDirection
+      isHorizontal: function isHorizontal() {
+        return swiper.params.direction === 'horizontal';
+      },
+      isVertical: function isVertical() {
+        return swiper.params.direction === 'vertical';
+      },
+      // Indexes
+      activeIndex: 0,
+      realIndex: 0,
+      //
+      isBeginning: true,
+      isEnd: false,
+      // Props
+      translate: 0,
+      previousTranslate: 0,
+      progress: 0,
+      velocity: 0,
+      animating: false,
+      // Locks
+      allowSlideNext: swiper.params.allowSlideNext,
+      allowSlidePrev: swiper.params.allowSlidePrev,
+      // Touch Events
+      touchEvents: function touchEvents() {
+        var touch = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
+        var desktop = ['mousedown', 'mousemove', 'mouseup'];
+
+        if (swiper.support.pointerEvents) {
+          desktop = ['pointerdown', 'pointermove', 'pointerup'];
+        }
+
+        swiper.touchEventsTouch = {
+          start: touch[0],
+          move: touch[1],
+          end: touch[2],
+          cancel: touch[3]
+        };
+        swiper.touchEventsDesktop = {
+          start: desktop[0],
+          move: desktop[1],
+          end: desktop[2]
+        };
+        return swiper.support.touch || !swiper.params.simulateTouch ? swiper.touchEventsTouch : swiper.touchEventsDesktop;
+      }(),
+      touchEventsData: {
+        isTouched: undefined,
+        isMoved: undefined,
+        allowTouchCallbacks: undefined,
+        touchStartTime: undefined,
+        isScrolling: undefined,
+        currentTranslate: undefined,
+        startTranslate: undefined,
+        allowThresholdMove: undefined,
+        // Form elements to match
+        formElements: 'input, select, option, textarea, button, video, label',
+        // Last click time
+        lastClickTime: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["now"])(),
+        clickTimeout: undefined,
+        // Velocities
+        velocities: [],
+        allowMomentumBounce: undefined,
+        isTouchEvent: undefined,
+        startMoving: undefined
+      },
+      // Clicks
+      allowClick: true,
+      // Touches
+      allowTouchMove: swiper.params.allowTouchMove,
+      touches: {
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+        diff: 0
+      },
+      // Images
+      imagesToLoad: [],
+      imagesLoaded: 0
+    }); // Install Modules
+
+    swiper.useModules();
+    swiper.emit('_swiper'); // Init
+
+    if (swiper.params.init) {
+      swiper.init();
+    } // Return app instance
+
+
+    return swiper;
+  }
+
+  var _proto = Swiper.prototype;
+
+  _proto.emitContainerClasses = function emitContainerClasses() {
+    var swiper = this;
+    if (!swiper.params._emitClasses || !swiper.el) return;
+    var classes = swiper.el.className.split(' ').filter(function (className) {
+      return className.indexOf('swiper-container') === 0 || className.indexOf(swiper.params.containerModifierClass) === 0;
+    });
+    swiper.emit('_containerClasses', classes.join(' '));
+  };
+
+  _proto.getSlideClasses = function getSlideClasses(slideEl) {
+    var swiper = this;
+    return slideEl.className.split(' ').filter(function (className) {
+      return className.indexOf('swiper-slide') === 0 || className.indexOf(swiper.params.slideClass) === 0;
+    }).join(' ');
+  };
+
+  _proto.emitSlidesClasses = function emitSlidesClasses() {
+    var swiper = this;
+    if (!swiper.params._emitClasses || !swiper.el) return;
+    var updates = [];
+    swiper.slides.each(function (slideEl) {
+      var classNames = swiper.getSlideClasses(slideEl);
+      updates.push({
+        slideEl: slideEl,
+        classNames: classNames
+      });
+      swiper.emit('_slideClass', slideEl, classNames);
+    });
+    swiper.emit('_slideClasses', updates);
+  };
+
+  _proto.slidesPerViewDynamic = function slidesPerViewDynamic() {
+    var swiper = this;
+    var params = swiper.params,
+        slides = swiper.slides,
+        slidesGrid = swiper.slidesGrid,
+        swiperSize = swiper.size,
+        activeIndex = swiper.activeIndex;
+    var spv = 1;
+
+    if (params.centeredSlides) {
+      var slideSize = slides[activeIndex].swiperSlideSize;
+      var breakLoop;
+
+      for (var i = activeIndex + 1; i < slides.length; i += 1) {
+        if (slides[i] && !breakLoop) {
+          slideSize += slides[i].swiperSlideSize;
+          spv += 1;
+          if (slideSize > swiperSize) breakLoop = true;
+        }
+      }
+
+      for (var _i = activeIndex - 1; _i >= 0; _i -= 1) {
+        if (slides[_i] && !breakLoop) {
+          slideSize += slides[_i].swiperSlideSize;
+          spv += 1;
+          if (slideSize > swiperSize) breakLoop = true;
+        }
+      }
+    } else {
+      for (var _i2 = activeIndex + 1; _i2 < slides.length; _i2 += 1) {
+        if (slidesGrid[_i2] - slidesGrid[activeIndex] < swiperSize) {
+          spv += 1;
+        }
+      }
+    }
+
+    return spv;
+  };
+
+  _proto.update = function update() {
+    var swiper = this;
+    if (!swiper || swiper.destroyed) return;
+    var snapGrid = swiper.snapGrid,
+        params = swiper.params; // Breakpoints
+
+    if (params.breakpoints) {
+      swiper.setBreakpoint();
+    }
+
+    swiper.updateSize();
+    swiper.updateSlides();
+    swiper.updateProgress();
+    swiper.updateSlidesClasses();
+
+    function setTranslate() {
+      var translateValue = swiper.rtlTranslate ? swiper.translate * -1 : swiper.translate;
+      var newTranslate = Math.min(Math.max(translateValue, swiper.maxTranslate()), swiper.minTranslate());
+      swiper.setTranslate(newTranslate);
+      swiper.updateActiveIndex();
+      swiper.updateSlidesClasses();
+    }
+
+    var translated;
+
+    if (swiper.params.freeMode) {
+      setTranslate();
+
+      if (swiper.params.autoHeight) {
+        swiper.updateAutoHeight();
+      }
+    } else {
+      if ((swiper.params.slidesPerView === 'auto' || swiper.params.slidesPerView > 1) && swiper.isEnd && !swiper.params.centeredSlides) {
+        translated = swiper.slideTo(swiper.slides.length - 1, 0, false, true);
+      } else {
+        translated = swiper.slideTo(swiper.activeIndex, 0, false, true);
+      }
+
+      if (!translated) {
+        setTranslate();
+      }
+    }
+
+    if (params.watchOverflow && snapGrid !== swiper.snapGrid) {
+      swiper.checkOverflow();
+    }
+
+    swiper.emit('update');
+  };
+
+  _proto.changeDirection = function changeDirection(newDirection, needUpdate) {
+    if (needUpdate === void 0) {
+      needUpdate = true;
+    }
+
+    var swiper = this;
+    var currentDirection = swiper.params.direction;
+
+    if (!newDirection) {
+      // eslint-disable-next-line
+      newDirection = currentDirection === 'horizontal' ? 'vertical' : 'horizontal';
+    }
+
+    if (newDirection === currentDirection || newDirection !== 'horizontal' && newDirection !== 'vertical') {
+      return swiper;
+    }
+
+    swiper.$el.removeClass("" + swiper.params.containerModifierClass + currentDirection).addClass("" + swiper.params.containerModifierClass + newDirection);
+    swiper.emitContainerClasses();
+    swiper.params.direction = newDirection;
+    swiper.slides.each(function (slideEl) {
+      if (newDirection === 'vertical') {
+        slideEl.style.width = '';
+      } else {
+        slideEl.style.height = '';
+      }
+    });
+    swiper.emit('changeDirection');
+    if (needUpdate) swiper.update();
+    return swiper;
+  };
+
+  _proto.mount = function mount(el) {
+    var swiper = this;
+    if (swiper.mounted) return true; // Find el
+
+    var $el = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(el || swiper.params.el);
+    el = $el[0];
+
+    if (!el) {
+      return false;
+    }
+
+    el.swiper = swiper; // Find Wrapper
+
+    var $wrapperEl;
+
+    if (el && el.shadowRoot && el.shadowRoot.querySelector) {
+      $wrapperEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(el.shadowRoot.querySelector("." + swiper.params.wrapperClass)); // Children needs to return slot items
+
+      $wrapperEl.children = function (options) {
+        return $el.children(options);
+      };
+    } else {
+      $wrapperEl = $el.children("." + swiper.params.wrapperClass);
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper, {
+      $el: $el,
+      el: el,
+      $wrapperEl: $wrapperEl,
+      wrapperEl: $wrapperEl[0],
+      mounted: true,
+      // RTL
+      rtl: el.dir.toLowerCase() === 'rtl' || $el.css('direction') === 'rtl',
+      rtlTranslate: swiper.params.direction === 'horizontal' && (el.dir.toLowerCase() === 'rtl' || $el.css('direction') === 'rtl'),
+      wrongRTL: $wrapperEl.css('display') === '-webkit-box'
+    });
+    return true;
+  };
+
+  _proto.init = function init(el) {
+    var swiper = this;
+    if (swiper.initialized) return swiper;
+    var mounted = swiper.mount(el);
+    if (mounted === false) return swiper;
+    swiper.emit('beforeInit'); // Set breakpoint
+
+    if (swiper.params.breakpoints) {
+      swiper.setBreakpoint();
+    } // Add Classes
+
+
+    swiper.addClasses(); // Create loop
+
+    if (swiper.params.loop) {
+      swiper.loopCreate();
+    } // Update size
+
+
+    swiper.updateSize(); // Update slides
+
+    swiper.updateSlides();
+
+    if (swiper.params.watchOverflow) {
+      swiper.checkOverflow();
+    } // Set Grab Cursor
+
+
+    if (swiper.params.grabCursor) {
+      swiper.setGrabCursor();
+    }
+
+    if (swiper.params.preloadImages) {
+      swiper.preloadImages();
+    } // Slide To Initial Slide
+
+
+    if (swiper.params.loop) {
+      swiper.slideTo(swiper.params.initialSlide + swiper.loopedSlides, 0, swiper.params.runCallbacksOnInit);
+    } else {
+      swiper.slideTo(swiper.params.initialSlide, 0, swiper.params.runCallbacksOnInit);
+    } // Attach events
+
+
+    swiper.attachEvents(); // Init Flag
+
+    swiper.initialized = true; // Emit
+
+    swiper.emit('init');
+    swiper.emit('afterInit');
+    return swiper;
+  };
+
+  _proto.destroy = function destroy(deleteInstance, cleanStyles) {
+    if (deleteInstance === void 0) {
+      deleteInstance = true;
+    }
+
+    if (cleanStyles === void 0) {
+      cleanStyles = true;
+    }
+
+    var swiper = this;
+    var params = swiper.params,
+        $el = swiper.$el,
+        $wrapperEl = swiper.$wrapperEl,
+        slides = swiper.slides;
+
+    if (typeof swiper.params === 'undefined' || swiper.destroyed) {
+      return null;
+    }
+
+    swiper.emit('beforeDestroy'); // Init Flag
+
+    swiper.initialized = false; // Detach events
+
+    swiper.detachEvents(); // Destroy loop
+
+    if (params.loop) {
+      swiper.loopDestroy();
+    } // Cleanup styles
+
+
+    if (cleanStyles) {
+      swiper.removeClasses();
+      $el.removeAttr('style');
+      $wrapperEl.removeAttr('style');
+
+      if (slides && slides.length) {
+        slides.removeClass([params.slideVisibleClass, params.slideActiveClass, params.slideNextClass, params.slidePrevClass].join(' ')).removeAttr('style').removeAttr('data-swiper-slide-index');
+      }
+    }
+
+    swiper.emit('destroy'); // Detach emitter events
+
+    Object.keys(swiper.eventsListeners).forEach(function (eventName) {
+      swiper.off(eventName);
+    });
+
+    if (deleteInstance !== false) {
+      swiper.$el[0].swiper = null;
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["deleteProps"])(swiper);
+    }
+
+    swiper.destroyed = true;
+    return null;
+  };
+
+  Swiper.extendDefaults = function extendDefaults(newDefaults) {
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(extendedDefaults, newDefaults);
+  };
+
+  Swiper.installModule = function installModule(module) {
+    if (!Swiper.prototype.modules) Swiper.prototype.modules = {};
+    var name = module.name || Object.keys(Swiper.prototype.modules).length + "_" + Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["now"])();
+    Swiper.prototype.modules[name] = module;
+  };
+
+  Swiper.use = function use(module) {
+    if (Array.isArray(module)) {
+      module.forEach(function (m) {
+        return Swiper.installModule(m);
+      });
+      return Swiper;
+    }
+
+    Swiper.installModule(module);
+    return Swiper;
+  };
+
+  _createClass(Swiper, null, [{
+    key: "extendedDefaults",
+    get: function get() {
+      return extendedDefaults;
+    }
+  }, {
+    key: "defaults",
+    get: function get() {
+      return _defaults__WEBPACK_IMPORTED_MODULE_21__["default"];
+    }
+  }]);
+
+  return Swiper;
+}();
+
+Object.keys(prototypes).forEach(function (prototypeGroup) {
+  Object.keys(prototypes[prototypeGroup]).forEach(function (protoMethod) {
+    Swiper.prototype[protoMethod] = prototypes[prototypeGroup][protoMethod];
+  });
+});
+Swiper.use([_modules_resize_resize__WEBPACK_IMPORTED_MODULE_5__["default"], _modules_observer_observer__WEBPACK_IMPORTED_MODULE_6__["default"]]);
+/* harmony default export */ __webpack_exports__["default"] = (Swiper);
+
+/***/ }),
+
+/***/ "c0r8":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/controller/controller.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+/* eslint no-bitwise: ["error", { "allow": [">>"] }] */
+
+var Controller = {
+  LinearSpline: function LinearSpline(x, y) {
+    var binarySearch = function search() {
+      var maxIndex;
+      var minIndex;
+      var guess;
+      return function (array, val) {
+        minIndex = -1;
+        maxIndex = array.length;
+
+        while (maxIndex - minIndex > 1) {
+          guess = maxIndex + minIndex >> 1;
+
+          if (array[guess] <= val) {
+            minIndex = guess;
+          } else {
+            maxIndex = guess;
+          }
+        }
+
+        return maxIndex;
+      };
+    }();
+
+    this.x = x;
+    this.y = y;
+    this.lastIndex = x.length - 1; // Given an x value (x2), return the expected y2 value:
+    // (x1,y1) is the known point before given value,
+    // (x3,y3) is the known point after given value.
+
+    var i1;
+    var i3;
+
+    this.interpolate = function interpolate(x2) {
+      if (!x2) return 0; // Get the indexes of x1 and x3 (the array indexes before and after given x2):
+
+      i3 = binarySearch(this.x, x2);
+      i1 = i3 - 1; // We have our indexes i1 & i3, so we can calculate already:
+      // y2 := ((x2−x1) × (y3−y1)) ÷ (x3−x1) + y1
+
+      return (x2 - this.x[i1]) * (this.y[i3] - this.y[i1]) / (this.x[i3] - this.x[i1]) + this.y[i1];
+    };
+
+    return this;
+  },
+  // xxx: for now i will just save one spline function to to
+  getInterpolateFunction: function getInterpolateFunction(c) {
+    var swiper = this;
+
+    if (!swiper.controller.spline) {
+      swiper.controller.spline = swiper.params.loop ? new Controller.LinearSpline(swiper.slidesGrid, c.slidesGrid) : new Controller.LinearSpline(swiper.snapGrid, c.snapGrid);
+    }
+  },
+  setTranslate: function setTranslate(_setTranslate, byController) {
+    var swiper = this;
+    var controlled = swiper.controller.control;
+    var multiplier;
+    var controlledTranslate;
+    var Swiper = swiper.constructor;
+
+    function setControlledTranslate(c) {
+      // this will create an Interpolate function based on the snapGrids
+      // x is the Grid of the scrolled scroller and y will be the controlled scroller
+      // it makes sense to create this only once and recall it for the interpolation
+      // the function does a lot of value caching for performance
+      var translate = swiper.rtlTranslate ? -swiper.translate : swiper.translate;
+
+      if (swiper.params.controller.by === 'slide') {
+        swiper.controller.getInterpolateFunction(c); // i am not sure why the values have to be multiplicated this way, tried to invert the snapGrid
+        // but it did not work out
+
+        controlledTranslate = -swiper.controller.spline.interpolate(-translate);
+      }
+
+      if (!controlledTranslate || swiper.params.controller.by === 'container') {
+        multiplier = (c.maxTranslate() - c.minTranslate()) / (swiper.maxTranslate() - swiper.minTranslate());
+        controlledTranslate = (translate - swiper.minTranslate()) * multiplier + c.minTranslate();
+      }
+
+      if (swiper.params.controller.inverse) {
+        controlledTranslate = c.maxTranslate() - controlledTranslate;
+      }
+
+      c.updateProgress(controlledTranslate);
+      c.setTranslate(controlledTranslate, swiper);
+      c.updateActiveIndex();
+      c.updateSlidesClasses();
+    }
+
+    if (Array.isArray(controlled)) {
+      for (var i = 0; i < controlled.length; i += 1) {
+        if (controlled[i] !== byController && controlled[i] instanceof Swiper) {
+          setControlledTranslate(controlled[i]);
+        }
+      }
+    } else if (controlled instanceof Swiper && byController !== controlled) {
+      setControlledTranslate(controlled);
+    }
+  },
+  setTransition: function setTransition(duration, byController) {
+    var swiper = this;
+    var Swiper = swiper.constructor;
+    var controlled = swiper.controller.control;
+    var i;
+
+    function setControlledTransition(c) {
+      c.setTransition(duration, swiper);
+
+      if (duration !== 0) {
+        c.transitionStart();
+
+        if (c.params.autoHeight) {
+          Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["nextTick"])(function () {
+            c.updateAutoHeight();
+          });
+        }
+
+        c.$wrapperEl.transitionEnd(function () {
+          if (!controlled) return;
+
+          if (c.params.loop && swiper.params.controller.by === 'slide') {
+            c.loopFix();
+          }
+
+          c.transitionEnd();
+        });
+      }
+    }
+
+    if (Array.isArray(controlled)) {
+      for (i = 0; i < controlled.length; i += 1) {
+        if (controlled[i] !== byController && controlled[i] instanceof Swiper) {
+          setControlledTransition(controlled[i]);
+        }
+      }
+    } else if (controlled instanceof Swiper && byController !== controlled) {
+      setControlledTransition(controlled);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'controller',
+  params: {
+    controller: {
+      control: undefined,
+      inverse: false,
+      by: 'slide' // or 'container'
+
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["bindModuleMethods"])(swiper, {
+      controller: _extends({
+        control: swiper.params.controller.control
+      }, Controller)
+    });
+  },
+  on: {
+    update: function update(swiper) {
+      if (!swiper.controller.control) return;
+
+      if (swiper.controller.spline) {
+        swiper.controller.spline = undefined;
+        delete swiper.controller.spline;
+      }
+    },
+    resize: function resize(swiper) {
+      if (!swiper.controller.control) return;
+
+      if (swiper.controller.spline) {
+        swiper.controller.spline = undefined;
+        delete swiper.controller.spline;
+      }
+    },
+    observerUpdate: function observerUpdate(swiper) {
+      if (!swiper.controller.control) return;
+
+      if (swiper.controller.spline) {
+        swiper.controller.spline = undefined;
+        delete swiper.controller.spline;
+      }
+    },
+    setTranslate: function setTranslate(swiper, translate, byController) {
+      if (!swiper.controller.control) return;
+      swiper.controller.setTranslate(translate, byController);
+    },
+    setTransition: function setTransition(swiper, duration, byController) {
+      if (!swiper.controller.control) return;
+      swiper.controller.setTransition(duration, byController);
+    }
+  }
+});
 
 /***/ }),
 
@@ -10893,6 +27500,191 @@ class FindValueSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subs
     }
 }
 //# sourceMappingURL=find.js.map
+
+/***/ }),
+
+/***/ "cKS0":
+/*!************************************************!*\
+  !*** ./node_modules/swiper/esm/utils/utils.js ***!
+  \************************************************/
+/*! exports provided: deleteProps, nextTick, now, getTranslate, isObject, extend, bindModuleMethods, getComputedStyle, classesToSelector */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deleteProps", function() { return deleteProps; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nextTick", function() { return nextTick; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "now", function() { return now; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getTranslate", function() { return getTranslate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObject", function() { return isObject; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "extend", function() { return extend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bindModuleMethods", function() { return bindModuleMethods; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getComputedStyle", function() { return getComputedStyle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "classesToSelector", function() { return classesToSelector; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+
+
+function deleteProps(obj) {
+  var object = obj;
+  Object.keys(object).forEach(function (key) {
+    try {
+      object[key] = null;
+    } catch (e) {// no getter for object
+    }
+
+    try {
+      delete object[key];
+    } catch (e) {// something got wrong
+    }
+  });
+}
+
+function nextTick(callback, delay) {
+  if (delay === void 0) {
+    delay = 0;
+  }
+
+  return setTimeout(callback, delay);
+}
+
+function now() {
+  return Date.now();
+}
+
+function getComputedStyle(el) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var style;
+
+  if (window.getComputedStyle) {
+    style = window.getComputedStyle(el, null);
+  }
+
+  if (!style && el.currentStyle) {
+    style = el.currentStyle;
+  }
+
+  if (!style) {
+    style = el.style;
+  }
+
+  return style;
+}
+
+function getTranslate(el, axis) {
+  if (axis === void 0) {
+    axis = 'x';
+  }
+
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var matrix;
+  var curTransform;
+  var transformMatrix;
+  var curStyle = getComputedStyle(el, null);
+
+  if (window.WebKitCSSMatrix) {
+    curTransform = curStyle.transform || curStyle.webkitTransform;
+
+    if (curTransform.split(',').length > 6) {
+      curTransform = curTransform.split(', ').map(function (a) {
+        return a.replace(',', '.');
+      }).join(', ');
+    } // Some old versions of Webkit choke when 'none' is passed; pass
+    // empty string instead in this case
+
+
+    transformMatrix = new window.WebKitCSSMatrix(curTransform === 'none' ? '' : curTransform);
+  } else {
+    transformMatrix = curStyle.MozTransform || curStyle.OTransform || curStyle.MsTransform || curStyle.msTransform || curStyle.transform || curStyle.getPropertyValue('transform').replace('translate(', 'matrix(1, 0, 0, 1,');
+    matrix = transformMatrix.toString().split(',');
+  }
+
+  if (axis === 'x') {
+    // Latest Chrome and webkits Fix
+    if (window.WebKitCSSMatrix) curTransform = transformMatrix.m41; // Crazy IE10 Matrix
+    else if (matrix.length === 16) curTransform = parseFloat(matrix[12]); // Normal Browsers
+      else curTransform = parseFloat(matrix[4]);
+  }
+
+  if (axis === 'y') {
+    // Latest Chrome and webkits Fix
+    if (window.WebKitCSSMatrix) curTransform = transformMatrix.m42; // Crazy IE10 Matrix
+    else if (matrix.length === 16) curTransform = parseFloat(matrix[13]); // Normal Browsers
+      else curTransform = parseFloat(matrix[5]);
+  }
+
+  return curTransform || 0;
+}
+
+function isObject(o) {
+  return typeof o === 'object' && o !== null && o.constructor && Object.prototype.toString.call(o).slice(8, -1) === 'Object';
+}
+
+function extend() {
+  var to = Object(arguments.length <= 0 ? undefined : arguments[0]);
+  var noExtend = ['__proto__', 'constructor', 'prototype'];
+
+  for (var i = 1; i < arguments.length; i += 1) {
+    var nextSource = i < 0 || arguments.length <= i ? undefined : arguments[i];
+
+    if (nextSource !== undefined && nextSource !== null) {
+      var keysArray = Object.keys(Object(nextSource)).filter(function (key) {
+        return noExtend.indexOf(key) < 0;
+      });
+
+      for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex += 1) {
+        var nextKey = keysArray[nextIndex];
+        var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+
+        if (desc !== undefined && desc.enumerable) {
+          if (isObject(to[nextKey]) && isObject(nextSource[nextKey])) {
+            if (nextSource[nextKey].__swiper__) {
+              to[nextKey] = nextSource[nextKey];
+            } else {
+              extend(to[nextKey], nextSource[nextKey]);
+            }
+          } else if (!isObject(to[nextKey]) && isObject(nextSource[nextKey])) {
+            to[nextKey] = {};
+
+            if (nextSource[nextKey].__swiper__) {
+              to[nextKey] = nextSource[nextKey];
+            } else {
+              extend(to[nextKey], nextSource[nextKey]);
+            }
+          } else {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+    }
+  }
+
+  return to;
+}
+
+function bindModuleMethods(instance, obj) {
+  Object.keys(obj).forEach(function (key) {
+    if (isObject(obj[key])) {
+      Object.keys(obj[key]).forEach(function (subKey) {
+        if (typeof obj[key][subKey] === 'function') {
+          obj[key][subKey] = obj[key][subKey].bind(instance);
+        }
+      });
+    }
+
+    instance[key] = obj[key];
+  });
+}
+
+function classesToSelector(classes) {
+  if (classes === void 0) {
+    classes = '';
+  }
+
+  return "." + classes.trim().replace(/([\.:\/])/g, '\\$1') // eslint-disable-line
+  .replace(/ /g, '.');
+}
+
+
 
 /***/ }),
 
@@ -11358,8 +28150,9 @@ if (false) {}
  */
 class VgOverlayPlayModule {
 }
+VgOverlayPlayModule.ɵfac = function VgOverlayPlayModule_Factory(t) { return new (t || VgOverlayPlayModule)(); };
 VgOverlayPlayModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: VgOverlayPlayModule });
-VgOverlayPlayModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function VgOverlayPlayModule_Factory(t) { return new (t || VgOverlayPlayModule)(); }, imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]] });
+VgOverlayPlayModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](VgOverlayPlayModule, { declarations: function () { return [VgOverlayPlayComponent]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_2__["VgCoreModule"]]; }, exports: function () { return [VgOverlayPlayComponent]; } }); })();
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](VgOverlayPlayModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
@@ -11465,6 +28258,128 @@ class SingleSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subscri
 
 /***/ }),
 
+/***/ "daxC":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/effect-coverflow/effect-coverflow.js ***!
+  \*********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Coverflow = {
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    var swiperWidth = swiper.width,
+        swiperHeight = swiper.height,
+        slides = swiper.slides,
+        slidesSizesGrid = swiper.slidesSizesGrid;
+    var params = swiper.params.coverflowEffect;
+    var isHorizontal = swiper.isHorizontal();
+    var transform = swiper.translate;
+    var center = isHorizontal ? -transform + swiperWidth / 2 : -transform + swiperHeight / 2;
+    var rotate = isHorizontal ? params.rotate : -params.rotate;
+    var translate = params.depth; // Each slide offset from center
+
+    for (var i = 0, length = slides.length; i < length; i += 1) {
+      var $slideEl = slides.eq(i);
+      var slideSize = slidesSizesGrid[i];
+      var slideOffset = $slideEl[0].swiperSlideOffset;
+      var offsetMultiplier = (center - slideOffset - slideSize / 2) / slideSize * params.modifier;
+      var rotateY = isHorizontal ? rotate * offsetMultiplier : 0;
+      var rotateX = isHorizontal ? 0 : rotate * offsetMultiplier; // var rotateZ = 0
+
+      var translateZ = -translate * Math.abs(offsetMultiplier);
+      var stretch = params.stretch; // Allow percentage to make a relative stretch for responsive sliders
+
+      if (typeof stretch === 'string' && stretch.indexOf('%') !== -1) {
+        stretch = parseFloat(params.stretch) / 100 * slideSize;
+      }
+
+      var translateY = isHorizontal ? 0 : stretch * offsetMultiplier;
+      var translateX = isHorizontal ? stretch * offsetMultiplier : 0;
+      var scale = 1 - (1 - params.scale) * Math.abs(offsetMultiplier); // Fix for ultra small values
+
+      if (Math.abs(translateX) < 0.001) translateX = 0;
+      if (Math.abs(translateY) < 0.001) translateY = 0;
+      if (Math.abs(translateZ) < 0.001) translateZ = 0;
+      if (Math.abs(rotateY) < 0.001) rotateY = 0;
+      if (Math.abs(rotateX) < 0.001) rotateX = 0;
+      if (Math.abs(scale) < 0.001) scale = 0;
+      var slideTransform = "translate3d(" + translateX + "px," + translateY + "px," + translateZ + "px)  rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg) scale(" + scale + ")";
+      $slideEl.transform(slideTransform);
+      $slideEl[0].style.zIndex = -Math.abs(Math.round(offsetMultiplier)) + 1;
+
+      if (params.slideShadows) {
+        // Set shadows
+        var $shadowBeforeEl = isHorizontal ? $slideEl.find('.swiper-slide-shadow-left') : $slideEl.find('.swiper-slide-shadow-top');
+        var $shadowAfterEl = isHorizontal ? $slideEl.find('.swiper-slide-shadow-right') : $slideEl.find('.swiper-slide-shadow-bottom');
+
+        if ($shadowBeforeEl.length === 0) {
+          $shadowBeforeEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (isHorizontal ? 'left' : 'top') + "\"></div>");
+          $slideEl.append($shadowBeforeEl);
+        }
+
+        if ($shadowAfterEl.length === 0) {
+          $shadowAfterEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (isHorizontal ? 'right' : 'bottom') + "\"></div>");
+          $slideEl.append($shadowAfterEl);
+        }
+
+        if ($shadowBeforeEl.length) $shadowBeforeEl[0].style.opacity = offsetMultiplier > 0 ? offsetMultiplier : 0;
+        if ($shadowAfterEl.length) $shadowAfterEl[0].style.opacity = -offsetMultiplier > 0 ? -offsetMultiplier : 0;
+      }
+    }
+  },
+  setTransition: function setTransition(duration) {
+    var swiper = this;
+    swiper.slides.transition(duration).find('.swiper-slide-shadow-top, .swiper-slide-shadow-right, .swiper-slide-shadow-bottom, .swiper-slide-shadow-left').transition(duration);
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'effect-coverflow',
+  params: {
+    coverflowEffect: {
+      rotate: 50,
+      stretch: 0,
+      depth: 100,
+      scale: 1,
+      modifier: 1,
+      slideShadows: true
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      coverflowEffect: _extends({}, Coverflow)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (swiper.params.effect !== 'coverflow') return;
+      swiper.classNames.push(swiper.params.containerModifierClass + "coverflow");
+      swiper.classNames.push(swiper.params.containerModifierClass + "3d");
+      swiper.params.watchSlidesProgress = true;
+      swiper.originalParams.watchSlidesProgress = true;
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (swiper.params.effect !== 'coverflow') return;
+      swiper.coverflowEffect.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      if (swiper.params.effect !== 'coverflow') return;
+      swiper.coverflowEffect.setTransition(duration);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "dkDA":
 /*!**********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/materialize.js ***!
@@ -11508,6 +28423,397 @@ class MaterializeSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Su
     }
 }
 //# sourceMappingURL=materialize.js.map
+
+/***/ }),
+
+/***/ "drdV":
+/*!***************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/virtual/virtual.js ***!
+  \***************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Virtual = {
+  update: function update(force) {
+    var swiper = this;
+    var _swiper$params = swiper.params,
+        slidesPerView = _swiper$params.slidesPerView,
+        slidesPerGroup = _swiper$params.slidesPerGroup,
+        centeredSlides = _swiper$params.centeredSlides;
+    var _swiper$params$virtua = swiper.params.virtual,
+        addSlidesBefore = _swiper$params$virtua.addSlidesBefore,
+        addSlidesAfter = _swiper$params$virtua.addSlidesAfter;
+    var _swiper$virtual = swiper.virtual,
+        previousFrom = _swiper$virtual.from,
+        previousTo = _swiper$virtual.to,
+        slides = _swiper$virtual.slides,
+        previousSlidesGrid = _swiper$virtual.slidesGrid,
+        renderSlide = _swiper$virtual.renderSlide,
+        previousOffset = _swiper$virtual.offset;
+    swiper.updateActiveIndex();
+    var activeIndex = swiper.activeIndex || 0;
+    var offsetProp;
+    if (swiper.rtlTranslate) offsetProp = 'right';else offsetProp = swiper.isHorizontal() ? 'left' : 'top';
+    var slidesAfter;
+    var slidesBefore;
+
+    if (centeredSlides) {
+      slidesAfter = Math.floor(slidesPerView / 2) + slidesPerGroup + addSlidesAfter;
+      slidesBefore = Math.floor(slidesPerView / 2) + slidesPerGroup + addSlidesBefore;
+    } else {
+      slidesAfter = slidesPerView + (slidesPerGroup - 1) + addSlidesAfter;
+      slidesBefore = slidesPerGroup + addSlidesBefore;
+    }
+
+    var from = Math.max((activeIndex || 0) - slidesBefore, 0);
+    var to = Math.min((activeIndex || 0) + slidesAfter, slides.length - 1);
+    var offset = (swiper.slidesGrid[from] || 0) - (swiper.slidesGrid[0] || 0);
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.virtual, {
+      from: from,
+      to: to,
+      offset: offset,
+      slidesGrid: swiper.slidesGrid
+    });
+
+    function onRendered() {
+      swiper.updateSlides();
+      swiper.updateProgress();
+      swiper.updateSlidesClasses();
+
+      if (swiper.lazy && swiper.params.lazy.enabled) {
+        swiper.lazy.load();
+      }
+    }
+
+    if (previousFrom === from && previousTo === to && !force) {
+      if (swiper.slidesGrid !== previousSlidesGrid && offset !== previousOffset) {
+        swiper.slides.css(offsetProp, offset + "px");
+      }
+
+      swiper.updateProgress();
+      return;
+    }
+
+    if (swiper.params.virtual.renderExternal) {
+      swiper.params.virtual.renderExternal.call(swiper, {
+        offset: offset,
+        from: from,
+        to: to,
+        slides: function getSlides() {
+          var slidesToRender = [];
+
+          for (var i = from; i <= to; i += 1) {
+            slidesToRender.push(slides[i]);
+          }
+
+          return slidesToRender;
+        }()
+      });
+
+      if (swiper.params.virtual.renderExternalUpdate) {
+        onRendered();
+      }
+
+      return;
+    }
+
+    var prependIndexes = [];
+    var appendIndexes = [];
+
+    if (force) {
+      swiper.$wrapperEl.find("." + swiper.params.slideClass).remove();
+    } else {
+      for (var i = previousFrom; i <= previousTo; i += 1) {
+        if (i < from || i > to) {
+          swiper.$wrapperEl.find("." + swiper.params.slideClass + "[data-swiper-slide-index=\"" + i + "\"]").remove();
+        }
+      }
+    }
+
+    for (var _i = 0; _i < slides.length; _i += 1) {
+      if (_i >= from && _i <= to) {
+        if (typeof previousTo === 'undefined' || force) {
+          appendIndexes.push(_i);
+        } else {
+          if (_i > previousTo) appendIndexes.push(_i);
+          if (_i < previousFrom) prependIndexes.push(_i);
+        }
+      }
+    }
+
+    appendIndexes.forEach(function (index) {
+      swiper.$wrapperEl.append(renderSlide(slides[index], index));
+    });
+    prependIndexes.sort(function (a, b) {
+      return b - a;
+    }).forEach(function (index) {
+      swiper.$wrapperEl.prepend(renderSlide(slides[index], index));
+    });
+    swiper.$wrapperEl.children('.swiper-slide').css(offsetProp, offset + "px");
+    onRendered();
+  },
+  renderSlide: function renderSlide(slide, index) {
+    var swiper = this;
+    var params = swiper.params.virtual;
+
+    if (params.cache && swiper.virtual.cache[index]) {
+      return swiper.virtual.cache[index];
+    }
+
+    var $slideEl = params.renderSlide ? Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.renderSlide.call(swiper, slide, index)) : Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"" + swiper.params.slideClass + "\" data-swiper-slide-index=\"" + index + "\">" + slide + "</div>");
+    if (!$slideEl.attr('data-swiper-slide-index')) $slideEl.attr('data-swiper-slide-index', index);
+    if (params.cache) swiper.virtual.cache[index] = $slideEl;
+    return $slideEl;
+  },
+  appendSlide: function appendSlide(slides) {
+    var swiper = this;
+
+    if (typeof slides === 'object' && 'length' in slides) {
+      for (var i = 0; i < slides.length; i += 1) {
+        if (slides[i]) swiper.virtual.slides.push(slides[i]);
+      }
+    } else {
+      swiper.virtual.slides.push(slides);
+    }
+
+    swiper.virtual.update(true);
+  },
+  prependSlide: function prependSlide(slides) {
+    var swiper = this;
+    var activeIndex = swiper.activeIndex;
+    var newActiveIndex = activeIndex + 1;
+    var numberOfNewSlides = 1;
+
+    if (Array.isArray(slides)) {
+      for (var i = 0; i < slides.length; i += 1) {
+        if (slides[i]) swiper.virtual.slides.unshift(slides[i]);
+      }
+
+      newActiveIndex = activeIndex + slides.length;
+      numberOfNewSlides = slides.length;
+    } else {
+      swiper.virtual.slides.unshift(slides);
+    }
+
+    if (swiper.params.virtual.cache) {
+      var cache = swiper.virtual.cache;
+      var newCache = {};
+      Object.keys(cache).forEach(function (cachedIndex) {
+        var $cachedEl = cache[cachedIndex];
+        var cachedElIndex = $cachedEl.attr('data-swiper-slide-index');
+
+        if (cachedElIndex) {
+          $cachedEl.attr('data-swiper-slide-index', parseInt(cachedElIndex, 10) + 1);
+        }
+
+        newCache[parseInt(cachedIndex, 10) + numberOfNewSlides] = $cachedEl;
+      });
+      swiper.virtual.cache = newCache;
+    }
+
+    swiper.virtual.update(true);
+    swiper.slideTo(newActiveIndex, 0);
+  },
+  removeSlide: function removeSlide(slidesIndexes) {
+    var swiper = this;
+    if (typeof slidesIndexes === 'undefined' || slidesIndexes === null) return;
+    var activeIndex = swiper.activeIndex;
+
+    if (Array.isArray(slidesIndexes)) {
+      for (var i = slidesIndexes.length - 1; i >= 0; i -= 1) {
+        swiper.virtual.slides.splice(slidesIndexes[i], 1);
+
+        if (swiper.params.virtual.cache) {
+          delete swiper.virtual.cache[slidesIndexes[i]];
+        }
+
+        if (slidesIndexes[i] < activeIndex) activeIndex -= 1;
+        activeIndex = Math.max(activeIndex, 0);
+      }
+    } else {
+      swiper.virtual.slides.splice(slidesIndexes, 1);
+
+      if (swiper.params.virtual.cache) {
+        delete swiper.virtual.cache[slidesIndexes];
+      }
+
+      if (slidesIndexes < activeIndex) activeIndex -= 1;
+      activeIndex = Math.max(activeIndex, 0);
+    }
+
+    swiper.virtual.update(true);
+    swiper.slideTo(activeIndex, 0);
+  },
+  removeAllSlides: function removeAllSlides() {
+    var swiper = this;
+    swiper.virtual.slides = [];
+
+    if (swiper.params.virtual.cache) {
+      swiper.virtual.cache = {};
+    }
+
+    swiper.virtual.update(true);
+    swiper.slideTo(0, 0);
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'virtual',
+  params: {
+    virtual: {
+      enabled: false,
+      slides: [],
+      cache: true,
+      renderSlide: null,
+      renderExternal: null,
+      renderExternalUpdate: true,
+      addSlidesBefore: 0,
+      addSlidesAfter: 0
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      virtual: _extends({}, Virtual, {
+        slides: swiper.params.virtual.slides,
+        cache: {}
+      })
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (!swiper.params.virtual.enabled) return;
+      swiper.classNames.push(swiper.params.containerModifierClass + "virtual");
+      var overwriteParams = {
+        watchSlidesProgress: true
+      };
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.params, overwriteParams);
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.originalParams, overwriteParams);
+
+      if (!swiper.params.initialSlide) {
+        swiper.virtual.update();
+      }
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (!swiper.params.virtual.enabled) return;
+      swiper.virtual.update();
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "dtSe":
+/*!**************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/manipulation/addSlide.js ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return addSlide; });
+function addSlide(index, slides) {
+  var swiper = this;
+  var $wrapperEl = swiper.$wrapperEl,
+      params = swiper.params,
+      activeIndex = swiper.activeIndex;
+  var activeIndexBuffer = activeIndex;
+
+  if (params.loop) {
+    activeIndexBuffer -= swiper.loopedSlides;
+    swiper.loopDestroy();
+    swiper.slides = $wrapperEl.children("." + params.slideClass);
+  }
+
+  var baseLength = swiper.slides.length;
+
+  if (index <= 0) {
+    swiper.prependSlide(slides);
+    return;
+  }
+
+  if (index >= baseLength) {
+    swiper.appendSlide(slides);
+    return;
+  }
+
+  var newActiveIndex = activeIndexBuffer > index ? activeIndexBuffer + 1 : activeIndexBuffer;
+  var slidesBuffer = [];
+
+  for (var i = baseLength - 1; i >= index; i -= 1) {
+    var currentSlide = swiper.slides.eq(i);
+    currentSlide.remove();
+    slidesBuffer.unshift(currentSlide);
+  }
+
+  if (typeof slides === 'object' && 'length' in slides) {
+    for (var _i = 0; _i < slides.length; _i += 1) {
+      if (slides[_i]) $wrapperEl.append(slides[_i]);
+    }
+
+    newActiveIndex = activeIndexBuffer > index ? activeIndexBuffer + slides.length : activeIndexBuffer;
+  } else {
+    $wrapperEl.append(slides);
+  }
+
+  for (var _i2 = 0; _i2 < slidesBuffer.length; _i2 += 1) {
+    $wrapperEl.append(slidesBuffer[_i2]);
+  }
+
+  if (params.loop) {
+    swiper.loopCreate();
+  }
+
+  if (!(params.observer && swiper.support.observer)) {
+    swiper.update();
+  }
+
+  if (params.loop) {
+    swiper.slideTo(newActiveIndex + swiper.loopedSlides, 0, false);
+  } else {
+    swiper.slideTo(newActiveIndex, 0, false);
+  }
+}
+
+/***/ }),
+
+/***/ "eCvj":
+/*!*************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/images/preloadImages.js ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return preloadImages; });
+function preloadImages() {
+  var swiper = this;
+  swiper.imagesToLoad = swiper.$el.find('img');
+
+  function onReady() {
+    if (typeof swiper === 'undefined' || swiper === null || !swiper || swiper.destroyed) return;
+    if (swiper.imagesLoaded !== undefined) swiper.imagesLoaded += 1;
+
+    if (swiper.imagesLoaded === swiper.imagesToLoad.length) {
+      if (swiper.params.updateOnImagesReady) swiper.update();
+      swiper.emit('imagesReady');
+    }
+  }
+
+  for (var i = 0; i < swiper.imagesToLoad.length; i += 1) {
+    var imageEl = swiper.imagesToLoad[i];
+    swiper.loadImage(imageEl, imageEl.currentSrc || imageEl.getAttribute('src'), imageEl.srcset || imageEl.getAttribute('srcset'), imageEl.sizes || imageEl.getAttribute('sizes'), true, onReady);
+  }
+}
 
 /***/ }),
 
@@ -11617,6 +28923,369 @@ const animationFrame = animationFrameScheduler;
 
 /***/ }),
 
+/***/ "ej0c":
+/*!************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateSlides.js ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateSlides; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function updateSlides() {
+  var swiper = this;
+
+  var getDirectionLabel = function getDirectionLabel(property) {
+    if (swiper.isHorizontal()) {
+      return property;
+    } // prettier-ignore
+
+
+    return {
+      'width': 'height',
+      'margin-top': 'margin-left',
+      'margin-bottom ': 'margin-right',
+      'margin-left': 'margin-top',
+      'margin-right': 'margin-bottom',
+      'padding-left': 'padding-top',
+      'padding-right': 'padding-bottom',
+      'marginRight': 'marginBottom'
+    }[property];
+  };
+
+  var getDirectionPropertyValue = function getDirectionPropertyValue(node, label) {
+    return parseFloat(node.getPropertyValue(getDirectionLabel(label)) || 0);
+  };
+
+  var params = swiper.params;
+  var $wrapperEl = swiper.$wrapperEl,
+      swiperSize = swiper.size,
+      rtl = swiper.rtlTranslate,
+      wrongRTL = swiper.wrongRTL;
+  var isVirtual = swiper.virtual && params.virtual.enabled;
+  var previousSlidesLength = isVirtual ? swiper.virtual.slides.length : swiper.slides.length;
+  var slides = $wrapperEl.children("." + swiper.params.slideClass);
+  var slidesLength = isVirtual ? swiper.virtual.slides.length : slides.length;
+  var snapGrid = [];
+  var slidesGrid = [];
+  var slidesSizesGrid = [];
+
+  function slidesForMargin(slideEl, slideIndex) {
+    if (!params.cssMode) return true;
+
+    if (slideIndex === slides.length - 1) {
+      return false;
+    }
+
+    return true;
+  }
+
+  var offsetBefore = params.slidesOffsetBefore;
+
+  if (typeof offsetBefore === 'function') {
+    offsetBefore = params.slidesOffsetBefore.call(swiper);
+  }
+
+  var offsetAfter = params.slidesOffsetAfter;
+
+  if (typeof offsetAfter === 'function') {
+    offsetAfter = params.slidesOffsetAfter.call(swiper);
+  }
+
+  var previousSnapGridLength = swiper.snapGrid.length;
+  var previousSlidesGridLength = swiper.slidesGrid.length;
+  var spaceBetween = params.spaceBetween;
+  var slidePosition = -offsetBefore;
+  var prevSlideSize = 0;
+  var index = 0;
+
+  if (typeof swiperSize === 'undefined') {
+    return;
+  }
+
+  if (typeof spaceBetween === 'string' && spaceBetween.indexOf('%') >= 0) {
+    spaceBetween = parseFloat(spaceBetween.replace('%', '')) / 100 * swiperSize;
+  }
+
+  swiper.virtualSize = -spaceBetween; // reset margins
+
+  if (rtl) slides.css({
+    marginLeft: '',
+    marginTop: ''
+  });else slides.css({
+    marginRight: '',
+    marginBottom: ''
+  });
+  var slidesNumberEvenToRows;
+
+  if (params.slidesPerColumn > 1) {
+    if (Math.floor(slidesLength / params.slidesPerColumn) === slidesLength / swiper.params.slidesPerColumn) {
+      slidesNumberEvenToRows = slidesLength;
+    } else {
+      slidesNumberEvenToRows = Math.ceil(slidesLength / params.slidesPerColumn) * params.slidesPerColumn;
+    }
+
+    if (params.slidesPerView !== 'auto' && params.slidesPerColumnFill === 'row') {
+      slidesNumberEvenToRows = Math.max(slidesNumberEvenToRows, params.slidesPerView * params.slidesPerColumn);
+    }
+  } // Calc slides
+
+
+  var slideSize;
+  var slidesPerColumn = params.slidesPerColumn;
+  var slidesPerRow = slidesNumberEvenToRows / slidesPerColumn;
+  var numFullColumns = Math.floor(slidesLength / params.slidesPerColumn);
+
+  for (var i = 0; i < slidesLength; i += 1) {
+    slideSize = 0;
+    var slide = slides.eq(i);
+
+    if (params.slidesPerColumn > 1) {
+      // Set slides order
+      var newSlideOrderIndex = void 0;
+      var column = void 0;
+      var row = void 0;
+
+      if (params.slidesPerColumnFill === 'row' && params.slidesPerGroup > 1) {
+        var groupIndex = Math.floor(i / (params.slidesPerGroup * params.slidesPerColumn));
+        var slideIndexInGroup = i - params.slidesPerColumn * params.slidesPerGroup * groupIndex;
+        var columnsInGroup = groupIndex === 0 ? params.slidesPerGroup : Math.min(Math.ceil((slidesLength - groupIndex * slidesPerColumn * params.slidesPerGroup) / slidesPerColumn), params.slidesPerGroup);
+        row = Math.floor(slideIndexInGroup / columnsInGroup);
+        column = slideIndexInGroup - row * columnsInGroup + groupIndex * params.slidesPerGroup;
+        newSlideOrderIndex = column + row * slidesNumberEvenToRows / slidesPerColumn;
+        slide.css({
+          '-webkit-box-ordinal-group': newSlideOrderIndex,
+          '-moz-box-ordinal-group': newSlideOrderIndex,
+          '-ms-flex-order': newSlideOrderIndex,
+          '-webkit-order': newSlideOrderIndex,
+          order: newSlideOrderIndex
+        });
+      } else if (params.slidesPerColumnFill === 'column') {
+        column = Math.floor(i / slidesPerColumn);
+        row = i - column * slidesPerColumn;
+
+        if (column > numFullColumns || column === numFullColumns && row === slidesPerColumn - 1) {
+          row += 1;
+
+          if (row >= slidesPerColumn) {
+            row = 0;
+            column += 1;
+          }
+        }
+      } else {
+        row = Math.floor(i / slidesPerRow);
+        column = i - row * slidesPerRow;
+      }
+
+      slide.css(getDirectionLabel('margin-top'), row !== 0 && params.spaceBetween && params.spaceBetween + "px");
+    }
+
+    if (slide.css('display') === 'none') continue; // eslint-disable-line
+
+    if (params.slidesPerView === 'auto') {
+      var slideStyles = getComputedStyle(slide[0]);
+      var currentTransform = slide[0].style.transform;
+      var currentWebKitTransform = slide[0].style.webkitTransform;
+
+      if (currentTransform) {
+        slide[0].style.transform = 'none';
+      }
+
+      if (currentWebKitTransform) {
+        slide[0].style.webkitTransform = 'none';
+      }
+
+      if (params.roundLengths) {
+        slideSize = swiper.isHorizontal() ? slide.outerWidth(true) : slide.outerHeight(true);
+      } else {
+        // eslint-disable-next-line
+        var width = getDirectionPropertyValue(slideStyles, 'width');
+        var paddingLeft = getDirectionPropertyValue(slideStyles, 'padding-left');
+        var paddingRight = getDirectionPropertyValue(slideStyles, 'padding-right');
+        var marginLeft = getDirectionPropertyValue(slideStyles, 'margin-left');
+        var marginRight = getDirectionPropertyValue(slideStyles, 'margin-right');
+        var boxSizing = slideStyles.getPropertyValue('box-sizing');
+
+        if (boxSizing && boxSizing === 'border-box') {
+          slideSize = width + marginLeft + marginRight;
+        } else {
+          var _slide$ = slide[0],
+              clientWidth = _slide$.clientWidth,
+              offsetWidth = _slide$.offsetWidth;
+          slideSize = width + paddingLeft + paddingRight + marginLeft + marginRight + (offsetWidth - clientWidth);
+        }
+      }
+
+      if (currentTransform) {
+        slide[0].style.transform = currentTransform;
+      }
+
+      if (currentWebKitTransform) {
+        slide[0].style.webkitTransform = currentWebKitTransform;
+      }
+
+      if (params.roundLengths) slideSize = Math.floor(slideSize);
+    } else {
+      slideSize = (swiperSize - (params.slidesPerView - 1) * spaceBetween) / params.slidesPerView;
+      if (params.roundLengths) slideSize = Math.floor(slideSize);
+
+      if (slides[i]) {
+        slides[i].style[getDirectionLabel('width')] = slideSize + "px";
+      }
+    }
+
+    if (slides[i]) {
+      slides[i].swiperSlideSize = slideSize;
+    }
+
+    slidesSizesGrid.push(slideSize);
+
+    if (params.centeredSlides) {
+      slidePosition = slidePosition + slideSize / 2 + prevSlideSize / 2 + spaceBetween;
+      if (prevSlideSize === 0 && i !== 0) slidePosition = slidePosition - swiperSize / 2 - spaceBetween;
+      if (i === 0) slidePosition = slidePosition - swiperSize / 2 - spaceBetween;
+      if (Math.abs(slidePosition) < 1 / 1000) slidePosition = 0;
+      if (params.roundLengths) slidePosition = Math.floor(slidePosition);
+      if (index % params.slidesPerGroup === 0) snapGrid.push(slidePosition);
+      slidesGrid.push(slidePosition);
+    } else {
+      if (params.roundLengths) slidePosition = Math.floor(slidePosition);
+      if ((index - Math.min(swiper.params.slidesPerGroupSkip, index)) % swiper.params.slidesPerGroup === 0) snapGrid.push(slidePosition);
+      slidesGrid.push(slidePosition);
+      slidePosition = slidePosition + slideSize + spaceBetween;
+    }
+
+    swiper.virtualSize += slideSize + spaceBetween;
+    prevSlideSize = slideSize;
+    index += 1;
+  }
+
+  swiper.virtualSize = Math.max(swiper.virtualSize, swiperSize) + offsetAfter;
+  var newSlidesGrid;
+
+  if (rtl && wrongRTL && (params.effect === 'slide' || params.effect === 'coverflow')) {
+    $wrapperEl.css({
+      width: swiper.virtualSize + params.spaceBetween + "px"
+    });
+  }
+
+  if (params.setWrapperSize) {
+    var _$wrapperEl$css;
+
+    $wrapperEl.css((_$wrapperEl$css = {}, _$wrapperEl$css[getDirectionLabel('width')] = swiper.virtualSize + params.spaceBetween + "px", _$wrapperEl$css));
+  }
+
+  if (params.slidesPerColumn > 1) {
+    var _$wrapperEl$css2;
+
+    swiper.virtualSize = (slideSize + params.spaceBetween) * slidesNumberEvenToRows;
+    swiper.virtualSize = Math.ceil(swiper.virtualSize / params.slidesPerColumn) - params.spaceBetween;
+    $wrapperEl.css((_$wrapperEl$css2 = {}, _$wrapperEl$css2[getDirectionLabel('width')] = swiper.virtualSize + params.spaceBetween + "px", _$wrapperEl$css2));
+
+    if (params.centeredSlides) {
+      newSlidesGrid = [];
+
+      for (var _i = 0; _i < snapGrid.length; _i += 1) {
+        var slidesGridItem = snapGrid[_i];
+        if (params.roundLengths) slidesGridItem = Math.floor(slidesGridItem);
+        if (snapGrid[_i] < swiper.virtualSize + snapGrid[0]) newSlidesGrid.push(slidesGridItem);
+      }
+
+      snapGrid = newSlidesGrid;
+    }
+  } // Remove last grid elements depending on width
+
+
+  if (!params.centeredSlides) {
+    newSlidesGrid = [];
+
+    for (var _i2 = 0; _i2 < snapGrid.length; _i2 += 1) {
+      var _slidesGridItem = snapGrid[_i2];
+      if (params.roundLengths) _slidesGridItem = Math.floor(_slidesGridItem);
+
+      if (snapGrid[_i2] <= swiper.virtualSize - swiperSize) {
+        newSlidesGrid.push(_slidesGridItem);
+      }
+    }
+
+    snapGrid = newSlidesGrid;
+
+    if (Math.floor(swiper.virtualSize - swiperSize) - Math.floor(snapGrid[snapGrid.length - 1]) > 1) {
+      snapGrid.push(swiper.virtualSize - swiperSize);
+    }
+  }
+
+  if (snapGrid.length === 0) snapGrid = [0];
+
+  if (params.spaceBetween !== 0) {
+    var _slides$filter$css;
+
+    var key = swiper.isHorizontal() && rtl ? 'marginLeft' : getDirectionLabel('marginRight');
+    slides.filter(slidesForMargin).css((_slides$filter$css = {}, _slides$filter$css[key] = spaceBetween + "px", _slides$filter$css));
+  }
+
+  if (params.centeredSlides && params.centeredSlidesBounds) {
+    var allSlidesSize = 0;
+    slidesSizesGrid.forEach(function (slideSizeValue) {
+      allSlidesSize += slideSizeValue + (params.spaceBetween ? params.spaceBetween : 0);
+    });
+    allSlidesSize -= params.spaceBetween;
+    var maxSnap = allSlidesSize - swiperSize;
+    snapGrid = snapGrid.map(function (snap) {
+      if (snap < 0) return -offsetBefore;
+      if (snap > maxSnap) return maxSnap + offsetAfter;
+      return snap;
+    });
+  }
+
+  if (params.centerInsufficientSlides) {
+    var _allSlidesSize = 0;
+    slidesSizesGrid.forEach(function (slideSizeValue) {
+      _allSlidesSize += slideSizeValue + (params.spaceBetween ? params.spaceBetween : 0);
+    });
+    _allSlidesSize -= params.spaceBetween;
+
+    if (_allSlidesSize < swiperSize) {
+      var allSlidesOffset = (swiperSize - _allSlidesSize) / 2;
+      snapGrid.forEach(function (snap, snapIndex) {
+        snapGrid[snapIndex] = snap - allSlidesOffset;
+      });
+      slidesGrid.forEach(function (snap, snapIndex) {
+        slidesGrid[snapIndex] = snap + allSlidesOffset;
+      });
+    }
+  }
+
+  Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper, {
+    slides: slides,
+    snapGrid: snapGrid,
+    slidesGrid: slidesGrid,
+    slidesSizesGrid: slidesSizesGrid
+  });
+
+  if (slidesLength !== previousSlidesLength) {
+    swiper.emit('slidesLengthChange');
+  }
+
+  if (snapGrid.length !== previousSnapGridLength) {
+    if (swiper.params.watchOverflow) swiper.checkOverflow();
+    swiper.emit('snapGridLengthChange');
+  }
+
+  if (slidesGrid.length !== previousSlidesGridLength) {
+    swiper.emit('slidesGridLengthChange');
+  }
+
+  if (params.watchSlidesProgress || params.watchSlidesVisibility) {
+    swiper.updateSlidesOffset();
+  }
+}
+
+/***/ }),
+
 /***/ "f29J":
 /*!*****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/concat.js ***!
@@ -11633,6 +29302,112 @@ function concat(...observables) {
     return (source) => source.lift.call(Object(_observable_concat__WEBPACK_IMPORTED_MODULE_0__["concat"])(source, ...observables));
 }
 //# sourceMappingURL=concat.js.map
+
+/***/ }),
+
+/***/ "f9ef":
+/*!**************************************************************!*\
+  !*** ./node_modules/swiper/esm/modules/observer/observer.js ***!
+  \**************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Observer = {
+  attach: function attach(target, options) {
+    if (options === void 0) {
+      options = {};
+    }
+
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var swiper = this;
+    var ObserverFunc = window.MutationObserver || window.WebkitMutationObserver;
+    var observer = new ObserverFunc(function (mutations) {
+      // The observerUpdate event should only be triggered
+      // once despite the number of mutations.  Additional
+      // triggers are redundant and are very costly
+      if (mutations.length === 1) {
+        swiper.emit('observerUpdate', mutations[0]);
+        return;
+      }
+
+      var observerUpdate = function observerUpdate() {
+        swiper.emit('observerUpdate', mutations[0]);
+      };
+
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(observerUpdate);
+      } else {
+        window.setTimeout(observerUpdate, 0);
+      }
+    });
+    observer.observe(target, {
+      attributes: typeof options.attributes === 'undefined' ? true : options.attributes,
+      childList: typeof options.childList === 'undefined' ? true : options.childList,
+      characterData: typeof options.characterData === 'undefined' ? true : options.characterData
+    });
+    swiper.observer.observers.push(observer);
+  },
+  init: function init() {
+    var swiper = this;
+    if (!swiper.support.observer || !swiper.params.observer) return;
+
+    if (swiper.params.observeParents) {
+      var containerParents = swiper.$el.parents();
+
+      for (var i = 0; i < containerParents.length; i += 1) {
+        swiper.observer.attach(containerParents[i]);
+      }
+    } // Observe container
+
+
+    swiper.observer.attach(swiper.$el[0], {
+      childList: swiper.params.observeSlideChildren
+    }); // Observe wrapper
+
+    swiper.observer.attach(swiper.$wrapperEl[0], {
+      attributes: false
+    });
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    swiper.observer.observers.forEach(function (observer) {
+      observer.disconnect();
+    });
+    swiper.observer.observers = [];
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'observer',
+  params: {
+    observer: false,
+    observeParents: false,
+    observeSlideChildren: false
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      observer: _extends({}, Observer, {
+        observers: []
+      })
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      swiper.observer.init();
+    },
+    destroy: function destroy(swiper) {
+      swiper.observer.destroy();
+    }
+  }
+});
 
 /***/ }),
 
@@ -11667,11 +29442,358 @@ function combineLatest(...observables) {
 
 /***/ }),
 
+/***/ "fFnh":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/loop/loopCreate.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return loopCreate; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+
+
+function loopCreate() {
+  var swiper = this;
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl; // Remove duplicated slides
+
+  $wrapperEl.children("." + params.slideClass + "." + params.slideDuplicateClass).remove();
+  var slides = $wrapperEl.children("." + params.slideClass);
+
+  if (params.loopFillGroupWithBlank) {
+    var blankSlidesNum = params.slidesPerGroup - slides.length % params.slidesPerGroup;
+
+    if (blankSlidesNum !== params.slidesPerGroup) {
+      for (var i = 0; i < blankSlidesNum; i += 1) {
+        var blankNode = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(document.createElement('div')).addClass(params.slideClass + " " + params.slideBlankClass);
+        $wrapperEl.append(blankNode);
+      }
+
+      slides = $wrapperEl.children("." + params.slideClass);
+    }
+  }
+
+  if (params.slidesPerView === 'auto' && !params.loopedSlides) params.loopedSlides = slides.length;
+  swiper.loopedSlides = Math.ceil(parseFloat(params.loopedSlides || params.slidesPerView, 10));
+  swiper.loopedSlides += params.loopAdditionalSlides;
+
+  if (swiper.loopedSlides > slides.length) {
+    swiper.loopedSlides = slides.length;
+  }
+
+  var prependSlides = [];
+  var appendSlides = [];
+  slides.each(function (el, index) {
+    var slide = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(el);
+
+    if (index < swiper.loopedSlides) {
+      appendSlides.push(el);
+    }
+
+    if (index < slides.length && index >= slides.length - swiper.loopedSlides) {
+      prependSlides.push(el);
+    }
+
+    slide.attr('data-swiper-slide-index', index);
+  });
+
+  for (var _i = 0; _i < appendSlides.length; _i += 1) {
+    $wrapperEl.append(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(appendSlides[_i].cloneNode(true)).addClass(params.slideDuplicateClass));
+  }
+
+  for (var _i2 = prependSlides.length - 1; _i2 >= 0; _i2 -= 1) {
+    $wrapperEl.prepend(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(prependSlides[_i2].cloneNode(true)).addClass(params.slideDuplicateClass));
+  }
+}
+
+/***/ }),
+
+/***/ "fMrl":
+/*!*********************************************************!*\
+  !*** ./node_modules/swiper/esm/components/lazy/lazy.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+var Lazy = {
+  loadInSlide: function loadInSlide(index, loadInDuplicate) {
+    if (loadInDuplicate === void 0) {
+      loadInDuplicate = true;
+    }
+
+    var swiper = this;
+    var params = swiper.params.lazy;
+    if (typeof index === 'undefined') return;
+    if (swiper.slides.length === 0) return;
+    var isVirtual = swiper.virtual && swiper.params.virtual.enabled;
+    var $slideEl = isVirtual ? swiper.$wrapperEl.children("." + swiper.params.slideClass + "[data-swiper-slide-index=\"" + index + "\"]") : swiper.slides.eq(index);
+    var $images = $slideEl.find("." + params.elementClass + ":not(." + params.loadedClass + "):not(." + params.loadingClass + ")");
+
+    if ($slideEl.hasClass(params.elementClass) && !$slideEl.hasClass(params.loadedClass) && !$slideEl.hasClass(params.loadingClass)) {
+      $images.push($slideEl[0]);
+    }
+
+    if ($images.length === 0) return;
+    $images.each(function (imageEl) {
+      var $imageEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(imageEl);
+      $imageEl.addClass(params.loadingClass);
+      var background = $imageEl.attr('data-background');
+      var src = $imageEl.attr('data-src');
+      var srcset = $imageEl.attr('data-srcset');
+      var sizes = $imageEl.attr('data-sizes');
+      var $pictureEl = $imageEl.parent('picture');
+      swiper.loadImage($imageEl[0], src || background, srcset, sizes, false, function () {
+        if (typeof swiper === 'undefined' || swiper === null || !swiper || swiper && !swiper.params || swiper.destroyed) return;
+
+        if (background) {
+          $imageEl.css('background-image', "url(\"" + background + "\")");
+          $imageEl.removeAttr('data-background');
+        } else {
+          if (srcset) {
+            $imageEl.attr('srcset', srcset);
+            $imageEl.removeAttr('data-srcset');
+          }
+
+          if (sizes) {
+            $imageEl.attr('sizes', sizes);
+            $imageEl.removeAttr('data-sizes');
+          }
+
+          if ($pictureEl.length) {
+            $pictureEl.children('source').each(function (sourceEl) {
+              var $source = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(sourceEl);
+
+              if ($source.attr('data-srcset')) {
+                $source.attr('srcset', $source.attr('data-srcset'));
+                $source.removeAttr('data-srcset');
+              }
+            });
+          }
+
+          if (src) {
+            $imageEl.attr('src', src);
+            $imageEl.removeAttr('data-src');
+          }
+        }
+
+        $imageEl.addClass(params.loadedClass).removeClass(params.loadingClass);
+        $slideEl.find("." + params.preloaderClass).remove();
+
+        if (swiper.params.loop && loadInDuplicate) {
+          var slideOriginalIndex = $slideEl.attr('data-swiper-slide-index');
+
+          if ($slideEl.hasClass(swiper.params.slideDuplicateClass)) {
+            var originalSlide = swiper.$wrapperEl.children("[data-swiper-slide-index=\"" + slideOriginalIndex + "\"]:not(." + swiper.params.slideDuplicateClass + ")");
+            swiper.lazy.loadInSlide(originalSlide.index(), false);
+          } else {
+            var duplicatedSlide = swiper.$wrapperEl.children("." + swiper.params.slideDuplicateClass + "[data-swiper-slide-index=\"" + slideOriginalIndex + "\"]");
+            swiper.lazy.loadInSlide(duplicatedSlide.index(), false);
+          }
+        }
+
+        swiper.emit('lazyImageReady', $slideEl[0], $imageEl[0]);
+
+        if (swiper.params.autoHeight) {
+          swiper.updateAutoHeight();
+        }
+      });
+      swiper.emit('lazyImageLoad', $slideEl[0], $imageEl[0]);
+    });
+  },
+  load: function load() {
+    var swiper = this;
+    var $wrapperEl = swiper.$wrapperEl,
+        swiperParams = swiper.params,
+        slides = swiper.slides,
+        activeIndex = swiper.activeIndex;
+    var isVirtual = swiper.virtual && swiperParams.virtual.enabled;
+    var params = swiperParams.lazy;
+    var slidesPerView = swiperParams.slidesPerView;
+
+    if (slidesPerView === 'auto') {
+      slidesPerView = 0;
+    }
+
+    function slideExist(index) {
+      if (isVirtual) {
+        if ($wrapperEl.children("." + swiperParams.slideClass + "[data-swiper-slide-index=\"" + index + "\"]").length) {
+          return true;
+        }
+      } else if (slides[index]) return true;
+
+      return false;
+    }
+
+    function slideIndex(slideEl) {
+      if (isVirtual) {
+        return Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(slideEl).attr('data-swiper-slide-index');
+      }
+
+      return Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(slideEl).index();
+    }
+
+    if (!swiper.lazy.initialImageLoaded) swiper.lazy.initialImageLoaded = true;
+
+    if (swiper.params.watchSlidesVisibility) {
+      $wrapperEl.children("." + swiperParams.slideVisibleClass).each(function (slideEl) {
+        var index = isVirtual ? Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(slideEl).attr('data-swiper-slide-index') : Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(slideEl).index();
+        swiper.lazy.loadInSlide(index);
+      });
+    } else if (slidesPerView > 1) {
+      for (var i = activeIndex; i < activeIndex + slidesPerView; i += 1) {
+        if (slideExist(i)) swiper.lazy.loadInSlide(i);
+      }
+    } else {
+      swiper.lazy.loadInSlide(activeIndex);
+    }
+
+    if (params.loadPrevNext) {
+      if (slidesPerView > 1 || params.loadPrevNextAmount && params.loadPrevNextAmount > 1) {
+        var amount = params.loadPrevNextAmount;
+        var spv = slidesPerView;
+        var maxIndex = Math.min(activeIndex + spv + Math.max(amount, spv), slides.length);
+        var minIndex = Math.max(activeIndex - Math.max(spv, amount), 0); // Next Slides
+
+        for (var _i = activeIndex + slidesPerView; _i < maxIndex; _i += 1) {
+          if (slideExist(_i)) swiper.lazy.loadInSlide(_i);
+        } // Prev Slides
+
+
+        for (var _i2 = minIndex; _i2 < activeIndex; _i2 += 1) {
+          if (slideExist(_i2)) swiper.lazy.loadInSlide(_i2);
+        }
+      } else {
+        var nextSlide = $wrapperEl.children("." + swiperParams.slideNextClass);
+        if (nextSlide.length > 0) swiper.lazy.loadInSlide(slideIndex(nextSlide));
+        var prevSlide = $wrapperEl.children("." + swiperParams.slidePrevClass);
+        if (prevSlide.length > 0) swiper.lazy.loadInSlide(slideIndex(prevSlide));
+      }
+    }
+  },
+  checkInViewOnLoad: function checkInViewOnLoad() {
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var swiper = this;
+    if (!swiper || swiper.destroyed) return;
+    var $scrollElement = swiper.params.lazy.scrollingElement ? Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(swiper.params.lazy.scrollingElement) : Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(window);
+    var isWindow = $scrollElement[0] === window;
+    var scrollElementWidth = isWindow ? window.innerWidth : $scrollElement[0].offsetWidth;
+    var scrollElementHeight = isWindow ? window.innerHeight : $scrollElement[0].offsetHeight;
+    var swiperOffset = swiper.$el.offset();
+    var rtl = swiper.rtlTranslate;
+    var inView = false;
+    if (rtl) swiperOffset.left -= swiper.$el[0].scrollLeft;
+    var swiperCoord = [[swiperOffset.left, swiperOffset.top], [swiperOffset.left + swiper.width, swiperOffset.top], [swiperOffset.left, swiperOffset.top + swiper.height], [swiperOffset.left + swiper.width, swiperOffset.top + swiper.height]];
+
+    for (var i = 0; i < swiperCoord.length; i += 1) {
+      var point = swiperCoord[i];
+
+      if (point[0] >= 0 && point[0] <= scrollElementWidth && point[1] >= 0 && point[1] <= scrollElementHeight) {
+        if (point[0] === 0 && point[1] === 0) continue; // eslint-disable-line
+
+        inView = true;
+      }
+    }
+
+    if (inView) {
+      swiper.lazy.load();
+      $scrollElement.off('scroll', swiper.lazy.checkInViewOnLoad);
+    } else if (!swiper.lazy.scrollHandlerAttached) {
+      swiper.lazy.scrollHandlerAttached = true;
+      $scrollElement.on('scroll', swiper.lazy.checkInViewOnLoad);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'lazy',
+  params: {
+    lazy: {
+      checkInView: false,
+      enabled: false,
+      loadPrevNext: false,
+      loadPrevNextAmount: 1,
+      loadOnTransitionStart: false,
+      scrollingElement: '',
+      elementClass: 'swiper-lazy',
+      loadingClass: 'swiper-lazy-loading',
+      loadedClass: 'swiper-lazy-loaded',
+      preloaderClass: 'swiper-lazy-preloader'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      lazy: _extends({
+        initialImageLoaded: false
+      }, Lazy)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (swiper.params.lazy.enabled && swiper.params.preloadImages) {
+        swiper.params.preloadImages = false;
+      }
+    },
+    init: function init(swiper) {
+      if (swiper.params.lazy.enabled && !swiper.params.loop && swiper.params.initialSlide === 0) {
+        if (swiper.params.lazy.checkInView) {
+          swiper.lazy.checkInViewOnLoad();
+        } else {
+          swiper.lazy.load();
+        }
+      }
+    },
+    scroll: function scroll(swiper) {
+      if (swiper.params.freeMode && !swiper.params.freeModeSticky) {
+        swiper.lazy.load();
+      }
+    },
+    'scrollbarDragMove resize _freeModeNoMomentumRelease': function lazyLoad(swiper) {
+      if (swiper.params.lazy.enabled) {
+        swiper.lazy.load();
+      }
+    },
+    transitionStart: function transitionStart(swiper) {
+      if (swiper.params.lazy.enabled) {
+        if (swiper.params.lazy.loadOnTransitionStart || !swiper.params.lazy.loadOnTransitionStart && !swiper.lazy.initialImageLoaded) {
+          swiper.lazy.load();
+        }
+      }
+    },
+    transitionEnd: function transitionEnd(swiper) {
+      if (swiper.params.lazy.enabled && !swiper.params.lazy.loadOnTransitionStart) {
+        swiper.lazy.load();
+      }
+    },
+    slideChange: function slideChange(swiper) {
+      if (swiper.params.lazy.enabled && swiper.params.cssMode) {
+        swiper.lazy.load();
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "fXoL":
 /*!******************************************************************!*\
   !*** ./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js ***!
   \******************************************************************/
-/*! exports provided: ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ɵ0, ɵALLOW_MULTIPLE_PLATFORMS, ɵAPP_ID_RANDOM_PROVIDER, ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__, ɵChangeDetectorStatus, ɵCodegenComponentFactoryResolver, ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, ɵCompiler_compileModuleAsync__POST_R3__, ɵCompiler_compileModuleSync__POST_R3__, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵEMPTY_ARRAY, ɵEMPTY_MAP, ɵINJECTOR_IMPL__POST_R3__, ɵINJECTOR_SCOPE, ɵLifecycleHooksFeature, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, ɵSWITCH_COMPILE_COMPONENT__POST_R3__, ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, ɵSWITCH_COMPILE_NGMODULE__POST_R3__, ɵSWITCH_COMPILE_PIPE__POST_R3__, ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, ɵSWITCH_IVY_ENABLED__POST_R3__, ɵSWITCH_RENDERER2_FACTORY__POST_R3__, ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵand, ɵangular_packages_core_core_a, ɵangular_packages_core_core_b, ɵangular_packages_core_core_ba, ɵangular_packages_core_core_bb, ɵangular_packages_core_core_bc, ɵangular_packages_core_core_bd, ɵangular_packages_core_core_be, ɵangular_packages_core_core_bf, ɵangular_packages_core_core_bg, ɵangular_packages_core_core_bh, ɵangular_packages_core_core_bi, ɵangular_packages_core_core_bj, ɵangular_packages_core_core_bl, ɵangular_packages_core_core_bm, ɵangular_packages_core_core_bn, ɵangular_packages_core_core_bo, ɵangular_packages_core_core_bp, ɵangular_packages_core_core_bq, ɵangular_packages_core_core_br, ɵangular_packages_core_core_bs, ɵangular_packages_core_core_bv, ɵangular_packages_core_core_bw, ɵangular_packages_core_core_bx, ɵangular_packages_core_core_bz, ɵangular_packages_core_core_c, ɵangular_packages_core_core_cb, ɵangular_packages_core_core_cc, ɵangular_packages_core_core_d, ɵangular_packages_core_core_e, ɵangular_packages_core_core_f, ɵangular_packages_core_core_g, ɵangular_packages_core_core_h, ɵangular_packages_core_core_i, ɵangular_packages_core_core_j, ɵangular_packages_core_core_k, ɵangular_packages_core_core_l, ɵangular_packages_core_core_m, ɵangular_packages_core_core_n, ɵangular_packages_core_core_o, ɵangular_packages_core_core_p, ɵangular_packages_core_core_q, ɵangular_packages_core_core_r, ɵangular_packages_core_core_s, ɵangular_packages_core_core_t, ɵangular_packages_core_core_u, ɵangular_packages_core_core_v, ɵangular_packages_core_core_w, ɵangular_packages_core_core_x, ɵangular_packages_core_core_y, ɵangular_packages_core_core_z, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵccf, ɵclearOverrides, ɵclearResolutionOfComponentResourcesQueue, ɵcmf, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory__POST_R3__, ɵcompilePipe, ɵcreateInjector, ɵcrt, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdetectChanges, ɵdevModeEqual, ɵdid, ɵeld, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵgetComponentViewDefinitionFactory, ɵgetDebugNodeR2, ɵgetDebugNode__POST_R3__, ɵgetDirectives, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetModuleFactory__POST_R3__, ɵgetSanitizationBypassType, ɵglobal, ɵinitServicesIfNeeded, ɵinlineInterpolate, ɵinterpolate, ɵisBoundToModule__POST_R3__, ɵisDefaultChangeDetectionStrategy, ɵisListLikeIterable, ɵisObservable, ɵisPromise, ɵisSubscribable, ɵivyEnabled, ɵmakeDecorator, ɵmarkDirty, ɵmod, ɵmpd, ɵncd, ɵnoSideEffects, ɵnov, ɵoverrideComponentView, ɵoverrideProvider, ɵpad, ɵpatchComponentDefWithScope, ɵpid, ɵpod, ɵppd, ɵprd, ɵpublishDefaultGlobalUtils, ɵpublishGlobalUtil, ɵqud, ɵregisterLocaleData, ɵregisterModuleFactory, ɵregisterNgModuleType, ɵrenderComponent, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵsetClassMetadata, ɵsetCurrentInjector, ɵsetDocument, ɵsetLocaleId, ɵstore, ɵstringify, ɵted, ɵtransitiveScopesFor, ɵunregisterLocaleData, ɵunv, ɵunwrapSafeValue, ɵvid, ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetFactoryOf, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery */
+/*! exports provided: ANALYZE_FOR_ENTRY_COMPONENTS, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, Directive, ElementRef, EmbeddedViewRef, ErrorHandler, EventEmitter, Host, HostBinding, HostListener, INJECTOR, Inject, InjectFlags, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleFactoryLoader, NgModuleRef, NgProbeToken, NgZone, Optional, Output, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, Pipe, PlatformRef, Query, QueryList, ReflectiveInjector, ReflectiveKey, Renderer2, RendererFactory2, RendererStyleFlags2, ResolvedReflectiveFactory, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, SystemJsNgModuleLoader, SystemJsNgModuleLoaderConfig, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, WrappedValue, asNativeElements, assertPlatform, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, enableProdMode, forwardRef, getDebugNode, getModuleFactory, getPlatform, inject, isDevMode, platformCore, resolveForwardRef, setTestabilityGetter, ɵ0, ɵALLOW_MULTIPLE_PLATFORMS, ɵAPP_ID_RANDOM_PROVIDER, ɵCREATE_ATTRIBUTE_DECORATOR__POST_R3__, ɵChangeDetectorStatus, ɵCodegenComponentFactoryResolver, ɵCompiler_compileModuleAndAllComponentsAsync__POST_R3__, ɵCompiler_compileModuleAndAllComponentsSync__POST_R3__, ɵCompiler_compileModuleAsync__POST_R3__, ɵCompiler_compileModuleSync__POST_R3__, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵEMPTY_ARRAY, ɵEMPTY_MAP, ɵINJECTOR_IMPL__POST_R3__, ɵINJECTOR_SCOPE, ɵLifecycleHooksFeature, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵSWITCH_CHANGE_DETECTOR_REF_FACTORY__POST_R3__, ɵSWITCH_COMPILE_COMPONENT__POST_R3__, ɵSWITCH_COMPILE_DIRECTIVE__POST_R3__, ɵSWITCH_COMPILE_INJECTABLE__POST_R3__, ɵSWITCH_COMPILE_NGMODULE__POST_R3__, ɵSWITCH_COMPILE_PIPE__POST_R3__, ɵSWITCH_ELEMENT_REF_FACTORY__POST_R3__, ɵSWITCH_IVY_ENABLED__POST_R3__, ɵSWITCH_RENDERER2_FACTORY__POST_R3__, ɵSWITCH_TEMPLATE_REF_FACTORY__POST_R3__, ɵSWITCH_VIEW_CONTAINER_REF_FACTORY__POST_R3__, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵand, ɵangular_packages_core_core_a, ɵangular_packages_core_core_b, ɵangular_packages_core_core_ba, ɵangular_packages_core_core_bb, ɵangular_packages_core_core_bc, ɵangular_packages_core_core_bd, ɵangular_packages_core_core_be, ɵangular_packages_core_core_bf, ɵangular_packages_core_core_bg, ɵangular_packages_core_core_bh, ɵangular_packages_core_core_bi, ɵangular_packages_core_core_bj, ɵangular_packages_core_core_bl, ɵangular_packages_core_core_bm, ɵangular_packages_core_core_bn, ɵangular_packages_core_core_bo, ɵangular_packages_core_core_bp, ɵangular_packages_core_core_bq, ɵangular_packages_core_core_br, ɵangular_packages_core_core_bs, ɵangular_packages_core_core_bv, ɵangular_packages_core_core_bw, ɵangular_packages_core_core_bx, ɵangular_packages_core_core_bz, ɵangular_packages_core_core_c, ɵangular_packages_core_core_cb, ɵangular_packages_core_core_cc, ɵangular_packages_core_core_d, ɵangular_packages_core_core_e, ɵangular_packages_core_core_f, ɵangular_packages_core_core_g, ɵangular_packages_core_core_h, ɵangular_packages_core_core_i, ɵangular_packages_core_core_j, ɵangular_packages_core_core_k, ɵangular_packages_core_core_l, ɵangular_packages_core_core_m, ɵangular_packages_core_core_n, ɵangular_packages_core_core_o, ɵangular_packages_core_core_p, ɵangular_packages_core_core_q, ɵangular_packages_core_core_r, ɵangular_packages_core_core_s, ɵangular_packages_core_core_t, ɵangular_packages_core_core_u, ɵangular_packages_core_core_v, ɵangular_packages_core_core_w, ɵangular_packages_core_core_x, ɵangular_packages_core_core_y, ɵangular_packages_core_core_z, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵccf, ɵclearOverrides, ɵclearResolutionOfComponentResourcesQueue, ɵcmf, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory__POST_R3__, ɵcompilePipe, ɵcreateInjector, ɵcrt, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdetectChanges, ɵdevModeEqual, ɵdid, ɵeld, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵgetComponentViewDefinitionFactory, ɵgetDebugNodeR2, ɵgetDebugNode__POST_R3__, ɵgetDirectives, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetModuleFactory__POST_R3__, ɵgetSanitizationBypassType, ɵglobal, ɵinitServicesIfNeeded, ɵinlineInterpolate, ɵinterpolate, ɵisBoundToModule__POST_R3__, ɵisDefaultChangeDetectionStrategy, ɵisListLikeIterable, ɵisObservable, ɵisPromise, ɵisSubscribable, ɵivyEnabled, ɵmakeDecorator, ɵmarkDirty, ɵmod, ɵmpd, ɵncd, ɵnoSideEffects, ɵnov, ɵoverrideComponentView, ɵoverrideProvider, ɵpad, ɵpatchComponentDefWithScope, ɵpid, ɵpod, ɵppd, ɵprd, ɵpublishDefaultGlobalUtils, ɵpublishGlobalUtil, ɵqud, ɵregisterLocaleData, ɵregisterModuleFactory, ɵregisterNgModuleType, ɵrenderComponent, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵsetClassMetadata, ɵsetCurrentInjector, ɵsetDocument, ɵsetLocaleId, ɵstore, ɵstringify, ɵted, ɵtransitiveScopesFor, ɵunregisterLocaleData, ɵunv, ɵunwrapSafeValue, ɵvid, ɵwhenRendered, ɵɵCopyDefinitionFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattribute, ɵɵattributeInterpolate1, ɵɵattributeInterpolate2, ɵɵattributeInterpolate3, ɵɵattributeInterpolate4, ɵɵattributeInterpolate5, ɵɵattributeInterpolate6, ɵɵattributeInterpolate7, ɵɵattributeInterpolate8, ɵɵattributeInterpolateV, ɵɵclassMap, ɵɵclassMapInterpolate1, ɵɵclassMapInterpolate2, ɵɵclassMapInterpolate3, ɵɵclassMapInterpolate4, ɵɵclassMapInterpolate5, ɵɵclassMapInterpolate6, ɵɵclassMapInterpolate7, ɵɵclassMapInterpolate8, ɵɵclassMapInterpolateV, ɵɵclassProp, ɵɵcontentQuery, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵhostProperty, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinjectPipeChangeDetectorRef, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpropertyInterpolate, ɵɵpropertyInterpolate1, ɵɵpropertyInterpolate2, ɵɵpropertyInterpolate3, ɵɵpropertyInterpolate4, ɵɵpropertyInterpolate5, ɵɵpropertyInterpolate6, ɵɵpropertyInterpolate7, ɵɵpropertyInterpolate8, ɵɵpropertyInterpolateV, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryRefresh, ɵɵreference, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstyleMap, ɵɵstyleMapInterpolate1, ɵɵstyleMapInterpolate2, ɵɵstyleMapInterpolate3, ɵɵstyleMapInterpolate4, ɵɵstyleMapInterpolate5, ɵɵstyleMapInterpolate6, ɵɵstyleMapInterpolate7, ɵɵstyleMapInterpolate8, ɵɵstyleMapInterpolateV, ɵɵstyleProp, ɵɵstylePropInterpolate1, ɵɵstylePropInterpolate2, ɵɵstylePropInterpolate3, ɵɵstylePropInterpolate4, ɵɵstylePropInterpolate5, ɵɵstylePropInterpolate6, ɵɵstylePropInterpolate7, ɵɵstylePropInterpolate8, ɵɵstylePropInterpolateV, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵviewQuery */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12007,7 +30129,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵelementStart", function() { return ɵɵelementStart; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵenableBindings", function() { return ɵɵenableBindings; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵgetCurrentView", function() { return ɵɵgetCurrentView; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵgetFactoryOf", function() { return ɵɵgetFactoryOf; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵgetInheritedFactory", function() { return ɵɵgetInheritedFactory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵhostProperty", function() { return ɵɵhostProperty; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵɵi18n", function() { return ɵɵi18n; });
@@ -12115,7 +30236,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs */ "qCKp");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
 /**
- * @license Angular v11.2.3
+ * @license Angular v11.2.9
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -12497,9 +30618,6 @@ const defineInjectable = ɵɵdefineInjectable;
  *
  * Options:
  *
- * * `factory`: an `InjectorType` is an instantiable type, so a zero argument `factory` function to
- *   create the type must be provided. If that factory function needs to inject arguments, it can
- *   use the `inject` function.
  * * `providers`: an optional array of providers to add to the injector. Each provider must
  *   either have a factory or point to a type which has a `ɵprov` static property (the
  *   type must be an `InjectableType`).
@@ -12510,11 +30628,7 @@ const defineInjectable = ɵɵdefineInjectable;
  * @codeGenApi
  */
 function ɵɵdefineInjector(options) {
-    return {
-        factory: options.factory,
-        providers: options.providers || [],
-        imports: options.imports || [],
-    };
+    return { providers: options.providers || [], imports: options.imports || [] };
 }
 /**
  * Read the injectable def (`ɵprov`) for `type` in a way which is immune to accidentally reading
@@ -12941,6 +31055,28 @@ if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+/**
+ * This file contains reuseable "empty" symbols that can be used as default return values
+ * in different parts of the rendering code. Because the same symbols are returned, this
+ * allows for identity checks against these values to be consistently used by the framework
+ * code.
+ */
+const EMPTY_ARRAY$1 = [];
+// freezing the values prevents any code from accidentally inserting new values in
+if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
+    // These property accesses can be ignored because ngDevMode will be set to false
+    // when optimizing code and the whole if statement will be dropped.
+    // tslint:disable-next-line:no-toplevel-property-access
+    Object.freeze(EMPTY_ARRAY$1);
+}
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const NG_COMP_DEF = getClosureSafeProperty({ ɵcmp: getClosureSafeProperty });
 const NG_DIR_DEF = getClosureSafeProperty({ ɵdir: getClosureSafeProperty });
 const NG_PIPE_DEF = getClosureSafeProperty({ ɵpipe: getClosureSafeProperty });
@@ -12985,7 +31121,6 @@ function ɵɵdefineComponent(componentDefinition) {
         // See the `initNgDevMode` docstring for more information.
         (typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode();
         const type = componentDefinition.type;
-        const typePrototype = type.prototype;
         const declaredInputs = {};
         const def = {
             type: type,
@@ -13007,7 +31142,7 @@ function ɵɵdefineComponent(componentDefinition) {
             onPush: componentDefinition.changeDetection === ChangeDetectionStrategy.OnPush,
             directiveDefs: null,
             pipeDefs: null,
-            selectors: componentDefinition.selectors || EMPTY_ARRAY,
+            selectors: componentDefinition.selectors || EMPTY_ARRAY$1,
             viewQuery: componentDefinition.viewQuery || null,
             features: componentDefinition.features || null,
             data: componentDefinition.data || {},
@@ -13015,7 +31150,7 @@ function ɵɵdefineComponent(componentDefinition) {
             // directly in the next line. Also `None` should be 0 not 2.
             encapsulation: componentDefinition.encapsulation || ViewEncapsulation.Emulated,
             id: 'c',
-            styles: componentDefinition.styles || EMPTY_ARRAY,
+            styles: componentDefinition.styles || EMPTY_ARRAY$1,
             _: null,
             setInput: null,
             schemas: componentDefinition.schemas || null,
@@ -13073,10 +31208,10 @@ const autoRegisterModuleById = {};
 function ɵɵdefineNgModule(def) {
     const res = {
         type: def.type,
-        bootstrap: def.bootstrap || EMPTY_ARRAY,
-        declarations: def.declarations || EMPTY_ARRAY,
-        imports: def.imports || EMPTY_ARRAY,
-        exports: def.exports || EMPTY_ARRAY,
+        bootstrap: def.bootstrap || EMPTY_ARRAY$1,
+        declarations: def.declarations || EMPTY_ARRAY$1,
+        imports: def.imports || EMPTY_ARRAY$1,
+        exports: def.exports || EMPTY_ARRAY$1,
         transitiveCompileScopes: null,
         schemas: def.schemas || null,
         id: def.id || null,
@@ -13101,9 +31236,9 @@ function ɵɵdefineNgModule(def) {
 function ɵɵsetNgModuleScope(type, scope) {
     return noSideEffects(() => {
         const ngModuleDef = getNgModuleDef(type, true);
-        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY;
-        ngModuleDef.imports = scope.imports || EMPTY_ARRAY;
-        ngModuleDef.exports = scope.exports || EMPTY_ARRAY;
+        ngModuleDef.declarations = scope.declarations || EMPTY_ARRAY$1;
+        ngModuleDef.imports = scope.imports || EMPTY_ARRAY$1;
+        ngModuleDef.exports = scope.exports || EMPTY_ARRAY$1;
     });
 }
 /**
@@ -13639,6 +31774,42 @@ function getSimpleChangesStore(instance) {
 function setSimpleChangesStore(instance, store) {
     return instance[SIMPLE_CHANGES_STORE] = store;
 }
+
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
+let profilerCallback = null;
+/**
+ * Sets the callback function which will be invoked before and after performing certain actions at
+ * runtime (for example, before and after running change detection).
+ *
+ * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+ * The contract of the function might be changed in any release and/or the function can be removed
+ * completely.
+ *
+ * @param profiler function provided by the caller or null value to disable profiling.
+ */
+const setProfiler = (profiler) => {
+    profilerCallback = profiler;
+};
+/**
+ * Profiler function which wraps user code executed by the runtime.
+ *
+ * @param event ProfilerEvent corresponding to the execution context
+ * @param instance component instance
+ * @param hookOrListener lifecycle hook function or output listener. The value depends on the
+ *  execution context
+ * @returns
+ */
+const profiler = function (event, instance, hookOrListener) {
+    if (profilerCallback != null /* both `null` and `undefined` */) {
+        profilerCallback(event, instance, hookOrListener);
+    }
+};
 
 /**
  * @license
@@ -14634,11 +32805,23 @@ function callHook(currentView, initPhase, arr, i) {
             (currentView[PREORDER_HOOK_FLAGS] >> 16 /* NumberOfInitHooksCalledShift */) &&
             (currentView[FLAGS] & 3 /* InitPhaseStateMask */) === initPhase) {
             currentView[FLAGS] += 2048 /* IndexWithinInitPhaseIncrementer */;
-            hook.call(directive);
+            profiler(4 /* LifecycleHookStart */, directive, hook);
+            try {
+                hook.call(directive);
+            }
+            finally {
+                profiler(5 /* LifecycleHookEnd */, directive, hook);
+            }
         }
     }
     else {
-        hook.call(directive);
+        profiler(4 /* LifecycleHookStart */, directive, hook);
+        try {
+            hook.call(directive);
+        }
+        finally {
+            profiler(5 /* LifecycleHookEnd */, directive, hook);
+        }
     }
 }
 
@@ -15733,33 +33916,15 @@ class NodeInjector {
 /**
  * @codeGenApi
  */
-function ɵɵgetFactoryOf(type) {
-    const typeAny = type;
-    if (isForwardRef(type)) {
-        return (() => {
-            const factory = ɵɵgetFactoryOf(resolveForwardRef(typeAny));
-            return factory ? factory() : null;
-        });
-    }
-    let factory = getFactoryDef(typeAny);
-    if (factory === null) {
-        const injectorDef = getInjectorDef(typeAny);
-        factory = injectorDef && injectorDef.factory;
-    }
-    return factory || null;
-}
-/**
- * @codeGenApi
- */
 function ɵɵgetInheritedFactory(type) {
     return noSideEffects(() => {
         const ownConstructor = type.prototype.constructor;
-        const ownFactory = ownConstructor[NG_FACTORY_DEF] || ɵɵgetFactoryOf(ownConstructor);
+        const ownFactory = ownConstructor[NG_FACTORY_DEF] || getFactoryOf(ownConstructor);
         const objectPrototype = Object.prototype;
         let parent = Object.getPrototypeOf(type.prototype).constructor;
         // Go up the prototype until we hit `Object`.
         while (parent && parent !== objectPrototype) {
-            const factory = parent[NG_FACTORY_DEF] || ɵɵgetFactoryOf(parent);
+            const factory = parent[NG_FACTORY_DEF] || getFactoryOf(parent);
             // If we hit something that has a factory and the factory isn't the same as the type,
             // we've found the inherited factory. Note the check that the factory isn't the type's
             // own factory is redundant in most cases, but if the user has custom decorators on the
@@ -15776,6 +33941,15 @@ function ɵɵgetInheritedFactory(type) {
         // latter has to be assumed.
         return t => new t();
     });
+}
+function getFactoryOf(type) {
+    if (isForwardRef(type)) {
+        return () => {
+            const factory = getFactoryOf(resolveForwardRef(type));
+            return factory && factory();
+        };
+    }
+    return getFactoryDef(type);
 }
 
 /**
@@ -18740,7 +36914,7 @@ function getDirectivesAtNodeIndex(nodeIndex, lView, includeComponents) {
     const tNode = lView[TVIEW].data[nodeIndex];
     let directiveStartIndex = tNode.directiveStart;
     if (directiveStartIndex == 0)
-        return EMPTY_ARRAY;
+        return EMPTY_ARRAY$1;
     const directiveEndIndex = tNode.directiveEnd;
     if (!includeComponents && tNode.flags & 2 /* isComponentHost */)
         directiveStartIndex++;
@@ -20690,7 +38864,6 @@ function getLViewToClone(type, name) {
             }
             return embeddedArray;
     }
-    throw new Error('unreachable code');
 }
 function nameSuffix(text) {
     if (text == null)
@@ -21651,17 +39824,22 @@ function renderComponentOrTemplate(tView, lView, templateFn, context) {
 }
 function executeTemplate(tView, lView, templateFn, rf, context) {
     const prevSelectedIndex = getSelectedIndex();
+    const isUpdatePhase = rf & 2 /* Update */;
     try {
         setSelectedIndex(-1);
-        if (rf & 2 /* Update */ && lView.length > HEADER_OFFSET) {
+        if (isUpdatePhase && lView.length > HEADER_OFFSET) {
             // When we're updating, inherently select 0 so we don't
             // have to generate that instruction for most update blocks.
             selectIndexInternal(tView, lView, HEADER_OFFSET, isInCheckNoChangesMode());
         }
+        const preHookType = isUpdatePhase ? 2 /* TemplateUpdateStart */ : 0 /* TemplateCreateStart */;
+        profiler(preHookType, context);
         templateFn(rf, context);
     }
     finally {
         setSelectedIndex(prevSelectedIndex);
+        const postHookType = isUpdatePhase ? 3 /* TemplateUpdateEnd */ : 1 /* TemplateCreateEnd */;
+        profiler(postHookType, context);
     }
 }
 //////////////////////////
@@ -23199,7 +41377,7 @@ const NOT_YET = {};
  * a circular dependency among the providers.
  */
 const CIRCULAR = {};
-const EMPTY_ARRAY$1 = [];
+const EMPTY_ARRAY$2 = [];
 /**
  * A lazily initialized NullInjector.
  */
@@ -23434,14 +41612,15 @@ class R3Injector {
             if (importTypesWithProviders !== undefined) {
                 for (let i = 0; i < importTypesWithProviders.length; i++) {
                     const { ngModule, providers } = importTypesWithProviders[i];
-                    deepForEach(providers, provider => this.processProvider(provider, ngModule, providers || EMPTY_ARRAY$1));
+                    deepForEach(providers, provider => this.processProvider(provider, ngModule, providers || EMPTY_ARRAY$2));
                 }
             }
         }
         // Track the InjectorType and add a provider for it. It's important that this is done after the
         // def's imports.
         this.injectorDefTypes.add(defType);
-        this.records.set(defType, makeRecord(def.factory, NOT_YET));
+        const factory = getFactoryDef(defType) || (() => new defType());
+        this.records.set(defType, makeRecord(factory, NOT_YET));
         // Next, include providers listed on the definition itself.
         const defProviders = def.providers;
         if (defProviders != null && !isDuplicate) {
@@ -23518,12 +41697,6 @@ function injectableDefOrInjectorDefFactory(token) {
     const factory = injectableDef !== null ? injectableDef.factory : getFactoryDef(token);
     if (factory !== null) {
         return factory;
-    }
-    // If the token is an NgModule, it's also injectable but the factory is on its injector def
-    // (`ɵinj`)
-    const injectorDef = getInjectorDef(token);
-    if (injectorDef !== null) {
-        return injectorDef.factory;
     }
     // InjectionTokens should have an injectable def (ɵprov) and thus should be handled above.
     // If it's missing that, it's an error.
@@ -24360,6 +42533,12 @@ let _published = false;
 function publishDefaultGlobalUtils() {
     if (!_published) {
         _published = true;
+        /**
+         * Warning: this function is *INTERNAL* and should not be relied upon in application's code.
+         * The contract of the function might be changed in any release and/or the function can be
+         * removed completely.
+         */
+        publishGlobalUtil('ɵsetProfiler', setProfiler);
         publishGlobalUtil('getComponent', getComponent);
         publishGlobalUtil('getContext', getContext);
         publishGlobalUtil('getListeners', getListeners);
@@ -24693,7 +42872,7 @@ function maybeUnwrapEmpty(value) {
     if (value === EMPTY_OBJ) {
         return {};
     }
-    else if (value === EMPTY_ARRAY) {
+    else if (value === EMPTY_ARRAY$1) {
         return [];
     }
     else {
@@ -25681,23 +43860,8 @@ const angularCoreDiEnv = {
     'ɵɵdefineInjectable': ɵɵdefineInjectable,
     'ɵɵdefineInjector': ɵɵdefineInjector,
     'ɵɵinject': ɵɵinject,
-    'ɵɵgetFactoryOf': getFactoryOf,
     'ɵɵinvalidFactoryDep': ɵɵinvalidFactoryDep,
 };
-function getFactoryOf(type) {
-    const typeAny = type;
-    if (isForwardRef(type)) {
-        return (() => {
-            const factory = getFactoryOf(resolveForwardRef(typeAny));
-            return factory ? factory() : null;
-        });
-    }
-    const def = getInjectableDef(typeAny) || getInjectorDef(typeAny);
-    if (!def || def.factory === undefined) {
-        return null;
-    }
-    return def.factory;
-}
 
 /**
  * @license
@@ -25802,7 +43966,7 @@ function getInjectableMetadata(type, srcMeta) {
  */
 const ɵ0$9 = getClosureSafeProperty;
 const USE_VALUE$2 = getClosureSafeProperty({ provide: String, useValue: ɵ0$9 });
-const EMPTY_ARRAY$2 = [];
+const EMPTY_ARRAY$3 = [];
 function convertInjectableProviderToFactory(type, provider) {
     if (!provider) {
         const reflectionCapabilities = new ReflectionCapabilities();
@@ -25820,7 +43984,7 @@ function convertInjectableProviderToFactory(type, provider) {
     }
     else if (provider.useFactory) {
         const factoryProvider = provider;
-        return () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY$2));
+        return () => factoryProvider.useFactory(...injectArgs(factoryProvider.deps || EMPTY_ARRAY$3));
     }
     else if (provider.useClass) {
         const classProvider = provider;
@@ -27235,6 +45399,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     const isTNodeDirectiveHost = isDirectiveHost(tNode);
     const firstCreatePass = tView.firstCreatePass;
     const tCleanup = firstCreatePass && getOrCreateTViewCleanup(tView);
+    const context = lView[CONTEXT];
     // When the ɵɵlistener instruction was generated and is executed we know that there is either a
     // native listener or a directive output on this element. As such we we know that we will have to
     // register a listener and store its cleanup function on LView.
@@ -27287,7 +45452,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
                 // The first argument of `listen` function in Procedural Renderer is:
                 // - either a target name (as a string) in case of global target (window, document, body)
                 // - or element reference (in all other cases)
-                listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+                listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
                 const cleanupFn = renderer.listen(resolved.name || target, eventName, listenerFn);
                 ngDevMode && ngDevMode.rendererAddEventListener++;
                 lCleanup.push(listenerFn, cleanupFn);
@@ -27295,7 +45460,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
             }
         }
         else {
-            listenerFn = wrapListener(tNode, lView, listenerFn, true /** preventDefault */);
+            listenerFn = wrapListener(tNode, lView, context, listenerFn, true /** preventDefault */);
             target.addEventListener(eventName, listenerFn, useCapture);
             ngDevMode && ngDevMode.rendererAddEventListener++;
             lCleanup.push(listenerFn);
@@ -27305,7 +45470,7 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
     else {
         // Even if there is no native listener to add, we still need to wrap the listener so that OnPush
         // ancestors are marked dirty when an event occurs.
-        listenerFn = wrapListener(tNode, lView, listenerFn, false /** preventDefault */);
+        listenerFn = wrapListener(tNode, lView, context, listenerFn, false /** preventDefault */);
     }
     // subscribe to directive outputs
     const outputs = tNode.outputs;
@@ -27330,14 +45495,18 @@ function listenerInternal(tView, lView, renderer, tNode, eventName, listenerFn, 
         }
     }
 }
-function executeListenerWithErrorHandling(lView, listenerFn, e) {
+function executeListenerWithErrorHandling(lView, context, listenerFn, e) {
     try {
+        profiler(6 /* OutputStart */, context, listenerFn);
         // Only explicitly returning false from a listener should preventDefault
         return listenerFn(e) !== false;
     }
     catch (error) {
         handleError(lView, error);
         return false;
+    }
+    finally {
+        profiler(7 /* OutputEnd */, context, listenerFn);
     }
 }
 /**
@@ -27350,7 +45519,7 @@ function executeListenerWithErrorHandling(lView, listenerFn, e) {
  * @param wrapWithPreventDefault Whether or not to prevent default behavior
  * (the procedural renderer does this already, so in those cases, we should skip)
  */
-function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
+function wrapListener(tNode, lView, context, listenerFn, wrapWithPreventDefault) {
     // Note: we are performing most of the work in the listener function itself
     // to optimize listener registration.
     return function wrapListenerIn_markDirtyAndPreventDefault(e) {
@@ -27368,13 +45537,13 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
             markViewDirty(startView);
         }
-        let result = executeListenerWithErrorHandling(lView, listenerFn, e);
+        let result = executeListenerWithErrorHandling(lView, context, listenerFn, e);
         // A just-invoked listener function might have coalesced listeners so we need to check for
         // their presence and invoke as needed.
         let nextListenerFn = wrapListenerIn_markDirtyAndPreventDefault.__ngNextListenerFn__;
         while (nextListenerFn) {
             // We should prevent default if any of the listeners explicitly return false
-            result = executeListenerWithErrorHandling(lView, nextListenerFn, e) && result;
+            result = executeListenerWithErrorHandling(lView, context, nextListenerFn, e) && result;
             nextListenerFn = nextListenerFn.__ngNextListenerFn__;
         }
         if (wrapWithPreventDefault && result === false) {
@@ -27990,31 +46159,6 @@ function ɵɵpropertyInterpolateV(propName, values, sanitizer) {
         }
     }
     return ɵɵpropertyInterpolateV;
-}
-
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-/**
- * This file contains reuseable "empty" symbols that can be used as default return values
- * in different parts of the rendering code. Because the same symbols are returned, this
- * allows for identity checks against these values to be consistently used by the framework
- * code.
- */
-const EMPTY_OBJ$1 = {};
-const EMPTY_ARRAY$3 = [];
-// freezing the values prevents any code from accidentally inserting new values in
-if ((typeof ngDevMode === 'undefined' || ngDevMode) && initNgDevMode()) {
-    // These property accesses can be ignored because ngDevMode will be set to false
-    // when optimizing code and the whole if statement will be dropped.
-    // tslint:disable-next-line:no-toplevel-property-access
-    Object.freeze(EMPTY_OBJ$1);
-    // tslint:disable-next-line:no-toplevel-property-access
-    Object.freeze(EMPTY_ARRAY$3);
 }
 
 /**
@@ -29199,7 +47343,7 @@ function collectStylingFromTAttrs(stylingKey, attrs, isClassBased) {
  */
 function toStylingKeyValueArray(keyValueArraySet, stringParser, value) {
     if (value == null /*|| value === undefined */ || value === '')
-        return EMPTY_ARRAY$3;
+        return EMPTY_ARRAY;
     const styleKeyValueArray = [];
     const unwrappedValue = unwrapSafeValue(value);
     if (Array.isArray(unwrappedValue)) {
@@ -29256,7 +47400,7 @@ function styleKeyValueArraySet(keyValueArray, key, value) {
 function updateStylingMap(tView, tNode, lView, renderer, oldKeyValueArray, newKeyValueArray, isClassBased, bindingIndex) {
     if (oldKeyValueArray === NO_CHANGE) {
         // On first execution the oldKeyValueArray is NO_CHANGE => treat it as empty KeyValueArray.
-        oldKeyValueArray = EMPTY_ARRAY$3;
+        oldKeyValueArray = EMPTY_ARRAY;
     }
     let oldIndex = 0;
     let newIndex = 0;
@@ -29394,7 +47538,7 @@ function findStylingValue(tData, tNode, lView, prop, index, isClassBased) {
             // we have `undefined` (or empty array in case of styling-map instruction) instead. This
             // allows the resolution to apply the value (which may later be overwritten when the
             // binding actually executes.)
-            valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY$3 : undefined;
+            valueAtLViewIndex = isStylingMap ? EMPTY_ARRAY : undefined;
         }
         let currentValue = isStylingMap ? keyValueArrayGet(valueAtLViewIndex, prop) :
             key === prop ? valueAtLViewIndex : undefined;
@@ -31833,7 +49977,7 @@ function loadIcuContainerVisitor() {
             _removes = tIcu.remove[currentCase];
         }
         else {
-            _removes = EMPTY_ARRAY;
+            _removes = EMPTY_ARRAY$1;
         }
     }
     function icuContainerIteratorNext() {
@@ -33512,7 +51656,7 @@ class Version {
 /**
  * @publicApi
  */
-const VERSION = new Version('11.2.3');
+const VERSION = new Version('11.2.9');
 
 /**
  * @license
@@ -38770,7 +56914,6 @@ const ɵ0$c = () => ({
     'ɵɵdefineNgModule': ɵɵdefineNgModule,
     'ɵɵdefinePipe': ɵɵdefinePipe,
     'ɵɵdirectiveInject': ɵɵdirectiveInject,
-    'ɵɵgetFactoryOf': ɵɵgetFactoryOf,
     'ɵɵgetInheritedFactory': ɵɵgetInheritedFactory,
     'ɵɵinject': ɵɵinject,
     'ɵɵinjectAttribute': ɵɵinjectAttribute,
@@ -38996,7 +57139,7 @@ function compileNgModule(moduleType, ngModule = {}) {
     enqueueModuleForDelayedScoping(moduleType, ngModule);
 }
 /**
- * Compiles and adds the `ɵmod` and `ɵinj` properties to the module class.
+ * Compiles and adds the `ɵmod`, `ɵfac` and `ɵinj` properties to the module class.
  *
  * It's possible to compile a module via this API which will allow duplicate declarations in its
  * root.
@@ -39039,6 +57182,25 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
             return ngModuleDef;
         }
     });
+    let ngFactoryDef = null;
+    Object.defineProperty(moduleType, NG_FACTORY_DEF, {
+        get: () => {
+            if (ngFactoryDef === null) {
+                const compiler = getCompilerFacade();
+                ngFactoryDef = compiler.compileFactory(angularCoreEnv, `ng:///${moduleType.name}/ɵfac.js`, {
+                    name: moduleType.name,
+                    type: moduleType,
+                    deps: reflectDependencies(moduleType),
+                    injectFn: 'inject',
+                    target: compiler.R3FactoryTarget.NgModule,
+                    typeArgumentCount: 0,
+                });
+            }
+            return ngFactoryDef;
+        },
+        // Make the property configurable in dev mode to allow overriding in tests
+        configurable: !!ngDevMode,
+    });
     let ngInjectorDef = null;
     Object.defineProperty(moduleType, NG_INJ_DEF, {
         get: () => {
@@ -39048,7 +57210,6 @@ function compileNgModuleDefs(moduleType, ngModule, allowDuplicateDeclarationsInR
                 const meta = {
                     name: moduleType.name,
                     type: moduleType,
-                    deps: reflectDependencies(moduleType),
                     providers: ngModule.providers || EMPTY_ARRAY$5,
                     imports: [
                         (ngModule.imports || EMPTY_ARRAY$5).map(resolveForwardRef),
@@ -39457,7 +57618,7 @@ function compileComponent(type, metadata) {
                     }
                 }
                 const templateUrl = metadata.templateUrl || `ng:///${type.name}/template.html`;
-                const meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
+                const meta = Object.assign(Object.assign({}, directiveMetadata(type, metadata)), { typeSourceSpan: compiler.createParseSourceSpan('Component', type.name, templateUrl), template: metadata.template || '', preserveWhitespaces, styles: metadata.styles || EMPTY_ARRAY$1, animations: metadata.animations, directives: [], changeDetection: metadata.changeDetection, pipes: new Map(), encapsulation, interpolation: metadata.interpolation, viewProviders: metadata.viewProviders || null });
                 compilationDepth++;
                 try {
                     if (meta.usesInheritance) {
@@ -39566,8 +57727,8 @@ function directiveMetadata(type, metadata) {
         deps: reflectDependencies(type),
         host: metadata.host || EMPTY_OBJ,
         propMetadata: propMetadata,
-        inputs: metadata.inputs || EMPTY_ARRAY,
-        outputs: metadata.outputs || EMPTY_ARRAY,
+        inputs: metadata.inputs || EMPTY_ARRAY$1,
+        outputs: metadata.outputs || EMPTY_ARRAY$1,
         queries: extractQueriesMetadata(type, propMetadata, isContentQuery),
         lifecycle: { usesOnChanges: reflect.hasLifecycleHook(type, 'ngOnChanges') },
         typeSourceSpan: null,
@@ -39860,11 +58021,10 @@ function preR3NgModuleCompile(moduleType, metadata) {
     if (metadata && metadata.exports) {
         imports = [...imports, metadata.exports];
     }
-    moduleType.ɵinj = ɵɵdefineInjector({
-        factory: convertInjectableProviderToFactory(moduleType, { useClass: moduleType }),
-        providers: metadata && metadata.providers,
-        imports: imports,
-    });
+    const moduleInjectorType = moduleType;
+    moduleInjectorType.ɵfac = convertInjectableProviderToFactory(moduleType, { useClass: moduleType });
+    moduleInjectorType.ɵinj =
+        ɵɵdefineInjector({ providers: metadata && metadata.providers, imports: imports });
 }
 const SWITCH_COMPILE_NGMODULE__POST_R3__ = compileNgModule;
 const SWITCH_COMPILE_NGMODULE__PRE_R3__ = preR3NgModuleCompile;
@@ -42691,8 +60851,9 @@ class ApplicationModule {
     // Inject ApplicationRef to make it eager...
     constructor(appRef) { }
 }
+ApplicationModule.ɵfac = function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); };
 ApplicationModule.ɵmod = ɵɵdefineNgModule({ type: ApplicationModule });
-ApplicationModule.ɵinj = ɵɵdefineInjector({ factory: function ApplicationModule_Factory(t) { return new (t || ApplicationModule)(ɵɵinject(ApplicationRef)); }, providers: APPLICATION_MODULE_PROVIDERS });
+ApplicationModule.ɵinj = ɵɵdefineInjector({ providers: APPLICATION_MODULE_PROVIDERS });
 ApplicationModule.ctorParameters = () => [
     { type: ApplicationRef }
 ];
@@ -45090,6 +63251,436 @@ if (typeof ngDevMode !== 'undefined' && ngDevMode) {
 
 /***/ }),
 
+/***/ "g0Ox":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/navigation/navigation.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Navigation = {
+  toggleEl: function toggleEl($el, disabled) {
+    $el[disabled ? 'addClass' : 'removeClass'](this.params.navigation.disabledClass);
+    if ($el[0] && $el[0].tagName === 'BUTTON') $el[0].disabled = disabled;
+  },
+  update: function update() {
+    // Update Navigation Buttons
+    var swiper = this;
+    var params = swiper.params.navigation;
+    var toggleEl = swiper.navigation.toggleEl;
+    if (swiper.params.loop) return;
+    var _swiper$navigation = swiper.navigation,
+        $nextEl = _swiper$navigation.$nextEl,
+        $prevEl = _swiper$navigation.$prevEl;
+
+    if ($prevEl && $prevEl.length > 0) {
+      if (swiper.isBeginning) {
+        toggleEl($prevEl, true);
+      } else {
+        toggleEl($prevEl, false);
+      }
+
+      $prevEl[swiper.params.watchOverflow && swiper.isLocked ? 'addClass' : 'removeClass'](params.lockClass);
+    }
+
+    if ($nextEl && $nextEl.length > 0) {
+      if (swiper.isEnd) {
+        toggleEl($nextEl, true);
+      } else {
+        toggleEl($nextEl, false);
+      }
+
+      $nextEl[swiper.params.watchOverflow && swiper.isLocked ? 'addClass' : 'removeClass'](params.lockClass);
+    }
+  },
+  onPrevClick: function onPrevClick(e) {
+    var swiper = this;
+    e.preventDefault();
+    if (swiper.isBeginning && !swiper.params.loop) return;
+    swiper.slidePrev();
+  },
+  onNextClick: function onNextClick(e) {
+    var swiper = this;
+    e.preventDefault();
+    if (swiper.isEnd && !swiper.params.loop) return;
+    swiper.slideNext();
+  },
+  init: function init() {
+    var swiper = this;
+    var params = swiper.params.navigation;
+    if (!(params.nextEl || params.prevEl)) return;
+    var $nextEl;
+    var $prevEl;
+
+    if (params.nextEl) {
+      $nextEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.nextEl);
+
+      if (swiper.params.uniqueNavElements && typeof params.nextEl === 'string' && $nextEl.length > 1 && swiper.$el.find(params.nextEl).length === 1) {
+        $nextEl = swiper.$el.find(params.nextEl);
+      }
+    }
+
+    if (params.prevEl) {
+      $prevEl = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(params.prevEl);
+
+      if (swiper.params.uniqueNavElements && typeof params.prevEl === 'string' && $prevEl.length > 1 && swiper.$el.find(params.prevEl).length === 1) {
+        $prevEl = swiper.$el.find(params.prevEl);
+      }
+    }
+
+    if ($nextEl && $nextEl.length > 0) {
+      $nextEl.on('click', swiper.navigation.onNextClick);
+    }
+
+    if ($prevEl && $prevEl.length > 0) {
+      $prevEl.on('click', swiper.navigation.onPrevClick);
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.navigation, {
+      $nextEl: $nextEl,
+      nextEl: $nextEl && $nextEl[0],
+      $prevEl: $prevEl,
+      prevEl: $prevEl && $prevEl[0]
+    });
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    var _swiper$navigation2 = swiper.navigation,
+        $nextEl = _swiper$navigation2.$nextEl,
+        $prevEl = _swiper$navigation2.$prevEl;
+
+    if ($nextEl && $nextEl.length) {
+      $nextEl.off('click', swiper.navigation.onNextClick);
+      $nextEl.removeClass(swiper.params.navigation.disabledClass);
+    }
+
+    if ($prevEl && $prevEl.length) {
+      $prevEl.off('click', swiper.navigation.onPrevClick);
+      $prevEl.removeClass(swiper.params.navigation.disabledClass);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'navigation',
+  params: {
+    navigation: {
+      nextEl: null,
+      prevEl: null,
+      hideOnClick: false,
+      disabledClass: 'swiper-button-disabled',
+      hiddenClass: 'swiper-button-hidden',
+      lockClass: 'swiper-button-lock'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      navigation: _extends({}, Navigation)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      swiper.navigation.init();
+      swiper.navigation.update();
+    },
+    toEdge: function toEdge(swiper) {
+      swiper.navigation.update();
+    },
+    fromEdge: function fromEdge(swiper) {
+      swiper.navigation.update();
+    },
+    destroy: function destroy(swiper) {
+      swiper.navigation.destroy();
+    },
+    click: function click(swiper, e) {
+      var _swiper$navigation3 = swiper.navigation,
+          $nextEl = _swiper$navigation3.$nextEl,
+          $prevEl = _swiper$navigation3.$prevEl;
+      var targetEl = e.target;
+
+      if (swiper.params.navigation.hideOnClick && !Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(targetEl).is($prevEl) && !Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(targetEl).is($nextEl)) {
+        if (swiper.pagination && swiper.params.pagination && swiper.params.pagination.clickable && (swiper.pagination.el === targetEl || swiper.pagination.el.contains(targetEl))) return;
+        var isHidden;
+
+        if ($nextEl) {
+          isHidden = $nextEl.hasClass(swiper.params.navigation.hiddenClass);
+        } else if ($prevEl) {
+          isHidden = $prevEl.hasClass(swiper.params.navigation.hiddenClass);
+        }
+
+        if (isHidden === true) {
+          swiper.emit('navigationShow');
+        } else {
+          swiper.emit('navigationHide');
+        }
+
+        if ($nextEl) {
+          $nextEl.toggleClass(swiper.params.navigation.hiddenClass);
+        }
+
+        if ($prevEl) {
+          $prevEl.toggleClass(swiper.params.navigation.hiddenClass);
+        }
+      }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "g1JZ":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onTouchMove.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onTouchMove; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+
+
+function onTouchMove(event) {
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var swiper = this;
+  var data = swiper.touchEventsData;
+  var params = swiper.params,
+      touches = swiper.touches,
+      rtl = swiper.rtlTranslate;
+  var e = event;
+  if (e.originalEvent) e = e.originalEvent;
+
+  if (!data.isTouched) {
+    if (data.startMoving && data.isScrolling) {
+      swiper.emit('touchMoveOpposite', e);
+    }
+
+    return;
+  }
+
+  if (data.isTouchEvent && e.type !== 'touchmove') return;
+  var targetTouch = e.type === 'touchmove' && e.targetTouches && (e.targetTouches[0] || e.changedTouches[0]);
+  var pageX = e.type === 'touchmove' ? targetTouch.pageX : e.pageX;
+  var pageY = e.type === 'touchmove' ? targetTouch.pageY : e.pageY;
+
+  if (e.preventedByNestedSwiper) {
+    touches.startX = pageX;
+    touches.startY = pageY;
+    return;
+  }
+
+  if (!swiper.allowTouchMove) {
+    // isMoved = true;
+    swiper.allowClick = false;
+
+    if (data.isTouched) {
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["extend"])(touches, {
+        startX: pageX,
+        startY: pageY,
+        currentX: pageX,
+        currentY: pageY
+      });
+      data.touchStartTime = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])();
+    }
+
+    return;
+  }
+
+  if (data.isTouchEvent && params.touchReleaseOnEdges && !params.loop) {
+    if (swiper.isVertical()) {
+      // Vertical
+      if (pageY < touches.startY && swiper.translate <= swiper.maxTranslate() || pageY > touches.startY && swiper.translate >= swiper.minTranslate()) {
+        data.isTouched = false;
+        data.isMoved = false;
+        return;
+      }
+    } else if (pageX < touches.startX && swiper.translate <= swiper.maxTranslate() || pageX > touches.startX && swiper.translate >= swiper.minTranslate()) {
+      return;
+    }
+  }
+
+  if (data.isTouchEvent && document.activeElement) {
+    if (e.target === document.activeElement && Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(e.target).is(data.formElements)) {
+      data.isMoved = true;
+      swiper.allowClick = false;
+      return;
+    }
+  }
+
+  if (data.allowTouchCallbacks) {
+    swiper.emit('touchMove', e);
+  }
+
+  if (e.targetTouches && e.targetTouches.length > 1) return;
+  touches.currentX = pageX;
+  touches.currentY = pageY;
+  var diffX = touches.currentX - touches.startX;
+  var diffY = touches.currentY - touches.startY;
+  if (swiper.params.threshold && Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2)) < swiper.params.threshold) return;
+
+  if (typeof data.isScrolling === 'undefined') {
+    var touchAngle;
+
+    if (swiper.isHorizontal() && touches.currentY === touches.startY || swiper.isVertical() && touches.currentX === touches.startX) {
+      data.isScrolling = false;
+    } else {
+      // eslint-disable-next-line
+      if (diffX * diffX + diffY * diffY >= 25) {
+        touchAngle = Math.atan2(Math.abs(diffY), Math.abs(diffX)) * 180 / Math.PI;
+        data.isScrolling = swiper.isHorizontal() ? touchAngle > params.touchAngle : 90 - touchAngle > params.touchAngle;
+      }
+    }
+  }
+
+  if (data.isScrolling) {
+    swiper.emit('touchMoveOpposite', e);
+  }
+
+  if (typeof data.startMoving === 'undefined') {
+    if (touches.currentX !== touches.startX || touches.currentY !== touches.startY) {
+      data.startMoving = true;
+    }
+  }
+
+  if (data.isScrolling) {
+    data.isTouched = false;
+    return;
+  }
+
+  if (!data.startMoving) {
+    return;
+  }
+
+  swiper.allowClick = false;
+
+  if (!params.cssMode && e.cancelable) {
+    e.preventDefault();
+  }
+
+  if (params.touchMoveStopPropagation && !params.nested) {
+    e.stopPropagation();
+  }
+
+  if (!data.isMoved) {
+    if (params.loop) {
+      swiper.loopFix();
+    }
+
+    data.startTranslate = swiper.getTranslate();
+    swiper.setTransition(0);
+
+    if (swiper.animating) {
+      swiper.$wrapperEl.trigger('webkitTransitionEnd transitionend');
+    }
+
+    data.allowMomentumBounce = false; // Grab Cursor
+
+    if (params.grabCursor && (swiper.allowSlideNext === true || swiper.allowSlidePrev === true)) {
+      swiper.setGrabCursor(true);
+    }
+
+    swiper.emit('sliderFirstMove', e);
+  }
+
+  swiper.emit('sliderMove', e);
+  data.isMoved = true;
+  var diff = swiper.isHorizontal() ? diffX : diffY;
+  touches.diff = diff;
+  diff *= params.touchRatio;
+  if (rtl) diff = -diff;
+  swiper.swipeDirection = diff > 0 ? 'prev' : 'next';
+  data.currentTranslate = diff + data.startTranslate;
+  var disableParentSwiper = true;
+  var resistanceRatio = params.resistanceRatio;
+
+  if (params.touchReleaseOnEdges) {
+    resistanceRatio = 0;
+  }
+
+  if (diff > 0 && data.currentTranslate > swiper.minTranslate()) {
+    disableParentSwiper = false;
+    if (params.resistance) data.currentTranslate = swiper.minTranslate() - 1 + Math.pow(-swiper.minTranslate() + data.startTranslate + diff, resistanceRatio);
+  } else if (diff < 0 && data.currentTranslate < swiper.maxTranslate()) {
+    disableParentSwiper = false;
+    if (params.resistance) data.currentTranslate = swiper.maxTranslate() + 1 - Math.pow(swiper.maxTranslate() - data.startTranslate - diff, resistanceRatio);
+  }
+
+  if (disableParentSwiper) {
+    e.preventedByNestedSwiper = true;
+  } // Directions locks
+
+
+  if (!swiper.allowSlideNext && swiper.swipeDirection === 'next' && data.currentTranslate < data.startTranslate) {
+    data.currentTranslate = data.startTranslate;
+  }
+
+  if (!swiper.allowSlidePrev && swiper.swipeDirection === 'prev' && data.currentTranslate > data.startTranslate) {
+    data.currentTranslate = data.startTranslate;
+  }
+
+  if (!swiper.allowSlidePrev && !swiper.allowSlideNext) {
+    data.currentTranslate = data.startTranslate;
+  } // Threshold
+
+
+  if (params.threshold > 0) {
+    if (Math.abs(diff) > params.threshold || data.allowThresholdMove) {
+      if (!data.allowThresholdMove) {
+        data.allowThresholdMove = true;
+        touches.startX = touches.currentX;
+        touches.startY = touches.currentY;
+        data.currentTranslate = data.startTranslate;
+        touches.diff = swiper.isHorizontal() ? touches.currentX - touches.startX : touches.currentY - touches.startY;
+        return;
+      }
+    } else {
+      data.currentTranslate = data.startTranslate;
+      return;
+    }
+  }
+
+  if (!params.followFinger || params.cssMode) return; // Update active index in free mode
+
+  if (params.freeMode || params.watchSlidesProgress || params.watchSlidesVisibility) {
+    swiper.updateActiveIndex();
+    swiper.updateSlidesClasses();
+  }
+
+  if (params.freeMode) {
+    // Velocity
+    if (data.velocities.length === 0) {
+      data.velocities.push({
+        position: touches[swiper.isHorizontal() ? 'startX' : 'startY'],
+        time: data.touchStartTime
+      });
+    }
+
+    data.velocities.push({
+      position: touches[swiper.isHorizontal() ? 'currentX' : 'currentY'],
+      time: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])()
+    });
+  } // Update progress
+
+
+  swiper.updateProgress(data.currentTranslate); // Update translate
+
+  swiper.setTranslate(data.currentTranslate);
+}
+
+/***/ }),
+
 /***/ "gRHU":
 /*!*********************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/Observer.js ***!
@@ -45207,6 +63798,179 @@ function dispatchNext(arg) {
     subscriber.clearThrottle();
 }
 //# sourceMappingURL=throttleTime.js.map
+
+/***/ }),
+
+/***/ "gtyG":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideReset.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideReset; });
+/* eslint no-unused-vars: "off" */
+function slideReset(speed, runCallbacks, internal) {
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  return swiper.slideTo(swiper.activeIndex, speed, runCallbacks, internal);
+}
+
+/***/ }),
+
+/***/ "h2/A":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/keyboard/keyboard.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+var Keyboard = {
+  handle: function handle(event) {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    var rtl = swiper.rtlTranslate;
+    var e = event;
+    if (e.originalEvent) e = e.originalEvent; // jquery fix
+
+    var kc = e.keyCode || e.charCode;
+    var pageUpDown = swiper.params.keyboard.pageUpDown;
+    var isPageUp = pageUpDown && kc === 33;
+    var isPageDown = pageUpDown && kc === 34;
+    var isArrowLeft = kc === 37;
+    var isArrowRight = kc === 39;
+    var isArrowUp = kc === 38;
+    var isArrowDown = kc === 40; // Directions locks
+
+    if (!swiper.allowSlideNext && (swiper.isHorizontal() && isArrowRight || swiper.isVertical() && isArrowDown || isPageDown)) {
+      return false;
+    }
+
+    if (!swiper.allowSlidePrev && (swiper.isHorizontal() && isArrowLeft || swiper.isVertical() && isArrowUp || isPageUp)) {
+      return false;
+    }
+
+    if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) {
+      return undefined;
+    }
+
+    if (document.activeElement && document.activeElement.nodeName && (document.activeElement.nodeName.toLowerCase() === 'input' || document.activeElement.nodeName.toLowerCase() === 'textarea')) {
+      return undefined;
+    }
+
+    if (swiper.params.keyboard.onlyInViewport && (isPageUp || isPageDown || isArrowLeft || isArrowRight || isArrowUp || isArrowDown)) {
+      var inView = false; // Check that swiper should be inside of visible area of window
+
+      if (swiper.$el.parents("." + swiper.params.slideClass).length > 0 && swiper.$el.parents("." + swiper.params.slideActiveClass).length === 0) {
+        return undefined;
+      }
+
+      var $el = swiper.$el;
+      var swiperWidth = $el[0].clientWidth;
+      var swiperHeight = $el[0].clientHeight;
+      var windowWidth = window.innerWidth;
+      var windowHeight = window.innerHeight;
+      var swiperOffset = swiper.$el.offset();
+      if (rtl) swiperOffset.left -= swiper.$el[0].scrollLeft;
+      var swiperCoord = [[swiperOffset.left, swiperOffset.top], [swiperOffset.left + swiperWidth, swiperOffset.top], [swiperOffset.left, swiperOffset.top + swiperHeight], [swiperOffset.left + swiperWidth, swiperOffset.top + swiperHeight]];
+
+      for (var i = 0; i < swiperCoord.length; i += 1) {
+        var point = swiperCoord[i];
+
+        if (point[0] >= 0 && point[0] <= windowWidth && point[1] >= 0 && point[1] <= windowHeight) {
+          if (point[0] === 0 && point[1] === 0) continue; // eslint-disable-line
+
+          inView = true;
+        }
+      }
+
+      if (!inView) return undefined;
+    }
+
+    if (swiper.isHorizontal()) {
+      if (isPageUp || isPageDown || isArrowLeft || isArrowRight) {
+        if (e.preventDefault) e.preventDefault();else e.returnValue = false;
+      }
+
+      if ((isPageDown || isArrowRight) && !rtl || (isPageUp || isArrowLeft) && rtl) swiper.slideNext();
+      if ((isPageUp || isArrowLeft) && !rtl || (isPageDown || isArrowRight) && rtl) swiper.slidePrev();
+    } else {
+      if (isPageUp || isPageDown || isArrowUp || isArrowDown) {
+        if (e.preventDefault) e.preventDefault();else e.returnValue = false;
+      }
+
+      if (isPageDown || isArrowDown) swiper.slideNext();
+      if (isPageUp || isArrowUp) swiper.slidePrev();
+    }
+
+    swiper.emit('keyPress', kc);
+    return undefined;
+  },
+  enable: function enable() {
+    var swiper = this;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    if (swiper.keyboard.enabled) return;
+    Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(document).on('keydown', swiper.keyboard.handle);
+    swiper.keyboard.enabled = true;
+  },
+  disable: function disable() {
+    var swiper = this;
+    var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+    if (!swiper.keyboard.enabled) return;
+    Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(document).off('keydown', swiper.keyboard.handle);
+    swiper.keyboard.enabled = false;
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'keyboard',
+  params: {
+    keyboard: {
+      enabled: false,
+      onlyInViewport: true,
+      pageUpDown: true
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      keyboard: _extends({
+        enabled: false
+      }, Keyboard)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (swiper.params.keyboard.enabled) {
+        swiper.keyboard.enable();
+      }
+    },
+    destroy: function destroy(swiper) {
+      if (swiper.keyboard.enabled) {
+        swiper.keyboard.disable();
+      }
+    }
+  }
+});
 
 /***/ }),
 
@@ -45471,6 +64235,44 @@ class CombineLatestSubscriber extends _OuterSubscriber__WEBPACK_IMPORTED_MODULE_
 
 /***/ }),
 
+/***/ "jQP/":
+/*!***************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/getTranslate.js ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return getSwiperTranslate; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function getSwiperTranslate(axis) {
+  if (axis === void 0) {
+    axis = this.isHorizontal() ? 'x' : 'y';
+  }
+
+  var swiper = this;
+  var params = swiper.params,
+      rtl = swiper.rtlTranslate,
+      translate = swiper.translate,
+      $wrapperEl = swiper.$wrapperEl;
+
+  if (params.virtualTranslate) {
+    return rtl ? -translate : translate;
+  }
+
+  if (params.cssMode) {
+    return translate;
+  }
+
+  var currentTranslate = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["getTranslate"])($wrapperEl[0], axis);
+  if (rtl) currentTranslate = -currentTranslate;
+  return currentTranslate || 0;
+}
+
+/***/ }),
+
 /***/ "jZKg":
 /*!************************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/scheduled/scheduleArray.js ***!
@@ -45575,7 +64377,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ɵgetDOM", function() { return _angular_common__WEBPACK_IMPORTED_MODULE_0__["ɵgetDOM"]; });
 
 /**
- * @license Angular v11.2.3
+ * @license Angular v11.2.9
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -46702,8 +65504,9 @@ const HAMMER_PROVIDERS = HAMMER_PROVIDERS__POST_R3__;
  */
 class HammerModule {
 }
+HammerModule.ɵfac = function HammerModule_Factory(t) { return new (t || HammerModule)(); };
 HammerModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: HammerModule });
-HammerModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function HammerModule_Factory(t) { return new (t || HammerModule)(); }, providers: HAMMER_PROVIDERS__PRE_R3__ });
+HammerModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ providers: HAMMER_PROVIDERS__PRE_R3__ });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵsetClassMetadata"](HammerModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"],
         args: [{ providers: HAMMER_PROVIDERS__PRE_R3__ }]
@@ -47134,8 +65937,9 @@ class BrowserModule {
         };
     }
 }
+BrowserModule.ɵfac = function BrowserModule_Factory(t) { return new (t || BrowserModule)(_angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](BrowserModule, 12)); };
 BrowserModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: BrowserModule });
-BrowserModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function BrowserModule_Factory(t) { return new (t || BrowserModule)(_angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](BrowserModule, 12)); }, providers: BROWSER_MODULE_PROVIDERS, imports: [_angular_common__WEBPACK_IMPORTED_MODULE_0__["CommonModule"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["ApplicationModule"]] });
+BrowserModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ providers: BROWSER_MODULE_PROVIDERS, imports: [_angular_common__WEBPACK_IMPORTED_MODULE_0__["CommonModule"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["ApplicationModule"]] });
 BrowserModule.ctorParameters = () => [
     { type: BrowserModule, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["SkipSelf"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["Inject"], args: [BrowserModule,] }] }
 ];
@@ -47622,6 +66426,7 @@ function initTransferState(doc, appId) {
     let initialState = {};
     if (script && script.textContent) {
         try {
+            // Avoid using any here as it triggers lint errors in google3 (any is not allowed).
             initialState = JSON.parse(unescapeHtml(script.textContent));
         }
         catch (e) {
@@ -47638,8 +66443,9 @@ function initTransferState(doc, appId) {
  */
 class BrowserTransferStateModule {
 }
+BrowserTransferStateModule.ɵfac = function BrowserTransferStateModule_Factory(t) { return new (t || BrowserTransferStateModule)(); };
 BrowserTransferStateModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: BrowserTransferStateModule });
-BrowserTransferStateModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function BrowserTransferStateModule_Factory(t) { return new (t || BrowserTransferStateModule)(); }, providers: [{ provide: TransferState, useFactory: initTransferState, deps: [_angular_common__WEBPACK_IMPORTED_MODULE_0__["DOCUMENT"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["APP_ID"]] }] });
+BrowserTransferStateModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ providers: [{ provide: TransferState, useFactory: initTransferState, deps: [_angular_common__WEBPACK_IMPORTED_MODULE_0__["DOCUMENT"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["APP_ID"]] }] });
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵsetClassMetadata"](BrowserTransferStateModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"],
         args: [{
@@ -47725,7 +66531,7 @@ function elementMatches(n, selector) {
 /**
  * @publicApi
  */
-const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["Version"]('11.2.3');
+const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["Version"]('11.2.9');
 
 /**
  * @license
@@ -47886,6 +66692,29 @@ class ReplayEvent {
     }
 }
 //# sourceMappingURL=ReplaySubject.js.map
+
+/***/ }),
+
+/***/ "ju4L":
+/*!***************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/loop/index.js ***!
+  \***************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _loopCreate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loopCreate */ "fFnh");
+/* harmony import */ var _loopFix__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./loopFix */ "KcmN");
+/* harmony import */ var _loopDestroy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./loopDestroy */ "OvF9");
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  loopCreate: _loopCreate__WEBPACK_IMPORTED_MODULE_0__["default"],
+  loopFix: _loopFix__WEBPACK_IMPORTED_MODULE_1__["default"],
+  loopDestroy: _loopDestroy__WEBPACK_IMPORTED_MODULE_2__["default"]
+});
 
 /***/ }),
 
@@ -48488,6 +67317,83 @@ class OuterSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subscrib
 
 /***/ }),
 
+/***/ "l9MX":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideToClickedSlide.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideToClickedSlide; });
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+
+function slideToClickedSlide() {
+  var swiper = this;
+  var params = swiper.params,
+      $wrapperEl = swiper.$wrapperEl;
+  var slidesPerView = params.slidesPerView === 'auto' ? swiper.slidesPerViewDynamic() : params.slidesPerView;
+  var slideToIndex = swiper.clickedIndex;
+  var realIndex;
+
+  if (params.loop) {
+    if (swiper.animating) return;
+    realIndex = parseInt(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(swiper.clickedSlide).attr('data-swiper-slide-index'), 10);
+
+    if (params.centeredSlides) {
+      if (slideToIndex < swiper.loopedSlides - slidesPerView / 2 || slideToIndex > swiper.slides.length - swiper.loopedSlides + slidesPerView / 2) {
+        swiper.loopFix();
+        slideToIndex = $wrapperEl.children("." + params.slideClass + "[data-swiper-slide-index=\"" + realIndex + "\"]:not(." + params.slideDuplicateClass + ")").eq(0).index();
+        Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["nextTick"])(function () {
+          swiper.slideTo(slideToIndex);
+        });
+      } else {
+        swiper.slideTo(slideToIndex);
+      }
+    } else if (slideToIndex > swiper.slides.length - slidesPerView) {
+      swiper.loopFix();
+      slideToIndex = $wrapperEl.children("." + params.slideClass + "[data-swiper-slide-index=\"" + realIndex + "\"]:not(." + params.slideDuplicateClass + ")").eq(0).index();
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["nextTick"])(function () {
+        swiper.slideTo(slideToIndex);
+      });
+    } else {
+      swiper.slideTo(slideToIndex);
+    }
+  } else {
+    swiper.slideTo(slideToIndex);
+  }
+}
+
+/***/ }),
+
+/***/ "l9qo":
+/*!*******************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/onClick.js ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return onClick; });
+function onClick(e) {
+  var swiper = this;
+
+  if (!swiper.allowClick) {
+    if (swiper.params.preventClicks) e.preventDefault();
+
+    if (swiper.params.preventClicksPropagation && swiper.animating) {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }
+  }
+}
+
+/***/ }),
+
 /***/ "lJxs":
 /*!**************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/map.js ***!
@@ -48696,6 +67602,143 @@ function pipeFromArray(fns) {
 
 /***/ }),
 
+/***/ "mK+M":
+/*!***********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/effect-flip/effect-flip.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Flip = {
+  setTranslate: function setTranslate() {
+    var swiper = this;
+    var slides = swiper.slides,
+        rtl = swiper.rtlTranslate;
+
+    for (var i = 0; i < slides.length; i += 1) {
+      var $slideEl = slides.eq(i);
+      var progress = $slideEl[0].progress;
+
+      if (swiper.params.flipEffect.limitRotation) {
+        progress = Math.max(Math.min($slideEl[0].progress, 1), -1);
+      }
+
+      var offset = $slideEl[0].swiperSlideOffset;
+      var rotate = -180 * progress;
+      var rotateY = rotate;
+      var rotateX = 0;
+      var tx = -offset;
+      var ty = 0;
+
+      if (!swiper.isHorizontal()) {
+        ty = tx;
+        tx = 0;
+        rotateX = -rotateY;
+        rotateY = 0;
+      } else if (rtl) {
+        rotateY = -rotateY;
+      }
+
+      $slideEl[0].style.zIndex = -Math.abs(Math.round(progress)) + slides.length;
+
+      if (swiper.params.flipEffect.slideShadows) {
+        // Set shadows
+        var shadowBefore = swiper.isHorizontal() ? $slideEl.find('.swiper-slide-shadow-left') : $slideEl.find('.swiper-slide-shadow-top');
+        var shadowAfter = swiper.isHorizontal() ? $slideEl.find('.swiper-slide-shadow-right') : $slideEl.find('.swiper-slide-shadow-bottom');
+
+        if (shadowBefore.length === 0) {
+          shadowBefore = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (swiper.isHorizontal() ? 'left' : 'top') + "\"></div>");
+          $slideEl.append(shadowBefore);
+        }
+
+        if (shadowAfter.length === 0) {
+          shadowAfter = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])("<div class=\"swiper-slide-shadow-" + (swiper.isHorizontal() ? 'right' : 'bottom') + "\"></div>");
+          $slideEl.append(shadowAfter);
+        }
+
+        if (shadowBefore.length) shadowBefore[0].style.opacity = Math.max(-progress, 0);
+        if (shadowAfter.length) shadowAfter[0].style.opacity = Math.max(progress, 0);
+      }
+
+      $slideEl.transform("translate3d(" + tx + "px, " + ty + "px, 0px) rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)");
+    }
+  },
+  setTransition: function setTransition(duration) {
+    var swiper = this;
+    var slides = swiper.slides,
+        activeIndex = swiper.activeIndex,
+        $wrapperEl = swiper.$wrapperEl;
+    slides.transition(duration).find('.swiper-slide-shadow-top, .swiper-slide-shadow-right, .swiper-slide-shadow-bottom, .swiper-slide-shadow-left').transition(duration);
+
+    if (swiper.params.virtualTranslate && duration !== 0) {
+      var eventTriggered = false; // eslint-disable-next-line
+
+      slides.eq(activeIndex).transitionEnd(function onTransitionEnd() {
+        if (eventTriggered) return;
+        if (!swiper || swiper.destroyed) return; // if (!$(this).hasClass(swiper.params.slideActiveClass)) return;
+
+        eventTriggered = true;
+        swiper.animating = false;
+        var triggerEvents = ['webkitTransitionEnd', 'transitionend'];
+
+        for (var i = 0; i < triggerEvents.length; i += 1) {
+          $wrapperEl.trigger(triggerEvents[i]);
+        }
+      });
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'effect-flip',
+  params: {
+    flipEffect: {
+      slideShadows: true,
+      limitRotation: true
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      flipEffect: _extends({}, Flip)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      if (swiper.params.effect !== 'flip') return;
+      swiper.classNames.push(swiper.params.containerModifierClass + "flip");
+      swiper.classNames.push(swiper.params.containerModifierClass + "3d");
+      var overwriteParams = {
+        slidesPerView: 1,
+        slidesPerColumn: 1,
+        slidesPerGroup: 1,
+        watchSlidesProgress: true,
+        spaceBetween: 0,
+        virtualTranslate: true
+      };
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.params, overwriteParams);
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["extend"])(swiper.originalParams, overwriteParams);
+    },
+    setTranslate: function setTranslate(swiper) {
+      if (swiper.params.effect !== 'flip') return;
+      swiper.flipEffect.setTranslate();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      if (swiper.params.effect !== 'flip') return;
+      swiper.flipEffect.setTransition(duration);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "mk5/":
 /*!*****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/window.js ***!
@@ -48840,6 +67883,83 @@ class FinallySubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subscr
 
 /***/ }),
 
+/***/ "ngAh":
+/*!*****************************************************!*\
+  !*** ./node_modules/swiper/esm/utils/get-device.js ***!
+  \*****************************************************/
+/*! exports provided: getDevice */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDevice", function() { return getDevice; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _get_support__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./get-support */ "OsfX");
+
+
+var device;
+
+function calcDevice(_temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
+      userAgent = _ref.userAgent;
+
+  var support = Object(_get_support__WEBPACK_IMPORTED_MODULE_1__["getSupport"])();
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var platform = window.navigator.platform;
+  var ua = userAgent || window.navigator.userAgent;
+  var device = {
+    ios: false,
+    android: false
+  };
+  var screenWidth = window.screen.width;
+  var screenHeight = window.screen.height;
+  var android = ua.match(/(Android);?[\s\/]+([\d.]+)?/); // eslint-disable-line
+
+  var ipad = ua.match(/(iPad).*OS\s([\d_]+)/);
+  var ipod = ua.match(/(iPod)(.*OS\s([\d_]+))?/);
+  var iphone = !ipad && ua.match(/(iPhone\sOS|iOS)\s([\d_]+)/);
+  var windows = platform === 'Win32';
+  var macos = platform === 'MacIntel'; // iPadOs 13 fix
+
+  var iPadScreens = ['1024x1366', '1366x1024', '834x1194', '1194x834', '834x1112', '1112x834', '768x1024', '1024x768', '820x1180', '1180x820', '810x1080', '1080x810'];
+
+  if (!ipad && macos && support.touch && iPadScreens.indexOf(screenWidth + "x" + screenHeight) >= 0) {
+    ipad = ua.match(/(Version)\/([\d.]+)/);
+    if (!ipad) ipad = [0, 1, '13_0_0'];
+    macos = false;
+  } // Android
+
+
+  if (android && !windows) {
+    device.os = 'android';
+    device.android = true;
+  }
+
+  if (ipad || iphone || ipod) {
+    device.os = 'ios';
+    device.ios = true;
+  } // Export object
+
+
+  return device;
+}
+
+function getDevice(overrides) {
+  if (overrides === void 0) {
+    overrides = {};
+  }
+
+  if (!device) {
+    device = calcDevice(overrides);
+  }
+
+  return device;
+}
+
+
+
+/***/ }),
+
 /***/ "ngJS":
 /*!**********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/subscribeToArray.js ***!
@@ -48857,6 +67977,301 @@ const subscribeToArray = (array) => (subscriber) => {
     subscriber.complete();
 };
 //# sourceMappingURL=subscribeToArray.js.map
+
+/***/ }),
+
+/***/ "nyfm":
+/*!*************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/defaults.js ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ({
+  init: true,
+  direction: 'horizontal',
+  touchEventsTarget: 'container',
+  initialSlide: 0,
+  speed: 300,
+  cssMode: false,
+  updateOnWindowResize: true,
+  resizeObserver: false,
+  nested: false,
+  // Overrides
+  width: null,
+  height: null,
+  //
+  preventInteractionOnTransition: false,
+  // ssr
+  userAgent: null,
+  url: null,
+  // To support iOS's swipe-to-go-back gesture (when being used in-app).
+  edgeSwipeDetection: false,
+  edgeSwipeThreshold: 20,
+  // Free mode
+  freeMode: false,
+  freeModeMomentum: true,
+  freeModeMomentumRatio: 1,
+  freeModeMomentumBounce: true,
+  freeModeMomentumBounceRatio: 1,
+  freeModeMomentumVelocityRatio: 1,
+  freeModeSticky: false,
+  freeModeMinimumVelocity: 0.02,
+  // Autoheight
+  autoHeight: false,
+  // Set wrapper width
+  setWrapperSize: false,
+  // Virtual Translate
+  virtualTranslate: false,
+  // Effects
+  effect: 'slide',
+  // 'slide' or 'fade' or 'cube' or 'coverflow' or 'flip'
+  // Breakpoints
+  breakpoints: undefined,
+  breakpointsBase: 'window',
+  // Slides grid
+  spaceBetween: 0,
+  slidesPerView: 1,
+  slidesPerColumn: 1,
+  slidesPerColumnFill: 'column',
+  slidesPerGroup: 1,
+  slidesPerGroupSkip: 0,
+  centeredSlides: false,
+  centeredSlidesBounds: false,
+  slidesOffsetBefore: 0,
+  // in px
+  slidesOffsetAfter: 0,
+  // in px
+  normalizeSlideIndex: true,
+  centerInsufficientSlides: false,
+  // Disable swiper and hide navigation when container not overflow
+  watchOverflow: false,
+  // Round length
+  roundLengths: false,
+  // Touches
+  touchRatio: 1,
+  touchAngle: 45,
+  simulateTouch: true,
+  shortSwipes: true,
+  longSwipes: true,
+  longSwipesRatio: 0.5,
+  longSwipesMs: 300,
+  followFinger: true,
+  allowTouchMove: true,
+  threshold: 0,
+  touchMoveStopPropagation: false,
+  touchStartPreventDefault: true,
+  touchStartForcePreventDefault: false,
+  touchReleaseOnEdges: false,
+  // Unique Navigation Elements
+  uniqueNavElements: true,
+  // Resistance
+  resistance: true,
+  resistanceRatio: 0.85,
+  // Progress
+  watchSlidesProgress: false,
+  watchSlidesVisibility: false,
+  // Cursor
+  grabCursor: false,
+  // Clicks
+  preventClicks: true,
+  preventClicksPropagation: true,
+  slideToClickedSlide: false,
+  // Images
+  preloadImages: true,
+  updateOnImagesReady: true,
+  // loop
+  loop: false,
+  loopAdditionalSlides: 0,
+  loopedSlides: null,
+  loopFillGroupWithBlank: false,
+  loopPreventsSlide: true,
+  // Swiping/no swiping
+  allowSlidePrev: true,
+  allowSlideNext: true,
+  swipeHandler: null,
+  // '.swipe-handler',
+  noSwiping: true,
+  noSwipingClass: 'swiper-no-swiping',
+  noSwipingSelector: null,
+  // Passive Listeners
+  passiveListeners: true,
+  // NS
+  containerModifierClass: 'swiper-container-',
+  // NEW
+  slideClass: 'swiper-slide',
+  slideBlankClass: 'swiper-slide-invisible-blank',
+  slideActiveClass: 'swiper-slide-active',
+  slideDuplicateActiveClass: 'swiper-slide-duplicate-active',
+  slideVisibleClass: 'swiper-slide-visible',
+  slideDuplicateClass: 'swiper-slide-duplicate',
+  slideNextClass: 'swiper-slide-next',
+  slideDuplicateNextClass: 'swiper-slide-duplicate-next',
+  slidePrevClass: 'swiper-slide-prev',
+  slideDuplicatePrevClass: 'swiper-slide-duplicate-prev',
+  wrapperClass: 'swiper-wrapper',
+  // Callbacks
+  runCallbacksOnInit: true,
+  // Internals
+  _emitClasses: false
+});
+
+/***/ }),
+
+/***/ "nyww":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events/index.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _onTouchStart__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./onTouchStart */ "XGUr");
+/* harmony import */ var _onTouchMove__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./onTouchMove */ "g1JZ");
+/* harmony import */ var _onTouchEnd__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./onTouchEnd */ "VjSb");
+/* harmony import */ var _onResize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./onResize */ "D3OB");
+/* harmony import */ var _onClick__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./onClick */ "l9qo");
+/* harmony import */ var _onScroll__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./onScroll */ "C7JN");
+
+
+
+
+
+
+
+var dummyEventAttached = false;
+
+function dummyEventListener() {}
+
+function attachEvents() {
+  var swiper = this;
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var params = swiper.params,
+      touchEvents = swiper.touchEvents,
+      el = swiper.el,
+      wrapperEl = swiper.wrapperEl,
+      device = swiper.device,
+      support = swiper.support;
+  swiper.onTouchStart = _onTouchStart__WEBPACK_IMPORTED_MODULE_1__["default"].bind(swiper);
+  swiper.onTouchMove = _onTouchMove__WEBPACK_IMPORTED_MODULE_2__["default"].bind(swiper);
+  swiper.onTouchEnd = _onTouchEnd__WEBPACK_IMPORTED_MODULE_3__["default"].bind(swiper);
+
+  if (params.cssMode) {
+    swiper.onScroll = _onScroll__WEBPACK_IMPORTED_MODULE_6__["default"].bind(swiper);
+  }
+
+  swiper.onClick = _onClick__WEBPACK_IMPORTED_MODULE_5__["default"].bind(swiper);
+  var capture = !!params.nested; // Touch Events
+
+  if (!support.touch && support.pointerEvents) {
+    el.addEventListener(touchEvents.start, swiper.onTouchStart, false);
+    document.addEventListener(touchEvents.move, swiper.onTouchMove, capture);
+    document.addEventListener(touchEvents.end, swiper.onTouchEnd, false);
+  } else {
+    if (support.touch) {
+      var passiveListener = touchEvents.start === 'touchstart' && support.passiveListener && params.passiveListeners ? {
+        passive: true,
+        capture: false
+      } : false;
+      el.addEventListener(touchEvents.start, swiper.onTouchStart, passiveListener);
+      el.addEventListener(touchEvents.move, swiper.onTouchMove, support.passiveListener ? {
+        passive: false,
+        capture: capture
+      } : capture);
+      el.addEventListener(touchEvents.end, swiper.onTouchEnd, passiveListener);
+
+      if (touchEvents.cancel) {
+        el.addEventListener(touchEvents.cancel, swiper.onTouchEnd, passiveListener);
+      }
+
+      if (!dummyEventAttached) {
+        document.addEventListener('touchstart', dummyEventListener);
+        dummyEventAttached = true;
+      }
+    }
+
+    if (params.simulateTouch && !device.ios && !device.android || params.simulateTouch && !support.touch && device.ios) {
+      el.addEventListener('mousedown', swiper.onTouchStart, false);
+      document.addEventListener('mousemove', swiper.onTouchMove, capture);
+      document.addEventListener('mouseup', swiper.onTouchEnd, false);
+    }
+  } // Prevent Links Clicks
+
+
+  if (params.preventClicks || params.preventClicksPropagation) {
+    el.addEventListener('click', swiper.onClick, true);
+  }
+
+  if (params.cssMode) {
+    wrapperEl.addEventListener('scroll', swiper.onScroll);
+  } // Resize handler
+
+
+  if (params.updateOnWindowResize) {
+    swiper.on(device.ios || device.android ? 'resize orientationchange observerUpdate' : 'resize observerUpdate', _onResize__WEBPACK_IMPORTED_MODULE_4__["default"], true);
+  } else {
+    swiper.on('observerUpdate', _onResize__WEBPACK_IMPORTED_MODULE_4__["default"], true);
+  }
+}
+
+function detachEvents() {
+  var swiper = this;
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var params = swiper.params,
+      touchEvents = swiper.touchEvents,
+      el = swiper.el,
+      wrapperEl = swiper.wrapperEl,
+      device = swiper.device,
+      support = swiper.support;
+  var capture = !!params.nested; // Touch Events
+
+  if (!support.touch && support.pointerEvents) {
+    el.removeEventListener(touchEvents.start, swiper.onTouchStart, false);
+    document.removeEventListener(touchEvents.move, swiper.onTouchMove, capture);
+    document.removeEventListener(touchEvents.end, swiper.onTouchEnd, false);
+  } else {
+    if (support.touch) {
+      var passiveListener = touchEvents.start === 'onTouchStart' && support.passiveListener && params.passiveListeners ? {
+        passive: true,
+        capture: false
+      } : false;
+      el.removeEventListener(touchEvents.start, swiper.onTouchStart, passiveListener);
+      el.removeEventListener(touchEvents.move, swiper.onTouchMove, capture);
+      el.removeEventListener(touchEvents.end, swiper.onTouchEnd, passiveListener);
+
+      if (touchEvents.cancel) {
+        el.removeEventListener(touchEvents.cancel, swiper.onTouchEnd, passiveListener);
+      }
+    }
+
+    if (params.simulateTouch && !device.ios && !device.android || params.simulateTouch && !support.touch && device.ios) {
+      el.removeEventListener('mousedown', swiper.onTouchStart, false);
+      document.removeEventListener('mousemove', swiper.onTouchMove, capture);
+      document.removeEventListener('mouseup', swiper.onTouchEnd, false);
+    }
+  } // Prevent Links Clicks
+
+
+  if (params.preventClicks || params.preventClicksPropagation) {
+    el.removeEventListener('click', swiper.onClick, true);
+  }
+
+  if (params.cssMode) {
+    wrapperEl.removeEventListener('scroll', swiper.onScroll);
+  } // Resize handler
+
+
+  swiper.off(device.ios || device.android ? 'resize orientationchange observerUpdate' : 'resize observerUpdate', _onResize__WEBPACK_IMPORTED_MODULE_4__["default"]);
+}
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  attachEvents: attachEvents,
+  detachEvents: detachEvents
+});
 
 /***/ }),
 
@@ -49013,7 +68428,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ɵsetRootDomAdapter", function() { return setRootDomAdapter; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "fXoL");
 /**
- * @license Angular v11.2.3
+ * @license Angular v11.2.9
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -50034,7 +69449,7 @@ var NumberSymbol;
     /**
      * Decimal separator.
      * For `en-US`, the dot character.
-     * Example : 2,345`.`67
+     * Example: 2,345`.`67
      */
     NumberSymbol[NumberSymbol["Decimal"] = 0] = "Decimal";
     /**
@@ -52099,7 +71514,7 @@ class NgForOfContext {
  * of the cloned templates.
  *
  * The `ngForOf` directive is generally used in the
- * [shorthand form](guide/structural-directives#the-asterisk--prefix) `*ngFor`.
+ * [shorthand form](guide/structural-directives#asterisk) `*ngFor`.
  * In this form, the template to be rendered for each iteration is the content
  * of an anchor element containing the directive.
  *
@@ -52128,11 +71543,11 @@ class NgForOfContext {
  * context according to its lexical position.
  *
  * When using the shorthand syntax, Angular allows only [one structural directive
- * on an element](guide/structural-directives#one-structural-directive-per-host-element).
+ * on an element](guide/built-in-directives#one-per-element).
  * If you want to iterate conditionally, for example,
  * put the `*ngIf` on a container element that wraps the `*ngFor` element.
  * For futher discussion, see
- * [Structural Directives](guide/structural-directives#one-per-element).
+ * [Structural Directives](guide/built-in-directives#one-per-element).
  *
  * @usageNotes
  *
@@ -52201,7 +71616,7 @@ class NgForOf {
     }
     /**
      * The value of the iterable expression, which can be used as a
-     * [template input variable](guide/structural-directives#template-input-variable).
+     * [template input variable](guide/structural-directives#shorthand).
      */
     set ngForOf(ngForOf) {
         this._ngForOf = ngForOf;
@@ -52367,7 +71782,7 @@ function getTypeName(type) {
  * Angular renders the template provided in an optional `else` clause. The default
  * template for the `else` clause is blank.
  *
- * A [shorthand form](guide/structural-directives#the-asterisk--prefix) of the directive,
+ * A [shorthand form](guide/structural-directives#asterisk) of the directive,
  * `*ngIf="condition"`, is generally used, provided
  * as an attribute of the anchor element for the inserted template.
  * Angular expands this into a more explicit version, in which the anchor element
@@ -52493,7 +71908,7 @@ function getTypeName(type) {
  *
  * The presence of the implicit template object has implications for the nesting of
  * structural directives. For more on this subject, see
- * [Structural Directives](https://angular.io/guide/structural-directives#one-per-element).
+ * [Structural Directives](https://angular.io/guide/built-in-directives#one-per-element).
  *
  * @ngModule CommonModule
  * @publicApi
@@ -53878,32 +73293,60 @@ function defaultComparator(keyValueA, keyValueB) {
  * @ngModule CommonModule
  * @description
  *
- * Transforms a number into a string,
- * formatted according to locale rules that determine group sizing and
- * separator, decimal-point character, and other locale-specific
- * configurations.
- *
- * If no parameters are specified, the function rounds off to the nearest value using this
- * [rounding method](https://en.wikibooks.org/wiki/Arithmetic/Rounding).
- * The behavior differs from that of the JavaScript ```Math.round()``` function.
- * In the following case for example, the pipe rounds down where
- * ```Math.round()``` rounds up:
- *
- * ```html
- * -2.5 | number:'1.0-0'
- * > -3
- * Math.round(-2.5)
- * > -2
- * ```
+ * Formats a value according to digit options and locale rules.
+ * Locale determines group sizing and separator,
+ * decimal point character, and other locale-specific configurations.
  *
  * @see `formatNumber()`
  *
  * @usageNotes
- * The following code shows how the pipe transforms numbers
- * into text strings, according to various format specifications,
- * where the caller's default locale is `en-US`.
+ *
+ * ### digitsInfo
+ *
+ * The value's decimal representation is specified by the `digitsInfo`
+ * parameter, written in the following format:<br>
+ *
+ * ```
+ * {minIntegerDigits}.{minFractionDigits}-{maxFractionDigits}
+ * ```
+ *
+ *  - `minIntegerDigits`:
+ * The minimum number of integer digits before the decimal point.
+ * Default is 1.
+ *
+ * - `minFractionDigits`:
+ * The minimum number of digits after the decimal point.
+ * Default is 0.
+ *
+ *  - `maxFractionDigits`:
+ * The maximum number of digits after the decimal point.
+ * Default is 3.
+ *
+ * If the formatted value is truncated it will be rounded using the "to-nearest" method:
+ *
+ * ```
+ * {{3.6 | number: '1.0-0'}}
+ * <!--will output '4'-->
+ *
+ * {{-3.6 | number:'1.0-0'}}
+ * <!--will output '-4'-->
+ * ```
+ *
+ * ### locale
+ *
+ * `locale` will format a value according to locale rules.
+ * Locale determines group sizing and separator,
+ * decimal point character, and other locale-specific configurations.
+ *
+ * When not supplied, uses the value of `LOCALE_ID`, which is `en-US` by default.
+ *
+ * See [Setting your app locale](guide/i18n#setting-up-the-locale-of-your-app).
  *
  * ### Example
+ *
+ * The following code shows how the pipe transforms values
+ * according to various format specifications,
+ * where the caller's default locale is `en-US`.
  *
  * <code-example path="common/pipes/ts/number_pipe.ts" region='NumberPipe'></code-example>
  *
@@ -53913,6 +73356,13 @@ class DecimalPipe {
     constructor(_locale) {
         this._locale = _locale;
     }
+    /**
+     * @param value The value to be formatted.
+     * @param digitsInfo Sets digit and decimal representation.
+     * [See more](#digitsinfo).
+     * @param locale Specifies what locale format rules to use.
+     * [See more](#locale).
+     */
     transform(value, digitsInfo, locale) {
         if (!isValue(value))
             return null;
@@ -54003,7 +73453,7 @@ PercentPipe.ctorParameters = () => [
  * The default currency code is currently always `USD` but this is deprecated from v9.
  *
  * **In v11 the default currency code will be taken from the current locale identified by
- * the `LOCAL_ID` token. See the [i18n guide](guide/i18n#setting-up-the-locale-of-your-app) for
+ * the `LOCALE_ID` token. See the [i18n guide](guide/i18n#setting-up-the-locale-of-your-app) for
  * more information.**
  *
  * If you need the previous behavior then set it by creating a `DEFAULT_CURRENCY_CODE` provider in
@@ -54205,8 +73655,9 @@ const COMMON_PIPES = [
  */
 class CommonModule {
 }
+CommonModule.ɵfac = function CommonModule_Factory(t) { return new (t || CommonModule)(); };
 CommonModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: CommonModule });
-CommonModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function CommonModule_Factory(t) { return new (t || CommonModule)(); }, providers: [
+CommonModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ providers: [
         { provide: NgLocalization, useClass: NgLocaleLocalization },
     ] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](CommonModule, { declarations: [NgClass, NgComponentOutlet, NgForOf, NgIf, NgTemplateOutlet, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault, NgPlural, NgPluralCase, AsyncPipe, UpperCasePipe, LowerCasePipe, JsonPipe, SlicePipe, DecimalPipe, PercentPipe, TitleCasePipe, CurrencyPipe, DatePipe, I18nPluralPipe, I18nSelectPipe, KeyValuePipe], exports: [NgClass, NgComponentOutlet, NgForOf, NgIf, NgTemplateOutlet, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault, NgPlural, NgPluralCase, AsyncPipe, UpperCasePipe, LowerCasePipe, JsonPipe, SlicePipe, DecimalPipe, PercentPipe, TitleCasePipe, CurrencyPipe, DatePipe, I18nPluralPipe, I18nSelectPipe, KeyValuePipe] }); })();
@@ -54271,7 +73722,7 @@ function isPlatformWorkerUi(platformId) {
 /**
  * @publicApi
  */
-const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["Version"]('11.2.3');
+const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_0__["Version"]('11.2.9');
 
 /**
  * @license
@@ -55358,6 +74809,225 @@ function iif(condition, trueResult = _empty__WEBPACK_IMPORTED_MODULE_1__["EMPTY"
 
 /***/ }),
 
+/***/ "rJb+":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/transition/setTransition.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return setTransition; });
+function setTransition(duration, byController) {
+  var swiper = this;
+
+  if (!swiper.params.cssMode) {
+    swiper.$wrapperEl.transition(duration);
+  }
+
+  swiper.emit('setTransition', duration, byController);
+}
+
+/***/ }),
+
+/***/ "rM28":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateClickedSlide.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateClickedSlide; });
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+
+function updateClickedSlide(e) {
+  var swiper = this;
+  var params = swiper.params;
+  var slide = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(e.target).closest("." + params.slideClass)[0];
+  var slideFound = false;
+  var slideIndex;
+
+  if (slide) {
+    for (var i = 0; i < swiper.slides.length; i += 1) {
+      if (swiper.slides[i] === slide) {
+        slideFound = true;
+        slideIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (slide && slideFound) {
+    swiper.clickedSlide = slide;
+
+    if (swiper.virtual && swiper.params.virtual.enabled) {
+      swiper.clickedIndex = parseInt(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(slide).attr('data-swiper-slide-index'), 10);
+    } else {
+      swiper.clickedIndex = slideIndex;
+    }
+  } else {
+    swiper.clickedSlide = undefined;
+    swiper.clickedIndex = undefined;
+    return;
+  }
+
+  if (params.slideToClickedSlide && swiper.clickedIndex !== undefined && swiper.clickedIndex !== swiper.activeIndex) {
+    swiper.slideToClickedSlide();
+  }
+}
+
+/***/ }),
+
+/***/ "rTk1":
+/*!*****************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/index.js ***!
+  \*****************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _updateSize__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./updateSize */ "4g6d");
+/* harmony import */ var _updateSlides__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./updateSlides */ "ej0c");
+/* harmony import */ var _updateAutoHeight__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./updateAutoHeight */ "IoKV");
+/* harmony import */ var _updateSlidesOffset__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./updateSlidesOffset */ "xwuM");
+/* harmony import */ var _updateSlidesProgress__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./updateSlidesProgress */ "wJFT");
+/* harmony import */ var _updateProgress__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./updateProgress */ "akMW");
+/* harmony import */ var _updateSlidesClasses__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./updateSlidesClasses */ "87oN");
+/* harmony import */ var _updateActiveIndex__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./updateActiveIndex */ "Fsl0");
+/* harmony import */ var _updateClickedSlide__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./updateClickedSlide */ "rM28");
+
+
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  updateSize: _updateSize__WEBPACK_IMPORTED_MODULE_0__["default"],
+  updateSlides: _updateSlides__WEBPACK_IMPORTED_MODULE_1__["default"],
+  updateAutoHeight: _updateAutoHeight__WEBPACK_IMPORTED_MODULE_2__["default"],
+  updateSlidesOffset: _updateSlidesOffset__WEBPACK_IMPORTED_MODULE_3__["default"],
+  updateSlidesProgress: _updateSlidesProgress__WEBPACK_IMPORTED_MODULE_4__["default"],
+  updateProgress: _updateProgress__WEBPACK_IMPORTED_MODULE_5__["default"],
+  updateSlidesClasses: _updateSlidesClasses__WEBPACK_IMPORTED_MODULE_6__["default"],
+  updateActiveIndex: _updateActiveIndex__WEBPACK_IMPORTED_MODULE_7__["default"],
+  updateClickedSlide: _updateClickedSlide__WEBPACK_IMPORTED_MODULE_8__["default"]
+});
+
+/***/ }),
+
+/***/ "s/PY":
+/*!**************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/translate/translateTo.js ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return translateTo; });
+function translateTo(translate, speed, runCallbacks, translateBounds, internal) {
+  if (translate === void 0) {
+    translate = 0;
+  }
+
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  if (translateBounds === void 0) {
+    translateBounds = true;
+  }
+
+  var swiper = this;
+  var params = swiper.params,
+      wrapperEl = swiper.wrapperEl;
+
+  if (swiper.animating && params.preventInteractionOnTransition) {
+    return false;
+  }
+
+  var minTranslate = swiper.minTranslate();
+  var maxTranslate = swiper.maxTranslate();
+  var newTranslate;
+  if (translateBounds && translate > minTranslate) newTranslate = minTranslate;else if (translateBounds && translate < maxTranslate) newTranslate = maxTranslate;else newTranslate = translate; // Update progress
+
+  swiper.updateProgress(newTranslate);
+
+  if (params.cssMode) {
+    var isH = swiper.isHorizontal();
+
+    if (speed === 0) {
+      wrapperEl[isH ? 'scrollLeft' : 'scrollTop'] = -newTranslate;
+    } else {
+      // eslint-disable-next-line
+      if (wrapperEl.scrollTo) {
+        var _wrapperEl$scrollTo;
+
+        wrapperEl.scrollTo((_wrapperEl$scrollTo = {}, _wrapperEl$scrollTo[isH ? 'left' : 'top'] = -newTranslate, _wrapperEl$scrollTo.behavior = 'smooth', _wrapperEl$scrollTo));
+      } else {
+        wrapperEl[isH ? 'scrollLeft' : 'scrollTop'] = -newTranslate;
+      }
+    }
+
+    return true;
+  }
+
+  if (speed === 0) {
+    swiper.setTransition(0);
+    swiper.setTranslate(newTranslate);
+
+    if (runCallbacks) {
+      swiper.emit('beforeTransitionStart', speed, internal);
+      swiper.emit('transitionEnd');
+    }
+  } else {
+    swiper.setTransition(speed);
+    swiper.setTranslate(newTranslate);
+
+    if (runCallbacks) {
+      swiper.emit('beforeTransitionStart', speed, internal);
+      swiper.emit('transitionStart');
+    }
+
+    if (!swiper.animating) {
+      swiper.animating = true;
+
+      if (!swiper.onTranslateToWrapperTransitionEnd) {
+        swiper.onTranslateToWrapperTransitionEnd = function transitionEnd(e) {
+          if (!swiper || swiper.destroyed) return;
+          if (e.target !== this) return;
+          swiper.$wrapperEl[0].removeEventListener('transitionend', swiper.onTranslateToWrapperTransitionEnd);
+          swiper.$wrapperEl[0].removeEventListener('webkitTransitionEnd', swiper.onTranslateToWrapperTransitionEnd);
+          swiper.onTranslateToWrapperTransitionEnd = null;
+          delete swiper.onTranslateToWrapperTransitionEnd;
+
+          if (runCallbacks) {
+            swiper.emit('transitionEnd');
+          }
+        };
+      }
+
+      swiper.$wrapperEl[0].addEventListener('transitionend', swiper.onTranslateToWrapperTransitionEnd);
+      swiper.$wrapperEl[0].addEventListener('webkitTransitionEnd', swiper.onTranslateToWrapperTransitionEnd);
+    }
+  }
+
+  return true;
+}
+
+/***/ }),
+
 /***/ "sTY7":
 /*!***********************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/windowToggle.js ***!
@@ -55596,6 +75266,662 @@ class TimeoutWithSubscriber extends _innerSubscribe__WEBPACK_IMPORTED_MODULE_2__
 
 /***/ }),
 
+/***/ "tC+P":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/mousewheel/mousewheel.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+
+
+
+
+function isEventSupported() {
+  var document = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getDocument"])();
+  var eventName = 'onwheel';
+  var isSupported = (eventName in document);
+
+  if (!isSupported) {
+    var element = document.createElement('div');
+    element.setAttribute(eventName, 'return;');
+    isSupported = typeof element[eventName] === 'function';
+  }
+
+  if (!isSupported && document.implementation && document.implementation.hasFeature && // always returns true in newer browsers as per the standard.
+  // @see http://dom.spec.whatwg.org/#dom-domimplementation-hasfeature
+  document.implementation.hasFeature('', '') !== true) {
+    // This is the only way to test support for the `wheel` event in IE9+.
+    isSupported = document.implementation.hasFeature('Events.wheel', '3.0');
+  }
+
+  return isSupported;
+}
+
+var Mousewheel = {
+  lastScrollTime: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])(),
+  lastEventBeforeSnap: undefined,
+  recentWheelEvents: [],
+  event: function event() {
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    if (window.navigator.userAgent.indexOf('firefox') > -1) return 'DOMMouseScroll';
+    return isEventSupported() ? 'wheel' : 'mousewheel';
+  },
+  normalize: function normalize(e) {
+    // Reasonable defaults
+    var PIXEL_STEP = 10;
+    var LINE_HEIGHT = 40;
+    var PAGE_HEIGHT = 800;
+    var sX = 0;
+    var sY = 0; // spinX, spinY
+
+    var pX = 0;
+    var pY = 0; // pixelX, pixelY
+    // Legacy
+
+    if ('detail' in e) {
+      sY = e.detail;
+    }
+
+    if ('wheelDelta' in e) {
+      sY = -e.wheelDelta / 120;
+    }
+
+    if ('wheelDeltaY' in e) {
+      sY = -e.wheelDeltaY / 120;
+    }
+
+    if ('wheelDeltaX' in e) {
+      sX = -e.wheelDeltaX / 120;
+    } // side scrolling on FF with DOMMouseScroll
+
+
+    if ('axis' in e && e.axis === e.HORIZONTAL_AXIS) {
+      sX = sY;
+      sY = 0;
+    }
+
+    pX = sX * PIXEL_STEP;
+    pY = sY * PIXEL_STEP;
+
+    if ('deltaY' in e) {
+      pY = e.deltaY;
+    }
+
+    if ('deltaX' in e) {
+      pX = e.deltaX;
+    }
+
+    if (e.shiftKey && !pX) {
+      // if user scrolls with shift he wants horizontal scroll
+      pX = pY;
+      pY = 0;
+    }
+
+    if ((pX || pY) && e.deltaMode) {
+      if (e.deltaMode === 1) {
+        // delta in LINE units
+        pX *= LINE_HEIGHT;
+        pY *= LINE_HEIGHT;
+      } else {
+        // delta in PAGE units
+        pX *= PAGE_HEIGHT;
+        pY *= PAGE_HEIGHT;
+      }
+    } // Fall-back if spin cannot be determined
+
+
+    if (pX && !sX) {
+      sX = pX < 1 ? -1 : 1;
+    }
+
+    if (pY && !sY) {
+      sY = pY < 1 ? -1 : 1;
+    }
+
+    return {
+      spinX: sX,
+      spinY: sY,
+      pixelX: pX,
+      pixelY: pY
+    };
+  },
+  handleMouseEnter: function handleMouseEnter() {
+    var swiper = this;
+    swiper.mouseEntered = true;
+  },
+  handleMouseLeave: function handleMouseLeave() {
+    var swiper = this;
+    swiper.mouseEntered = false;
+  },
+  handle: function handle(event) {
+    var e = event;
+    var disableParentSwiper = true;
+    var swiper = this;
+    var params = swiper.params.mousewheel;
+
+    if (swiper.params.cssMode) {
+      e.preventDefault();
+    }
+
+    var target = swiper.$el;
+
+    if (swiper.params.mousewheel.eventsTarget !== 'container') {
+      target = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(swiper.params.mousewheel.eventsTarget);
+    }
+
+    if (!swiper.mouseEntered && !target[0].contains(e.target) && !params.releaseOnEdges) return true;
+    if (e.originalEvent) e = e.originalEvent; // jquery fix
+
+    var delta = 0;
+    var rtlFactor = swiper.rtlTranslate ? -1 : 1;
+    var data = Mousewheel.normalize(e);
+
+    if (params.forceToAxis) {
+      if (swiper.isHorizontal()) {
+        if (Math.abs(data.pixelX) > Math.abs(data.pixelY)) delta = -data.pixelX * rtlFactor;else return true;
+      } else if (Math.abs(data.pixelY) > Math.abs(data.pixelX)) delta = -data.pixelY;else return true;
+    } else {
+      delta = Math.abs(data.pixelX) > Math.abs(data.pixelY) ? -data.pixelX * rtlFactor : -data.pixelY;
+    }
+
+    if (delta === 0) return true;
+    if (params.invert) delta = -delta; // Get the scroll positions
+
+    var positions = swiper.getTranslate() + delta * params.sensitivity;
+    if (positions >= swiper.minTranslate()) positions = swiper.minTranslate();
+    if (positions <= swiper.maxTranslate()) positions = swiper.maxTranslate(); // When loop is true:
+    //     the disableParentSwiper will be true.
+    // When loop is false:
+    //     if the scroll positions is not on edge,
+    //     then the disableParentSwiper will be true.
+    //     if the scroll on edge positions,
+    //     then the disableParentSwiper will be false.
+
+    disableParentSwiper = swiper.params.loop ? true : !(positions === swiper.minTranslate() || positions === swiper.maxTranslate());
+    if (disableParentSwiper && swiper.params.nested) e.stopPropagation();
+
+    if (!swiper.params.freeMode) {
+      // Register the new event in a variable which stores the relevant data
+      var newEvent = {
+        time: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])(),
+        delta: Math.abs(delta),
+        direction: Math.sign(delta),
+        raw: event
+      }; // Keep the most recent events
+
+      var recentWheelEvents = swiper.mousewheel.recentWheelEvents;
+
+      if (recentWheelEvents.length >= 2) {
+        recentWheelEvents.shift(); // only store the last N events
+      }
+
+      var prevEvent = recentWheelEvents.length ? recentWheelEvents[recentWheelEvents.length - 1] : undefined;
+      recentWheelEvents.push(newEvent); // If there is at least one previous recorded event:
+      //   If direction has changed or
+      //   if the scroll is quicker than the previous one:
+      //     Animate the slider.
+      // Else (this is the first time the wheel is moved):
+      //     Animate the slider.
+
+      if (prevEvent) {
+        if (newEvent.direction !== prevEvent.direction || newEvent.delta > prevEvent.delta || newEvent.time > prevEvent.time + 150) {
+          swiper.mousewheel.animateSlider(newEvent);
+        }
+      } else {
+        swiper.mousewheel.animateSlider(newEvent);
+      } // If it's time to release the scroll:
+      //   Return now so you don't hit the preventDefault.
+
+
+      if (swiper.mousewheel.releaseScroll(newEvent)) {
+        return true;
+      }
+    } else {
+      // Freemode or scrollContainer:
+      // If we recently snapped after a momentum scroll, then ignore wheel events
+      // to give time for the deceleration to finish. Stop ignoring after 500 msecs
+      // or if it's a new scroll (larger delta or inverse sign as last event before
+      // an end-of-momentum snap).
+      var _newEvent = {
+        time: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])(),
+        delta: Math.abs(delta),
+        direction: Math.sign(delta)
+      };
+      var lastEventBeforeSnap = swiper.mousewheel.lastEventBeforeSnap;
+      var ignoreWheelEvents = lastEventBeforeSnap && _newEvent.time < lastEventBeforeSnap.time + 500 && _newEvent.delta <= lastEventBeforeSnap.delta && _newEvent.direction === lastEventBeforeSnap.direction;
+
+      if (!ignoreWheelEvents) {
+        swiper.mousewheel.lastEventBeforeSnap = undefined;
+
+        if (swiper.params.loop) {
+          swiper.loopFix();
+        }
+
+        var position = swiper.getTranslate() + delta * params.sensitivity;
+        var wasBeginning = swiper.isBeginning;
+        var wasEnd = swiper.isEnd;
+        if (position >= swiper.minTranslate()) position = swiper.minTranslate();
+        if (position <= swiper.maxTranslate()) position = swiper.maxTranslate();
+        swiper.setTransition(0);
+        swiper.setTranslate(position);
+        swiper.updateProgress();
+        swiper.updateActiveIndex();
+        swiper.updateSlidesClasses();
+
+        if (!wasBeginning && swiper.isBeginning || !wasEnd && swiper.isEnd) {
+          swiper.updateSlidesClasses();
+        }
+
+        if (swiper.params.freeModeSticky) {
+          // When wheel scrolling starts with sticky (aka snap) enabled, then detect
+          // the end of a momentum scroll by storing recent (N=15?) wheel events.
+          // 1. do all N events have decreasing or same (absolute value) delta?
+          // 2. did all N events arrive in the last M (M=500?) msecs?
+          // 3. does the earliest event have an (absolute value) delta that's
+          //    at least P (P=1?) larger than the most recent event's delta?
+          // 4. does the latest event have a delta that's smaller than Q (Q=6?) pixels?
+          // If 1-4 are "yes" then we're near the end of a momentum scroll deceleration.
+          // Snap immediately and ignore remaining wheel events in this scroll.
+          // See comment above for "remaining wheel events in this scroll" determination.
+          // If 1-4 aren't satisfied, then wait to snap until 500ms after the last event.
+          clearTimeout(swiper.mousewheel.timeout);
+          swiper.mousewheel.timeout = undefined;
+          var _recentWheelEvents = swiper.mousewheel.recentWheelEvents;
+
+          if (_recentWheelEvents.length >= 15) {
+            _recentWheelEvents.shift(); // only store the last N events
+
+          }
+
+          var _prevEvent = _recentWheelEvents.length ? _recentWheelEvents[_recentWheelEvents.length - 1] : undefined;
+
+          var firstEvent = _recentWheelEvents[0];
+
+          _recentWheelEvents.push(_newEvent);
+
+          if (_prevEvent && (_newEvent.delta > _prevEvent.delta || _newEvent.direction !== _prevEvent.direction)) {
+            // Increasing or reverse-sign delta means the user started scrolling again. Clear the wheel event log.
+            _recentWheelEvents.splice(0);
+          } else if (_recentWheelEvents.length >= 15 && _newEvent.time - firstEvent.time < 500 && firstEvent.delta - _newEvent.delta >= 1 && _newEvent.delta <= 6) {
+            // We're at the end of the deceleration of a momentum scroll, so there's no need
+            // to wait for more events. Snap ASAP on the next tick.
+            // Also, because there's some remaining momentum we'll bias the snap in the
+            // direction of the ongoing scroll because it's better UX for the scroll to snap
+            // in the same direction as the scroll instead of reversing to snap.  Therefore,
+            // if it's already scrolled more than 20% in the current direction, keep going.
+            var snapToThreshold = delta > 0 ? 0.8 : 0.2;
+            swiper.mousewheel.lastEventBeforeSnap = _newEvent;
+
+            _recentWheelEvents.splice(0);
+
+            swiper.mousewheel.timeout = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["nextTick"])(function () {
+              swiper.slideToClosest(swiper.params.speed, true, undefined, snapToThreshold);
+            }, 0); // no delay; move on next tick
+          }
+
+          if (!swiper.mousewheel.timeout) {
+            // if we get here, then we haven't detected the end of a momentum scroll, so
+            // we'll consider a scroll "complete" when there haven't been any wheel events
+            // for 500ms.
+            swiper.mousewheel.timeout = Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["nextTick"])(function () {
+              var snapToThreshold = 0.5;
+              swiper.mousewheel.lastEventBeforeSnap = _newEvent;
+
+              _recentWheelEvents.splice(0);
+
+              swiper.slideToClosest(swiper.params.speed, true, undefined, snapToThreshold);
+            }, 500);
+          }
+        } // Emit event
+
+
+        if (!ignoreWheelEvents) swiper.emit('scroll', e); // Stop autoplay
+
+        if (swiper.params.autoplay && swiper.params.autoplayDisableOnInteraction) swiper.autoplay.stop(); // Return page scroll on edge positions
+
+        if (position === swiper.minTranslate() || position === swiper.maxTranslate()) return true;
+      }
+    }
+
+    if (e.preventDefault) e.preventDefault();else e.returnValue = false;
+    return false;
+  },
+  animateSlider: function animateSlider(newEvent) {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+    if (this.params.mousewheel.thresholdDelta && newEvent.delta < this.params.mousewheel.thresholdDelta) {
+      // Prevent if delta of wheel scroll delta is below configured threshold
+      return false;
+    }
+
+    if (this.params.mousewheel.thresholdTime && Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])() - swiper.mousewheel.lastScrollTime < this.params.mousewheel.thresholdTime) {
+      // Prevent if time between scrolls is below configured threshold
+      return false;
+    } // If the movement is NOT big enough and
+    // if the last time the user scrolled was too close to the current one (avoid continuously triggering the slider):
+    //   Don't go any further (avoid insignificant scroll movement).
+
+
+    if (newEvent.delta >= 6 && Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])() - swiper.mousewheel.lastScrollTime < 60) {
+      // Return false as a default
+      return true;
+    } // If user is scrolling towards the end:
+    //   If the slider hasn't hit the latest slide or
+    //   if the slider is a loop and
+    //   if the slider isn't moving right now:
+    //     Go to next slide and
+    //     emit a scroll event.
+    // Else (the user is scrolling towards the beginning) and
+    // if the slider hasn't hit the first slide or
+    // if the slider is a loop and
+    // if the slider isn't moving right now:
+    //   Go to prev slide and
+    //   emit a scroll event.
+
+
+    if (newEvent.direction < 0) {
+      if ((!swiper.isEnd || swiper.params.loop) && !swiper.animating) {
+        swiper.slideNext();
+        swiper.emit('scroll', newEvent.raw);
+      }
+    } else if ((!swiper.isBeginning || swiper.params.loop) && !swiper.animating) {
+      swiper.slidePrev();
+      swiper.emit('scroll', newEvent.raw);
+    } // If you got here is because an animation has been triggered so store the current time
+
+
+    swiper.mousewheel.lastScrollTime = new window.Date().getTime(); // Return false as a default
+
+    return false;
+  },
+  releaseScroll: function releaseScroll(newEvent) {
+    var swiper = this;
+    var params = swiper.params.mousewheel;
+
+    if (newEvent.direction < 0) {
+      if (swiper.isEnd && !swiper.params.loop && params.releaseOnEdges) {
+        // Return true to animate scroll on edges
+        return true;
+      }
+    } else if (swiper.isBeginning && !swiper.params.loop && params.releaseOnEdges) {
+      // Return true to animate scroll on edges
+      return true;
+    }
+
+    return false;
+  },
+  enable: function enable() {
+    var swiper = this;
+    var event = Mousewheel.event();
+
+    if (swiper.params.cssMode) {
+      swiper.wrapperEl.removeEventListener(event, swiper.mousewheel.handle);
+      return true;
+    }
+
+    if (!event) return false;
+    if (swiper.mousewheel.enabled) return false;
+    var target = swiper.$el;
+
+    if (swiper.params.mousewheel.eventsTarget !== 'container') {
+      target = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(swiper.params.mousewheel.eventsTarget);
+    }
+
+    target.on('mouseenter', swiper.mousewheel.handleMouseEnter);
+    target.on('mouseleave', swiper.mousewheel.handleMouseLeave);
+    target.on(event, swiper.mousewheel.handle);
+    swiper.mousewheel.enabled = true;
+    return true;
+  },
+  disable: function disable() {
+    var swiper = this;
+    var event = Mousewheel.event();
+
+    if (swiper.params.cssMode) {
+      swiper.wrapperEl.addEventListener(event, swiper.mousewheel.handle);
+      return true;
+    }
+
+    if (!event) return false;
+    if (!swiper.mousewheel.enabled) return false;
+    var target = swiper.$el;
+
+    if (swiper.params.mousewheel.eventsTarget !== 'container') {
+      target = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(swiper.params.mousewheel.eventsTarget);
+    }
+
+    target.off(event, swiper.mousewheel.handle);
+    swiper.mousewheel.enabled = false;
+    return true;
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'mousewheel',
+  params: {
+    mousewheel: {
+      enabled: false,
+      releaseOnEdges: false,
+      invert: false,
+      forceToAxis: false,
+      sensitivity: 1,
+      eventsTarget: 'container',
+      thresholdDelta: null,
+      thresholdTime: null
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["bindModuleMethods"])(swiper, {
+      mousewheel: {
+        enabled: false,
+        lastScrollTime: Object(_utils_utils__WEBPACK_IMPORTED_MODULE_2__["now"])(),
+        lastEventBeforeSnap: undefined,
+        recentWheelEvents: [],
+        enable: Mousewheel.enable,
+        disable: Mousewheel.disable,
+        handle: Mousewheel.handle,
+        handleMouseEnter: Mousewheel.handleMouseEnter,
+        handleMouseLeave: Mousewheel.handleMouseLeave,
+        animateSlider: Mousewheel.animateSlider,
+        releaseScroll: Mousewheel.releaseScroll
+      }
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (!swiper.params.mousewheel.enabled && swiper.params.cssMode) {
+        swiper.mousewheel.disable();
+      }
+
+      if (swiper.params.mousewheel.enabled) swiper.mousewheel.enable();
+    },
+    destroy: function destroy(swiper) {
+      if (swiper.params.cssMode) {
+        swiper.mousewheel.enable();
+      }
+
+      if (swiper.mousewheel.enabled) swiper.mousewheel.disable();
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "tQmk":
+/*!***************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/history/history.js ***!
+  \***************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var History = {
+  init: function init() {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    if (!swiper.params.history) return;
+
+    if (!window.history || !window.history.pushState) {
+      swiper.params.history.enabled = false;
+      swiper.params.hashNavigation.enabled = true;
+      return;
+    }
+
+    var history = swiper.history;
+    history.initialized = true;
+    history.paths = History.getPathValues(swiper.params.url);
+    if (!history.paths.key && !history.paths.value) return;
+    history.scrollToSlide(0, history.paths.value, swiper.params.runCallbacksOnInit);
+
+    if (!swiper.params.history.replaceState) {
+      window.addEventListener('popstate', swiper.history.setHistoryPopState);
+    }
+  },
+  destroy: function destroy() {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+
+    if (!swiper.params.history.replaceState) {
+      window.removeEventListener('popstate', swiper.history.setHistoryPopState);
+    }
+  },
+  setHistoryPopState: function setHistoryPopState() {
+    var swiper = this;
+    swiper.history.paths = History.getPathValues(swiper.params.url);
+    swiper.history.scrollToSlide(swiper.params.speed, swiper.history.paths.value, false);
+  },
+  getPathValues: function getPathValues(urlOverride) {
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    var location;
+
+    if (urlOverride) {
+      location = new URL(urlOverride);
+    } else {
+      location = window.location;
+    }
+
+    var pathArray = location.pathname.slice(1).split('/').filter(function (part) {
+      return part !== '';
+    });
+    var total = pathArray.length;
+    var key = pathArray[total - 2];
+    var value = pathArray[total - 1];
+    return {
+      key: key,
+      value: value
+    };
+  },
+  setHistory: function setHistory(key, index) {
+    var swiper = this;
+    var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+    if (!swiper.history.initialized || !swiper.params.history.enabled) return;
+    var location;
+
+    if (swiper.params.url) {
+      location = new URL(swiper.params.url);
+    } else {
+      location = window.location;
+    }
+
+    var slide = swiper.slides.eq(index);
+    var value = History.slugify(slide.attr('data-history'));
+
+    if (!location.pathname.includes(key)) {
+      value = key + "/" + value;
+    }
+
+    var currentState = window.history.state;
+
+    if (currentState && currentState.value === value) {
+      return;
+    }
+
+    if (swiper.params.history.replaceState) {
+      window.history.replaceState({
+        value: value
+      }, null, value);
+    } else {
+      window.history.pushState({
+        value: value
+      }, null, value);
+    }
+  },
+  slugify: function slugify(text) {
+    return text.toString().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+  },
+  scrollToSlide: function scrollToSlide(speed, value, runCallbacks) {
+    var swiper = this;
+
+    if (value) {
+      for (var i = 0, length = swiper.slides.length; i < length; i += 1) {
+        var slide = swiper.slides.eq(i);
+        var slideHistory = History.slugify(slide.attr('data-history'));
+
+        if (slideHistory === value && !slide.hasClass(swiper.params.slideDuplicateClass)) {
+          var index = slide.index();
+          swiper.slideTo(index, speed, runCallbacks);
+        }
+      }
+    } else {
+      swiper.slideTo(0, speed, runCallbacks);
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'history',
+  params: {
+    history: {
+      enabled: false,
+      replaceState: false,
+      key: 'slides'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_1__["bindModuleMethods"])(swiper, {
+      history: _extends({}, History)
+    });
+  },
+  on: {
+    init: function init(swiper) {
+      if (swiper.params.history.enabled) {
+        swiper.history.init();
+      }
+    },
+    destroy: function destroy(swiper) {
+      if (swiper.params.history.enabled) {
+        swiper.history.destroy();
+      }
+    },
+    transitionEnd: function transitionEnd(swiper) {
+      if (swiper.history.initialized) {
+        swiper.history.setHistory(swiper.params.history.key, swiper.activeIndex);
+      }
+    },
+    slideChange: function slideChange(swiper) {
+      if (swiper.history.initialized && swiper.params.cssMode) {
+        swiper.history.setHistory(swiper.params.history.key, swiper.activeIndex);
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "tS1D":
 /*!******************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/timeout.js ***!
@@ -55808,7 +76134,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "qCKp");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
 /**
- * @license Angular v11.2.3
+ * @license Angular v11.2.9
  * (c) 2010-2021 Google LLC. https://angular.io/
  * License: MIT
  */
@@ -60085,7 +80411,10 @@ class Router {
     get url() {
         return this.serializeUrl(this.currentUrlTree);
     }
-    /** The current Navigation object if one exists */
+    /**
+     * Returns the current `Navigation` object when the router is navigating,
+     * and `null` when idle.
+     */
     getCurrentNavigation() {
         return this.currentNavigation;
     }
@@ -61520,8 +81849,9 @@ class RouterModule {
         return { ngModule: RouterModule, providers: [provideRoutes(routes)] };
     }
 }
+RouterModule.ɵfac = function RouterModule_Factory(t) { return new (t || RouterModule)(_angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](ROUTER_FORROOT_GUARD, 8), _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](Router, 8)); };
 RouterModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: RouterModule });
-RouterModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function RouterModule_Factory(t) { return new (t || RouterModule)(_angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](ROUTER_FORROOT_GUARD, 8), _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵinject"](Router, 8)); } });
+RouterModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({});
 RouterModule.ctorParameters = () => [
     { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["Inject"], args: [ROUTER_FORROOT_GUARD,] }] },
     { type: Router, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["Optional"] }] }
@@ -61739,7 +82069,7 @@ function provideRouterInitializer() {
 /**
  * @publicApi
  */
-const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["Version"]('11.2.3');
+const VERSION = new _angular_core__WEBPACK_IMPORTED_MODULE_1__["Version"]('11.2.9');
 
 /**
  * @license
@@ -64574,8 +84904,9 @@ const components = [
 ];
 class VgControlsModule {
 }
+VgControlsModule.ɵfac = function VgControlsModule_Factory(t) { return new (t || VgControlsModule)(); };
 VgControlsModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineNgModule"]({ type: VgControlsModule });
-VgControlsModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ factory: function VgControlsModule_Factory(t) { return new (t || VgControlsModule)(); }, imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__["VgCoreModule"]]] });
+VgControlsModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjector"]({ imports: [[_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__["VgCoreModule"]]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵsetNgModuleScope"](VgControlsModule, { declarations: function () { return [VgControlsComponent, VgVolumeComponent, VgTrackSelectorComponent, VgTimeDisplayComponent, VgScrubBarComponent, VgQualitySelectorComponent, VgPlaybackButtonComponent, VgPlayPauseComponent, VgMuteComponent, VgFullscreenComponent, VgUtcPipe, VgScrubBarBufferingTimeComponent, VgScrubBarCuePointsComponent, VgScrubBarCurrentTimeComponent]; }, imports: function () { return [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CommonModule"], _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__["VgCoreModule"]]; }, exports: function () { return [VgControlsComponent, VgVolumeComponent, VgTrackSelectorComponent, VgTimeDisplayComponent, VgScrubBarComponent, VgQualitySelectorComponent, VgPlaybackButtonComponent, VgPlayPauseComponent, VgMuteComponent, VgFullscreenComponent, VgUtcPipe, VgScrubBarBufferingTimeComponent, VgScrubBarCuePointsComponent, VgScrubBarCurrentTimeComponent]; } }); })();
 (function () { (typeof ngDevMode === "undefined" || ngDevMode) && _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](VgControlsModule, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"],
@@ -64601,6 +84932,57 @@ VgControlsModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineI
 
 
 //# sourceMappingURL=videogular-ngx-videogular-controls.js.map
+
+/***/ }),
+
+/***/ "vPLx":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/transition/transitionStart.js ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return transitionStart; });
+function transitionStart(runCallbacks, direction) {
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  var activeIndex = swiper.activeIndex,
+      params = swiper.params,
+      previousIndex = swiper.previousIndex;
+  if (params.cssMode) return;
+
+  if (params.autoHeight) {
+    swiper.updateAutoHeight();
+  }
+
+  var dir = direction;
+
+  if (!dir) {
+    if (activeIndex > previousIndex) dir = 'next';else if (activeIndex < previousIndex) dir = 'prev';else dir = 'reset';
+  }
+
+  swiper.emit('transitionStart');
+
+  if (runCallbacks && activeIndex !== previousIndex) {
+    if (dir === 'reset') {
+      swiper.emit('slideResetTransitionStart');
+      return;
+    }
+
+    swiper.emit('slideChangeTransitionStart');
+
+    if (dir === 'next') {
+      swiper.emit('slideNextTransitionStart');
+    } else {
+      swiper.emit('slidePrevTransitionStart');
+    }
+  }
+}
 
 /***/ }),
 
@@ -64743,6 +85125,43 @@ class SkipUntilSubscriber extends _innerSubscribe__WEBPACK_IMPORTED_MODULE_0__["
 
 /***/ }),
 
+/***/ "w1YM":
+/*!********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/slide/slideNext.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return slideNext; });
+/* eslint no-unused-vars: "off" */
+function slideNext(speed, runCallbacks, internal) {
+  if (speed === void 0) {
+    speed = this.params.speed;
+  }
+
+  if (runCallbacks === void 0) {
+    runCallbacks = true;
+  }
+
+  var swiper = this;
+  var params = swiper.params,
+      animating = swiper.animating;
+  var increment = swiper.activeIndex < params.slidesPerGroupSkip ? 1 : params.slidesPerGroup;
+
+  if (params.loop) {
+    if (animating && params.loopPreventsSlide) return false;
+    swiper.loopFix(); // eslint-disable-next-line
+
+    swiper._clientLeft = swiper.$wrapperEl[0].clientLeft;
+  }
+
+  return swiper.slideTo(swiper.activeIndex + increment, speed, runCallbacks, internal);
+}
+
+/***/ }),
+
 /***/ "w1tV":
 /*!****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/share.js ***!
@@ -64766,6 +85185,149 @@ function share() {
     return (source) => Object(_refCount__WEBPACK_IMPORTED_MODULE_1__["refCount"])()(Object(_multicast__WEBPACK_IMPORTED_MODULE_0__["multicast"])(shareSubjectFactory)(source));
 }
 //# sourceMappingURL=share.js.map
+
+/***/ }),
+
+/***/ "wCrk":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/breakpoints/setBreakpoint.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return setBreakpoint; });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/utils */ "cKS0");
+
+function setBreakpoint() {
+  var swiper = this;
+  var activeIndex = swiper.activeIndex,
+      initialized = swiper.initialized,
+      _swiper$loopedSlides = swiper.loopedSlides,
+      loopedSlides = _swiper$loopedSlides === void 0 ? 0 : _swiper$loopedSlides,
+      params = swiper.params,
+      $el = swiper.$el;
+  var breakpoints = params.breakpoints;
+  if (!breakpoints || breakpoints && Object.keys(breakpoints).length === 0) return; // Get breakpoint for window width and update parameters
+
+  var breakpoint = swiper.getBreakpoint(breakpoints, swiper.params.breakpointsBase, swiper.el);
+
+  if (breakpoint && swiper.currentBreakpoint !== breakpoint) {
+    var breakpointOnlyParams = breakpoint in breakpoints ? breakpoints[breakpoint] : undefined;
+
+    if (breakpointOnlyParams) {
+      ['slidesPerView', 'spaceBetween', 'slidesPerGroup', 'slidesPerGroupSkip', 'slidesPerColumn'].forEach(function (param) {
+        var paramValue = breakpointOnlyParams[param];
+        if (typeof paramValue === 'undefined') return;
+
+        if (param === 'slidesPerView' && (paramValue === 'AUTO' || paramValue === 'auto')) {
+          breakpointOnlyParams[param] = 'auto';
+        } else if (param === 'slidesPerView') {
+          breakpointOnlyParams[param] = parseFloat(paramValue);
+        } else {
+          breakpointOnlyParams[param] = parseInt(paramValue, 10);
+        }
+      });
+    }
+
+    var breakpointParams = breakpointOnlyParams || swiper.originalParams;
+    var wasMultiRow = params.slidesPerColumn > 1;
+    var isMultiRow = breakpointParams.slidesPerColumn > 1;
+
+    if (wasMultiRow && !isMultiRow) {
+      $el.removeClass(params.containerModifierClass + "multirow " + params.containerModifierClass + "multirow-column");
+      swiper.emitContainerClasses();
+    } else if (!wasMultiRow && isMultiRow) {
+      $el.addClass(params.containerModifierClass + "multirow");
+
+      if (breakpointParams.slidesPerColumnFill === 'column') {
+        $el.addClass(params.containerModifierClass + "multirow-column");
+      }
+
+      swiper.emitContainerClasses();
+    }
+
+    var directionChanged = breakpointParams.direction && breakpointParams.direction !== params.direction;
+    var needsReLoop = params.loop && (breakpointParams.slidesPerView !== params.slidesPerView || directionChanged);
+
+    if (directionChanged && initialized) {
+      swiper.changeDirection();
+    }
+
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper.params, breakpointParams);
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper, {
+      allowTouchMove: swiper.params.allowTouchMove,
+      allowSlideNext: swiper.params.allowSlideNext,
+      allowSlidePrev: swiper.params.allowSlidePrev
+    });
+    swiper.currentBreakpoint = breakpoint;
+    swiper.emit('_beforeBreakpoint', breakpointParams);
+
+    if (needsReLoop && initialized) {
+      swiper.loopDestroy();
+      swiper.loopCreate();
+      swiper.updateSlides();
+      swiper.slideTo(activeIndex - loopedSlides + swiper.loopedSlides, 0, false);
+    }
+
+    swiper.emit('breakpoint', breakpointParams);
+  }
+}
+
+/***/ }),
+
+/***/ "wJFT":
+/*!********************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateSlidesProgress.js ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateSlidesProgress; });
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+
+function updateSlidesProgress(translate) {
+  if (translate === void 0) {
+    translate = this && this.translate || 0;
+  }
+
+  var swiper = this;
+  var params = swiper.params;
+  var slides = swiper.slides,
+      rtl = swiper.rtlTranslate;
+  if (slides.length === 0) return;
+  if (typeof slides[0].swiperSlideOffset === 'undefined') swiper.updateSlidesOffset();
+  var offsetCenter = -translate;
+  if (rtl) offsetCenter = translate; // Visible Slides
+
+  slides.removeClass(params.slideVisibleClass);
+  swiper.visibleSlidesIndexes = [];
+  swiper.visibleSlides = [];
+
+  for (var i = 0; i < slides.length; i += 1) {
+    var slide = slides[i];
+    var slideProgress = (offsetCenter + (params.centeredSlides ? swiper.minTranslate() : 0) - slide.swiperSlideOffset) / (slide.swiperSlideSize + params.spaceBetween);
+
+    if (params.watchSlidesVisibility || params.centeredSlides && params.autoHeight) {
+      var slideBefore = -(offsetCenter - slide.swiperSlideOffset);
+      var slideAfter = slideBefore + swiper.slidesSizesGrid[i];
+      var isVisible = slideBefore >= 0 && slideBefore < swiper.size - 1 || slideAfter > 1 && slideAfter <= swiper.size || slideBefore <= 0 && slideAfter >= swiper.size;
+
+      if (isVisible) {
+        swiper.visibleSlides.push(slide);
+        swiper.visibleSlidesIndexes.push(i);
+        slides.eq(i).addClass(params.slideVisibleClass);
+      }
+    }
+
+    slide.progress = rtl ? -slideProgress : slideProgress;
+  }
+
+  swiper.visibleSlides = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_0__["default"])(swiper.visibleSlides);
+}
 
 /***/ }),
 
@@ -64805,6 +85367,29 @@ function plucker(props, length) {
     return mapper;
 }
 //# sourceMappingURL=pluck.js.map
+
+/***/ }),
+
+/***/ "wvNA":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/transition/index.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _setTransition__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./setTransition */ "rJb+");
+/* harmony import */ var _transitionStart__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./transitionStart */ "vPLx");
+/* harmony import */ var _transitionEnd__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./transitionEnd */ "VyJC");
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  setTransition: _setTransition__WEBPACK_IMPORTED_MODULE_0__["default"],
+  transitionStart: _transitionStart__WEBPACK_IMPORTED_MODULE_1__["default"],
+  transitionEnd: _transitionEnd__WEBPACK_IMPORTED_MODULE_2__["default"]
+});
 
 /***/ }),
 
@@ -64871,6 +85456,128 @@ class RefCountSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subsc
     }
 }
 //# sourceMappingURL=refCount.js.map
+
+/***/ }),
+
+/***/ "xW1W":
+/*!*******************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/events-emitter.js ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* eslint-disable no-underscore-dangle */
+/* harmony default export */ __webpack_exports__["default"] = ({
+  on: function on(events, handler, priority) {
+    var self = this;
+    if (typeof handler !== 'function') return self;
+    var method = priority ? 'unshift' : 'push';
+    events.split(' ').forEach(function (event) {
+      if (!self.eventsListeners[event]) self.eventsListeners[event] = [];
+      self.eventsListeners[event][method](handler);
+    });
+    return self;
+  },
+  once: function once(events, handler, priority) {
+    var self = this;
+    if (typeof handler !== 'function') return self;
+
+    function onceHandler() {
+      self.off(events, onceHandler);
+
+      if (onceHandler.__emitterProxy) {
+        delete onceHandler.__emitterProxy;
+      }
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      handler.apply(self, args);
+    }
+
+    onceHandler.__emitterProxy = handler;
+    return self.on(events, onceHandler, priority);
+  },
+  onAny: function onAny(handler, priority) {
+    var self = this;
+    if (typeof handler !== 'function') return self;
+    var method = priority ? 'unshift' : 'push';
+
+    if (self.eventsAnyListeners.indexOf(handler) < 0) {
+      self.eventsAnyListeners[method](handler);
+    }
+
+    return self;
+  },
+  offAny: function offAny(handler) {
+    var self = this;
+    if (!self.eventsAnyListeners) return self;
+    var index = self.eventsAnyListeners.indexOf(handler);
+
+    if (index >= 0) {
+      self.eventsAnyListeners.splice(index, 1);
+    }
+
+    return self;
+  },
+  off: function off(events, handler) {
+    var self = this;
+    if (!self.eventsListeners) return self;
+    events.split(' ').forEach(function (event) {
+      if (typeof handler === 'undefined') {
+        self.eventsListeners[event] = [];
+      } else if (self.eventsListeners[event]) {
+        self.eventsListeners[event].forEach(function (eventHandler, index) {
+          if (eventHandler === handler || eventHandler.__emitterProxy && eventHandler.__emitterProxy === handler) {
+            self.eventsListeners[event].splice(index, 1);
+          }
+        });
+      }
+    });
+    return self;
+  },
+  emit: function emit() {
+    var self = this;
+    if (!self.eventsListeners) return self;
+    var events;
+    var data;
+    var context;
+
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    if (typeof args[0] === 'string' || Array.isArray(args[0])) {
+      events = args[0];
+      data = args.slice(1, args.length);
+      context = self;
+    } else {
+      events = args[0].events;
+      data = args[0].data;
+      context = args[0].context || self;
+    }
+
+    data.unshift(context);
+    var eventsArray = Array.isArray(events) ? events : events.split(' ');
+    eventsArray.forEach(function (event) {
+      if (self.eventsAnyListeners && self.eventsAnyListeners.length) {
+        self.eventsAnyListeners.forEach(function (eventHandler) {
+          eventHandler.apply(context, [event].concat(data));
+        });
+      }
+
+      if (self.eventsListeners && self.eventsListeners[event]) {
+        self.eventsListeners[event].forEach(function (eventHandler) {
+          eventHandler.apply(context, data);
+        });
+      }
+    });
+    return self;
+  }
+});
 
 /***/ }),
 
@@ -64994,6 +85701,27 @@ function isEventTarget(sourceObj) {
     return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
 }
 //# sourceMappingURL=fromEvent.js.map
+
+/***/ }),
+
+/***/ "xwuM":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/update/updateSlidesOffset.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return updateSlidesOffset; });
+function updateSlidesOffset() {
+  var swiper = this;
+  var slides = swiper.slides;
+
+  for (var i = 0; i < slides.length; i += 1) {
+    slides[i].swiperSlideOffset = swiper.isHorizontal() ? slides[i].offsetLeft : slides[i].offsetTop;
+  }
+}
 
 /***/ }),
 
@@ -65143,6 +85871,58 @@ class ThrottleSubscriber extends _innerSubscribe__WEBPACK_IMPORTED_MODULE_0__["S
 
 /***/ }),
 
+/***/ "z+Ea":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/images/loadImage.js ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return loadImage; });
+/* harmony import */ var ssr_window__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ssr-window */ "/xfr");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../utils/dom */ "Jq2x");
+
+
+function loadImage(imageEl, src, srcset, sizes, checkForComplete, callback) {
+  var window = Object(ssr_window__WEBPACK_IMPORTED_MODULE_0__["getWindow"])();
+  var image;
+
+  function onReady() {
+    if (callback) callback();
+  }
+
+  var isPicture = Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(imageEl).parent('picture')[0];
+
+  if (!isPicture && (!imageEl.complete || !checkForComplete)) {
+    if (src) {
+      image = new window.Image();
+      image.onload = onReady;
+      image.onerror = onReady;
+
+      if (sizes) {
+        image.sizes = sizes;
+      }
+
+      if (srcset) {
+        image.srcset = srcset;
+      }
+
+      if (src) {
+        image.src = src;
+      }
+    } else {
+      onReady();
+    }
+  } else {
+    // image already loaded...
+    onReady();
+  }
+}
+
+/***/ }),
+
 /***/ "z+Ro":
 /*!*****************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/util/isScheduler.js ***!
@@ -65187,6 +85967,222 @@ function dispatch({ error, subscriber }) {
 
 /***/ }),
 
+/***/ "zITX":
+/*!*************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/thumbs/thumbs.js ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/utils */ "cKS0");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/dom */ "Jq2x");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+var Thumbs = {
+  init: function init() {
+    var swiper = this;
+    var thumbsParams = swiper.params.thumbs;
+    if (swiper.thumbs.initialized) return false;
+    swiper.thumbs.initialized = true;
+    var SwiperClass = swiper.constructor;
+
+    if (thumbsParams.swiper instanceof SwiperClass) {
+      swiper.thumbs.swiper = thumbsParams.swiper;
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper.thumbs.swiper.originalParams, {
+        watchSlidesProgress: true,
+        slideToClickedSlide: false
+      });
+      Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])(swiper.thumbs.swiper.params, {
+        watchSlidesProgress: true,
+        slideToClickedSlide: false
+      });
+    } else if (Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["isObject"])(thumbsParams.swiper)) {
+      swiper.thumbs.swiper = new SwiperClass(Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["extend"])({}, thumbsParams.swiper, {
+        watchSlidesVisibility: true,
+        watchSlidesProgress: true,
+        slideToClickedSlide: false
+      }));
+      swiper.thumbs.swiperCreated = true;
+    }
+
+    swiper.thumbs.swiper.$el.addClass(swiper.params.thumbs.thumbsContainerClass);
+    swiper.thumbs.swiper.on('tap', swiper.thumbs.onThumbClick);
+    return true;
+  },
+  onThumbClick: function onThumbClick() {
+    var swiper = this;
+    var thumbsSwiper = swiper.thumbs.swiper;
+    if (!thumbsSwiper) return;
+    var clickedIndex = thumbsSwiper.clickedIndex;
+    var clickedSlide = thumbsSwiper.clickedSlide;
+    if (clickedSlide && Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(clickedSlide).hasClass(swiper.params.thumbs.slideThumbActiveClass)) return;
+    if (typeof clickedIndex === 'undefined' || clickedIndex === null) return;
+    var slideToIndex;
+
+    if (thumbsSwiper.params.loop) {
+      slideToIndex = parseInt(Object(_utils_dom__WEBPACK_IMPORTED_MODULE_1__["default"])(thumbsSwiper.clickedSlide).attr('data-swiper-slide-index'), 10);
+    } else {
+      slideToIndex = clickedIndex;
+    }
+
+    if (swiper.params.loop) {
+      var currentIndex = swiper.activeIndex;
+
+      if (swiper.slides.eq(currentIndex).hasClass(swiper.params.slideDuplicateClass)) {
+        swiper.loopFix(); // eslint-disable-next-line
+
+        swiper._clientLeft = swiper.$wrapperEl[0].clientLeft;
+        currentIndex = swiper.activeIndex;
+      }
+
+      var prevIndex = swiper.slides.eq(currentIndex).prevAll("[data-swiper-slide-index=\"" + slideToIndex + "\"]").eq(0).index();
+      var nextIndex = swiper.slides.eq(currentIndex).nextAll("[data-swiper-slide-index=\"" + slideToIndex + "\"]").eq(0).index();
+      if (typeof prevIndex === 'undefined') slideToIndex = nextIndex;else if (typeof nextIndex === 'undefined') slideToIndex = prevIndex;else if (nextIndex - currentIndex < currentIndex - prevIndex) slideToIndex = nextIndex;else slideToIndex = prevIndex;
+    }
+
+    swiper.slideTo(slideToIndex);
+  },
+  update: function update(initial) {
+    var swiper = this;
+    var thumbsSwiper = swiper.thumbs.swiper;
+    if (!thumbsSwiper) return;
+    var slidesPerView = thumbsSwiper.params.slidesPerView === 'auto' ? thumbsSwiper.slidesPerViewDynamic() : thumbsSwiper.params.slidesPerView;
+    var autoScrollOffset = swiper.params.thumbs.autoScrollOffset;
+    var useOffset = autoScrollOffset && !thumbsSwiper.params.loop;
+
+    if (swiper.realIndex !== thumbsSwiper.realIndex || useOffset) {
+      var currentThumbsIndex = thumbsSwiper.activeIndex;
+      var newThumbsIndex;
+      var direction;
+
+      if (thumbsSwiper.params.loop) {
+        if (thumbsSwiper.slides.eq(currentThumbsIndex).hasClass(thumbsSwiper.params.slideDuplicateClass)) {
+          thumbsSwiper.loopFix(); // eslint-disable-next-line
+
+          thumbsSwiper._clientLeft = thumbsSwiper.$wrapperEl[0].clientLeft;
+          currentThumbsIndex = thumbsSwiper.activeIndex;
+        } // Find actual thumbs index to slide to
+
+
+        var prevThumbsIndex = thumbsSwiper.slides.eq(currentThumbsIndex).prevAll("[data-swiper-slide-index=\"" + swiper.realIndex + "\"]").eq(0).index();
+        var nextThumbsIndex = thumbsSwiper.slides.eq(currentThumbsIndex).nextAll("[data-swiper-slide-index=\"" + swiper.realIndex + "\"]").eq(0).index();
+        if (typeof prevThumbsIndex === 'undefined') newThumbsIndex = nextThumbsIndex;else if (typeof nextThumbsIndex === 'undefined') newThumbsIndex = prevThumbsIndex;else if (nextThumbsIndex - currentThumbsIndex === currentThumbsIndex - prevThumbsIndex) newThumbsIndex = currentThumbsIndex;else if (nextThumbsIndex - currentThumbsIndex < currentThumbsIndex - prevThumbsIndex) newThumbsIndex = nextThumbsIndex;else newThumbsIndex = prevThumbsIndex;
+        direction = swiper.activeIndex > swiper.previousIndex ? 'next' : 'prev';
+      } else {
+        newThumbsIndex = swiper.realIndex;
+        direction = newThumbsIndex > swiper.previousIndex ? 'next' : 'prev';
+      }
+
+      if (useOffset) {
+        newThumbsIndex += direction === 'next' ? autoScrollOffset : -1 * autoScrollOffset;
+      }
+
+      if (thumbsSwiper.visibleSlidesIndexes && thumbsSwiper.visibleSlidesIndexes.indexOf(newThumbsIndex) < 0) {
+        if (thumbsSwiper.params.centeredSlides) {
+          if (newThumbsIndex > currentThumbsIndex) {
+            newThumbsIndex = newThumbsIndex - Math.floor(slidesPerView / 2) + 1;
+          } else {
+            newThumbsIndex = newThumbsIndex + Math.floor(slidesPerView / 2) - 1;
+          }
+        } else if (newThumbsIndex > currentThumbsIndex) {
+          newThumbsIndex = newThumbsIndex - slidesPerView + 1;
+        }
+
+        thumbsSwiper.slideTo(newThumbsIndex, initial ? 0 : undefined);
+      }
+    } // Activate thumbs
+
+
+    var thumbsToActivate = 1;
+    var thumbActiveClass = swiper.params.thumbs.slideThumbActiveClass;
+
+    if (swiper.params.slidesPerView > 1 && !swiper.params.centeredSlides) {
+      thumbsToActivate = swiper.params.slidesPerView;
+    }
+
+    if (!swiper.params.thumbs.multipleActiveThumbs) {
+      thumbsToActivate = 1;
+    }
+
+    thumbsToActivate = Math.floor(thumbsToActivate);
+    thumbsSwiper.slides.removeClass(thumbActiveClass);
+
+    if (thumbsSwiper.params.loop || thumbsSwiper.params.virtual && thumbsSwiper.params.virtual.enabled) {
+      for (var i = 0; i < thumbsToActivate; i += 1) {
+        thumbsSwiper.$wrapperEl.children("[data-swiper-slide-index=\"" + (swiper.realIndex + i) + "\"]").addClass(thumbActiveClass);
+      }
+    } else {
+      for (var _i = 0; _i < thumbsToActivate; _i += 1) {
+        thumbsSwiper.slides.eq(swiper.realIndex + _i).addClass(thumbActiveClass);
+      }
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'thumbs',
+  params: {
+    thumbs: {
+      swiper: null,
+      multipleActiveThumbs: true,
+      autoScrollOffset: 0,
+      slideThumbActiveClass: 'swiper-slide-thumb-active',
+      thumbsContainerClass: 'swiper-container-thumbs'
+    }
+  },
+  create: function create() {
+    var swiper = this;
+    Object(_utils_utils__WEBPACK_IMPORTED_MODULE_0__["bindModuleMethods"])(swiper, {
+      thumbs: _extends({
+        swiper: null,
+        initialized: false
+      }, Thumbs)
+    });
+  },
+  on: {
+    beforeInit: function beforeInit(swiper) {
+      var thumbs = swiper.params.thumbs;
+      if (!thumbs || !thumbs.swiper) return;
+      swiper.thumbs.init();
+      swiper.thumbs.update(true);
+    },
+    slideChange: function slideChange(swiper) {
+      if (!swiper.thumbs.swiper) return;
+      swiper.thumbs.update();
+    },
+    update: function update(swiper) {
+      if (!swiper.thumbs.swiper) return;
+      swiper.thumbs.update();
+    },
+    resize: function resize(swiper) {
+      if (!swiper.thumbs.swiper) return;
+      swiper.thumbs.update();
+    },
+    observerUpdate: function observerUpdate(swiper) {
+      if (!swiper.thumbs.swiper) return;
+      swiper.thumbs.update();
+    },
+    setTransition: function setTransition(swiper, duration) {
+      var thumbsSwiper = swiper.thumbs.swiper;
+      if (!thumbsSwiper) return;
+      thumbsSwiper.setTransition(duration);
+    },
+    beforeDestroy: function beforeDestroy(swiper) {
+      var thumbsSwiper = swiper.thumbs.swiper;
+      if (!thumbsSwiper) return;
+
+      if (swiper.thumbs.swiperCreated && thumbsSwiper) {
+        thumbsSwiper.destroy();
+      }
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "zP0r":
 /*!***************************************************************!*\
   !*** ./node_modules/rxjs/_esm2015/internal/operators/skip.js ***!
@@ -65223,6 +86219,28 @@ class SkipSubscriber extends _Subscriber__WEBPACK_IMPORTED_MODULE_0__["Subscribe
     }
 }
 //# sourceMappingURL=skip.js.map
+
+/***/ }),
+
+/***/ "zZCW":
+/*!******************************************************************************!*\
+  !*** ./node_modules/swiper/esm/components/core/grab-cursor/setGrabCursor.js ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return setGrabCursor; });
+function setGrabCursor(moving) {
+  var swiper = this;
+  if (swiper.support.touch || !swiper.params.simulateTouch || swiper.params.watchOverflow && swiper.isLocked || swiper.params.cssMode) return;
+  var el = swiper.el;
+  el.style.cursor = 'move';
+  el.style.cursor = moving ? '-webkit-grabbing' : '-webkit-grab';
+  el.style.cursor = moving ? '-moz-grabbin' : '-moz-grab';
+  el.style.cursor = moving ? 'grabbing' : 'grab';
+}
 
 /***/ }),
 
@@ -65487,7 +86505,14 @@ function innerSubscribe(result, innerSubscriber) {
     if (result instanceof _Observable__WEBPACK_IMPORTED_MODULE_1__["Observable"]) {
         return result.subscribe(innerSubscriber);
     }
-    return Object(_util_subscribeTo__WEBPACK_IMPORTED_MODULE_2__["subscribeTo"])(result)(innerSubscriber);
+    let subscription;
+    try {
+        subscription = Object(_util_subscribeTo__WEBPACK_IMPORTED_MODULE_2__["subscribeTo"])(result)(innerSubscriber);
+    }
+    catch (error) {
+        innerSubscriber.error(error);
+    }
+    return subscription;
 }
 //# sourceMappingURL=innerSubscribe.js.map
 

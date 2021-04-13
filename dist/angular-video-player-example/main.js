@@ -1,5 +1,32 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["main"],{
 
+/***/ "+nHi":
+/*!********************************************!*\
+  !*** ./src/app/swiper/swiper.component.ts ***!
+  \********************************************/
+/*! exports provided: SwiperComponent */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SwiperComponent", function() { return SwiperComponent; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "fXoL");
+
+class SwiperComponent {
+    constructor() { }
+    ngOnInit() {
+    }
+}
+SwiperComponent.ɵfac = function SwiperComponent_Factory(t) { return new (t || SwiperComponent)(); };
+SwiperComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: SwiperComponent, selectors: [["app-swiper"]], decls: 2, vars: 0, template: function SwiperComponent_Template(rf, ctx) { if (rf & 1) {
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "p");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](1, "swiper works!");
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    } }, styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzd2lwZXIuY29tcG9uZW50LmNzcyJ9 */"] });
+
+
+/***/ }),
+
 /***/ 0:
 /*!***************************!*\
   !*** multi ./src/main.ts ***!
@@ -173,14 +200,20 @@ AppComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineCompo
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppModule", function() { return AppModule; });
 /* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/platform-browser */ "jhN1");
-/* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./app-routing.module */ "vY5A");
-/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app.component */ "Sy1n");
-/* harmony import */ var _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @videogular/ngx-videogular/core */ "4w57");
-/* harmony import */ var _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @videogular/ngx-videogular/controls */ "v2j/");
-/* harmony import */ var _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @videogular/ngx-videogular/overlay-play */ "cqME");
-/* harmony import */ var _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @videogular/ngx-videogular/buffering */ "VKRg");
-/* harmony import */ var angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! angular-responsive-carousel */ "0L5U");
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/forms */ "3Pt+");
+/* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app-routing.module */ "vY5A");
+/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app.component */ "Sy1n");
+/* harmony import */ var swiper_angular__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! swiper/angular */ "UMfn");
+/* harmony import */ var _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @videogular/ngx-videogular/core */ "4w57");
+/* harmony import */ var _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @videogular/ngx-videogular/controls */ "v2j/");
+/* harmony import */ var _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @videogular/ngx-videogular/overlay-play */ "cqME");
+/* harmony import */ var _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @videogular/ngx-videogular/buffering */ "VKRg");
+/* harmony import */ var angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! angular-responsive-carousel */ "0L5U");
+/* harmony import */ var _swiper_swiper_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./swiper/swiper.component */ "+nHi");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ "fXoL");
+
+
+
 
 
 
@@ -192,21 +225,27 @@ __webpack_require__.r(__webpack_exports__);
 
 class AppModule {
 }
-AppModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_8__["ɵɵdefineNgModule"]({ type: AppModule, bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_2__["AppComponent"]] });
-AppModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_8__["ɵɵdefineInjector"]({ factory: function AppModule_Factory(t) { return new (t || AppModule)(); }, providers: [], imports: [[
+AppModule.ɵfac = function AppModule_Factory(t) { return new (t || AppModule)(); };
+AppModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_11__["ɵɵdefineNgModule"]({ type: AppModule, bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]] });
+AppModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_11__["ɵɵdefineInjector"]({ providers: [], imports: [[
             _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
-            _app_routing_module__WEBPACK_IMPORTED_MODULE_1__["AppRoutingModule"],
-            _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__["VgCoreModule"],
-            _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_4__["VgControlsModule"],
-            _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_5__["VgOverlayPlayModule"],
-            _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_6__["VgBufferingModule"], angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_7__["IvyCarouselModule"]
+            _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormsModule"],
+            _app_routing_module__WEBPACK_IMPORTED_MODULE_2__["AppRoutingModule"],
+            _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_5__["VgCoreModule"],
+            _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_6__["VgControlsModule"],
+            _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_7__["VgOverlayPlayModule"],
+            _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_8__["VgBufferingModule"], angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_9__["IvyCarouselModule"],
+            swiper_angular__WEBPACK_IMPORTED_MODULE_4__["SwiperModule"]
         ]] });
-(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_8__["ɵɵsetNgModuleScope"](AppModule, { declarations: [_app_component__WEBPACK_IMPORTED_MODULE_2__["AppComponent"]], imports: [_angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
-        _app_routing_module__WEBPACK_IMPORTED_MODULE_1__["AppRoutingModule"],
-        _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_3__["VgCoreModule"],
-        _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_4__["VgControlsModule"],
-        _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_5__["VgOverlayPlayModule"],
-        _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_6__["VgBufferingModule"], angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_7__["IvyCarouselModule"]] }); })();
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_11__["ɵɵsetNgModuleScope"](AppModule, { declarations: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"],
+        _swiper_swiper_component__WEBPACK_IMPORTED_MODULE_10__["SwiperComponent"]], imports: [_angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
+        _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormsModule"],
+        _app_routing_module__WEBPACK_IMPORTED_MODULE_2__["AppRoutingModule"],
+        _videogular_ngx_videogular_core__WEBPACK_IMPORTED_MODULE_5__["VgCoreModule"],
+        _videogular_ngx_videogular_controls__WEBPACK_IMPORTED_MODULE_6__["VgControlsModule"],
+        _videogular_ngx_videogular_overlay_play__WEBPACK_IMPORTED_MODULE_7__["VgOverlayPlayModule"],
+        _videogular_ngx_videogular_buffering__WEBPACK_IMPORTED_MODULE_8__["VgBufferingModule"], angular_responsive_carousel__WEBPACK_IMPORTED_MODULE_9__["IvyCarouselModule"],
+        swiper_angular__WEBPACK_IMPORTED_MODULE_4__["SwiperModule"]] }); })();
 
 
 /***/ }),
@@ -229,8 +268,9 @@ __webpack_require__.r(__webpack_exports__);
 const routes = [];
 class AppRoutingModule {
 }
+AppRoutingModule.ɵfac = function AppRoutingModule_Factory(t) { return new (t || AppRoutingModule)(); };
 AppRoutingModule.ɵmod = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineNgModule"]({ type: AppRoutingModule });
-AppRoutingModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ factory: function AppRoutingModule_Factory(t) { return new (t || AppRoutingModule)(); }, imports: [[_angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"].forRoot(routes)], _angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"]] });
+AppRoutingModule.ɵinj = _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjector"]({ imports: [[_angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"].forRoot(routes)], _angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"]] });
 (function () { (typeof ngJitMode === "undefined" || ngJitMode) && _angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵsetNgModuleScope"](AppRoutingModule, { imports: [_angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"]], exports: [_angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"]] }); })();
 
 
@@ -256,8 +296,14 @@ __webpack_require__.r(__webpack_exports__);
 if (_environments_environment__WEBPACK_IMPORTED_MODULE_3__["environment"].production) {
     Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["enableProdMode"])();
 }
-_angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["platformBrowser"]().bootstrapModule(_app_app_module__WEBPACK_IMPORTED_MODULE_2__["AppModule"])
-    .catch(err => console.error(err));
+_angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["platformBrowser"]().bootstrapModule(_app_app_module__WEBPACK_IMPORTED_MODULE_2__["AppModule"]).then(ref => {
+    // Ensure Angular destroys itself on hot reloads.
+    if (window['ngRef']) {
+        window['ngRef'].destroy();
+    }
+    window['ngRef'] = ref;
+    // Otherwise, log the boot error
+}).catch(err => console.error(err));
 
 
 /***/ }),

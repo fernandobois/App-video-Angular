@@ -1,5 +1,5 @@
 {
-  "name": "angular-video-player-example",
+  "name": "app-video",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,11 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "cordova": "cd cordova && rm -r www && cd.. && ng build --prod --base-href . --output-path cordova/www/",
+    "crun": "npm run cordova && cd cordova && cordova run browser",
+    "bw": "npm run cordova && cd cordova && cordova build browser && cordova emulate browser",
+    "ba": "npm run cordova && cd cordova && cordova build android && cordova emulate android"
   },
   "private": true,
   "dependencies": {
@@ -19,6 +23,9 @@
     "@angular/platform-browser": "~11.2.3",
     "@angular/platform-browser-dynamic": "~11.2.3",
     "@angular/router": "~11.2.3",
+    "@videogular/ngx-videogular": "^3.0.1",
+    "angular-responsive-carousel": "^2.0.2",
+    "cordova": "^10.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.3"
@@ -27,6 +34,7 @@
     "@angular-devkit/build-angular": "~0.1102.2",
     "@angular/cli": "~11.2.2",
     "@angular/compiler-cli": "~11.2.3",
+    "@types/core-js": "^2.5.4",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
